@@ -1,0 +1,120 @@
+version: "3.9"
+
+services:
+  gateway:
+    build:
+      context: ./backend/gateway
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${gatewayPORT}:3000"
+    depends_on:
+      - userService
+      - merchantService
+      - orderService
+      - paymentService
+    volumes:
+      - ./backend/gateway:/app
+      - /app/node_modules
+    environment:
+      - USER_SERVICE_URL=http://userService:${userServicePORT}
+      - MERCHANT_SERVICE_URL=http://merchantService:${merchantServicePORT}
+      - ORDER_SERVICE_URL=http://orderService:${orderServicePORT}
+      - PAYMENT_SERVICE_URL=http://paymentService:${paymentServicePORT}
+    networks:
+      - app-network
+
+  userService:
+    build:
+      context: ./backend/userService
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${userServicePORT}:3001"
+    environment:
+      - DATABASE_URL=${DATABASE_URL_USER}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/userService:/app
+      - /app/node_modules
+    networks:
+      - app-network
+  
+  merchantService:
+    build:
+      context: ./backend/merchantService
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${merchantServicePORT}:3002"
+    environment:
+      - DATABASE_URL=${DATABASE_URL_MERCHANT}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/merchantService:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  orderService:
+    build:
+      context: ./backend/orderService
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${orderServicePORT}:3003"
+    environment:
+      - DATABASE_URL=${DATABASE_URL_ORDER}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/orderService:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    
+  paymentService:
+    build:
+      context: ./backend/paymentService
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${paymentServicePORT}:3004"
+    environment:
+      - DATABASE_URL=${DATABASE_URL_PAYMENT}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/paymentService:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${frontendPORT}:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://gateway:3000
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

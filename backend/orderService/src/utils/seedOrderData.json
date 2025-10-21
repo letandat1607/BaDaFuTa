@@ -1,0 +1,30 @@
+{
+  "user_id": "2a75359e-e288-45bd-b37c-20ffc970d8e6",
+  "merchant_id": "b3e45d02-77f5-4b78-8d2f-79f5441d2a4e",
+  "full_name": "Nguyễn Văn A",
+  "phone": "0901234567",
+  "delivery_address": "123 Lê Lợi, Quận 1, TP.HCM",
+  "delivery_fee": 15000,
+  "note": "Giao giờ trưa",
+  "method": "MOMO",
+  "order_items": [
+    {
+      "menu_item_id": "67c9f1ab-8d0a-4c85-87aa-1a2bbf02d0f3",
+      "quantity": 2,
+      "price": 65000,
+      "note": "Ít cay",
+      "options": [
+        { "option_item_id": "98d2b771-1234-4acb-a21c-7c5a5d6b4a21" },
+        { "option_item_id": "ab7d93f0-8bca-4e0a-9137-b6fbe92da8cd" }
+      ]
+    },
+    {
+      "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d4",
+      "quantity": 1,
+      "price": 120000,
+      "note": "",
+      "options": []
+    }
+  ],
+  "total_amount": 265000
+}
