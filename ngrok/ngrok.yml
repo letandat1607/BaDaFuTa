@@ -1,0 +1,7 @@
+version: 2
+authtoken: 35FIMwvnbWWbo4805MddzIZGOK8_3GULEFRDTxUTMAkhSSVgC  # ← DÁN VÀO ĐÂY
+tunnels:
+  payment-tunnel:
+    addr: payment_service:3004
+    proto: http
+    inspect: false

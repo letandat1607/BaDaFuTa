@@ -1,6 +1,8 @@
 import React from 'react';
 import Navbar from '../component/merchantSys/commonMerchant/navbar';
 import { useEffect } from "react";
+import { Outlet } from "react-router-dom";
+
 
 export default function MerchantSys() {
 
@@ -30,12 +32,9 @@ export default function MerchantSys() {
     }, []);
     return (
         <div style={{ minHeight: "100vh", backgroundColor: "#f9f9f9", color: "#111" }}>
-            <header>
-                <Navbar />
-            </header>
             <main style={{ padding: "2rem" }}>
                 <div>
-
+                    <Outlet />
                 </div>
             </main>
         </div>

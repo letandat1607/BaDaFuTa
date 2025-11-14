@@ -35,13 +35,7 @@ const OrderItem = sequelize.define("OrderItem", {
     }
 );
 OrderItem.belongsTo(Order, {foreignKey: "order_id", onDelete: "CASCADE"});
-Order.hasMany(OrderItem, {foreignKey: "order_id"});
+Order.hasMany(OrderItem, {foreignKey: "order_id", as: "order_items"});
 
-// OrderItem.belongsTo(MenuItem, {foreignKey: "menu_item_id", onDelete: "SET NULL"});
-// MenuItem.hasMany(OrderItem, {foreignKey: "menu_item_id"});
-
-// OrderItem.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'OrderItem' synced successfully"))
-//   .catch(err => console.error(" Error syncing OrderItem table:", err));
 
 module.exports = OrderItem;

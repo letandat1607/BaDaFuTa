@@ -3,21 +3,28 @@ require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const express = require("express");
 const app = express();
 const PORT = process.env.paymentServicePORT;
+const {startConsumers} = require("./src/rabbitMQ/rabbitConsumer")
 // const { sequelize, connectDB } = require("./src/utils/db");
 // const {authenticate} = require("./src/helpers/middleware");
-const {handlePayment, checkPayment} = require("./src/controllers/paymentController")
+const {checkPaymentMomo} = require("./src/controllers/paymentController")
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/pay", handlePayment);
-app.get("/api/checkVnpay", async (req, res) =>{
+const start = async () => {
+    await startConsumers();
+    console.log("Consumer start successed");
+}
+
+// app.post("/pay", handlePayment);
+app.get("/checkPaymentVnp", async (req, res) =>{
     console.log(req.query);
 })
-app.get("/api/checkPayment", checkPayment);
+app.get("/checkPaymentMomo", checkPaymentMomo);
 
 
-app.listen(3004, async () => {
-    // await start();
+app.listen(PORT, async () => {
+    await start();
     console.log("API PaymentService run on port:", PORT)
 })

@@ -5,4 +5,5 @@ const Merchant = require("./merchant.js");
 const Option = require("./option.js");
 const OptionItem = require("./optionItem.js");
 
+
 module.exports = {Category, MenuItem, MenuItemOption, Merchant, Option, OptionItem} 

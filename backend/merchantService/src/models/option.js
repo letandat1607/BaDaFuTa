@@ -2,7 +2,6 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../utils/db");
 const Merchant = require("./merchant");
 
-
 const Option = sequelize.define("Option",{
     id:{
         type: DataTypes.UUID,
@@ -40,6 +39,6 @@ const Option = sequelize.define("Option",{
 //   .catch(err => console.error(" Error syncing Option table:", err));
 
 Option.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
-Merchant.hasMany(Option, {foreignKey: "merchant_id"});
+Merchant.hasMany(Option, {foreignKey: "merchant_id", as: "options"});
 
 module.exports = Option;

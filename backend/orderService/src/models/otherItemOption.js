@@ -21,11 +21,7 @@ const OrderItemOption = sequelize.define("OrderItemOption", {
         timestamps: false
     }
 );
-// OrderItem.belongsToMany(OptionItem, {through: OrderItemOption, foreignKey: "order_item_id", onDelete: "CASCADE"});
-// OptionItem.belongsToMany(OrderItem, {through: OrderItemOption, foreignKey: "option_item_id", onDelete: "CASCADE"});
-
-// OrderItemOption.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'OrderItemOption' synced successfully"))
-//   .catch(err => console.error(" Error syncing OrderItemOption table:", err));
+OrderItemOption.belongsTo(OrderItem, {foreignKey: "order_item_id", onDelete: "CASCADE"});
+OrderItem.hasMany(OrderItemOption, {foreignKey: "order_item_id", as: "options"});
 
 module.exports = OrderItemOption;

@@ -43,6 +43,10 @@ const Order = sequelize.define("Order", {
             type: DataTypes.STRING,
             allowNull: false
         },
+        status_payment:{
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         method:{
             type: DataTypes.STRING,
             allowNull: false
@@ -55,14 +59,5 @@ const Order = sequelize.define("Order", {
     updatedAt: "updated_at",
     }
 );
-// Order.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "SET NULL"});
-// Merchant.hasMany(Order, {foreignKey: "merchant_id"});
-
-// Order.belongsTo(User, {foreignKey: "user_id", onDelete: "SET NULL"});
-// User.hasMany(Order, {foreignKey: "user_id"});
-
-// Order.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'Order' synced successfully"))
-//   .catch(err => console.error(" Error syncing Order table:", err));
 
 module.exports = Order;

@@ -146,9 +146,6 @@ export default function MerchantInfor() {
 
   return (
     <>
-      <header>
-        <Navbar />
-      </header>
       <Box style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
         <Container size="1" style={{ margin: "2% 10%" }}>
           <Box py="9">

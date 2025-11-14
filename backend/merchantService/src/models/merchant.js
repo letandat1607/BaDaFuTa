@@ -33,6 +33,9 @@ const Merchant = sequelize.define("Merchant", {
     cover_image:{
         type: DataTypes.STRING,
     },
+    cuisin: {
+        type: DataTypes.STRING
+    },
     time_open:{
         type: DataTypes.JSONB,
     }
@@ -40,9 +43,5 @@ const Merchant = sequelize.define("Merchant", {
     tableName: "merchant", 
     timestamps: false    
 });
-
-// Merchant.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'Merchant' synced successfully"))
-//   .catch(err => console.error(" Error syncing Merchant table:", err));
 
 module.exports = Merchant;

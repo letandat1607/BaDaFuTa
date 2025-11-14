@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const { sequelize, connectDB } = require("./db");
 const PORT = process.env.userServicePORT;
-const {createUser, signInUser, updateProfile, createLocation} = require("./src/controllers/userController");
+const {registerUser, signInUser, updateProfile, createLocation} = require("./src/controllers/userController");
 const {authenticate, sendMail} = require("./src/helpers/middleware");
 
 const start = async () => {
@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.post("/register", createUser);
+app.post("/register", registerUser);
 app.post("/login", signInUser);
 app.post("/updateProfile",authenticate, updateProfile);
 app.post("/createLocation",authenticate, createLocation);

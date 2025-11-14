@@ -1,8 +1,8 @@
 const Joi = require("joi");
 
 const menuItemSchema = Joi.object({
-    // id: Joi.string().uuid().optional(),
-    // merchant_id: Joi.string().uuid().required(),
+    id: Joi.string().uuid().optional(),
+    merchant_id: Joi.string().uuid().required(),
     category_id: Joi.string().uuid().allow(null),
     name_item: Joi.string().max(100).required(),
     price: Joi.number().integer().min(0).required(),
@@ -15,4 +15,11 @@ const menuItemSchema = Joi.object({
     status: Joi.boolean().default(false),
 });
 
-module.exports = { menuItemSchema };
+// Schema dành cho cập nhật (update)
+// -> tất cả các field trong menuItemSchema đều được chuyển thành optional
+const updateMenuItemSchema = menuItemSchema.fork(
+  Object.keys(menuItemSchema.describe().keys),
+  (schema) => schema.optional()
+);
+
+module.exports = { menuItemSchema, updateMenuItemSchema };

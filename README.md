@@ -13,37 +13,15 @@ Hệ thống foodfast cho phép khách hàng có thể đặt đồ ăn và than
 ```bash
 git clone https://github.com/letandat1607/BaDaFuTa.git
 ```
-### Cài dependencies
-```bash
-## backend
-### gateway
-cd backend/gateway
-npm install
-
-### userService
-cd backend/userService
-npm install
-
-### merchantService
-cd backend/merchantService
-npm install
-
-### orderService
-cd backend/orderService
-npm install
-
-### paymentService
-cd backend/paymentService
-npm install
-
-## frontend
-cd frontend
-npm install
-```
-### Chạy project
+### Cài dependencies và chạy project
 ```bash
 ##Add .env
 touch .env
+#Docker build và tự động chạy
+cd BaDaFuTa
+docker compose up -d --build
+```
+```bash
 ## backend
 ### gateway
 cd backend/gateway
@@ -75,11 +53,19 @@ npm run dev
 ├── 📁 backend
 │   ├── 📁 gateway
 │   │   ├── 📁 src
-│   │   │   └── 📁 helpers
-│   │   │       └── 📄 middleware.js
+│   │   │   ├── 📁 helpers
+│   │   │   │   └── 📄 middleware.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   └── 📁 services
+│   │   │       └── 📄 gatewayService.js
 │   │   ├── 🐳 Dockerfile
 │   │   ├── 📄 Dockerfile.dev
 │   │   ├── 📄 app.js
+│   │   ├── 📄 merchant_dump.sql
 │   │   ├── ⚙️ package-lock.json
 │   │   └── ⚙️ package.json
 │   ├── 📁 merchantService
@@ -96,6 +82,15 @@ npm run dev
 │   │   │   │   ├── 📄 merchant.js
 │   │   │   │   ├── 📄 option.js
 │   │   │   │   └── 📄 optionItem.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 merchantRepository.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 merchantService.js
 │   │   │   ├── 📁 utils
 │   │   │   │   └── 📄 db.js
 │   │   │   └── 📁 validations
@@ -114,6 +109,8 @@ npm run dev
 │   │   ├── 📁 src
 │   │   │   ├── 📁 controllers
 │   │   │   │   └── 📄 orderController.js
+│   │   │   ├── 📁 helpers
+│   │   │   │   └── 📄 middleware.js
 │   │   │   ├── 📁 models
 │   │   │   │   ├── 📄 cart.js
 │   │   │   │   ├── 📄 cartItem.js
@@ -122,8 +119,18 @@ npm run dev
 │   │   │   │   ├── 📄 order.js
 │   │   │   │   ├── 📄 orderItem.js
 │   │   │   │   └── 📄 otherItemOption.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 orderRepository.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 orderService.js
 │   │   │   ├── 📁 utils
-│   │   │   │   └── 📄 db.js
+│   │   │   │   ├── 📄 db.js
+│   │   │   │   └── ⚙️ seedOrderData.json
 │   │   │   └── 📁 validations
 │   │   │       ├── 📄 cartItemOptionValidation.js
 │   │   │       ├── 📄 cartItemValidation.js
@@ -142,6 +149,14 @@ npm run dev
 │   │   │   │   └── 📄 paymentController.js
 │   │   │   ├── 📁 models
 │   │   │   │   └── 📄 payment.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 paymentService.js
 │   │   │   ├── 📁 untils
 │   │   │   │   └── 📄 db.js
 │   │   │   └── 📁 validations
@@ -163,9 +178,13 @@ npm run dev
 │   │   │   │   ├── 📄 roles.js
 │   │   │   │   ├── 📄 userRole.js
 │   │   │   │   └── 📄 users.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 userRepository.js
 │   │   │   ├── 📁 routes
 │   │   │   │   ├── 📄 protected.js
 │   │   │   │   └── 📄 public.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 userService.js
 │   │   │   ├── 📁 utils
 │   │   │   └── 📁 validation
 │   │   │       ├── 📄 addressValidation.js
@@ -187,15 +206,57 @@ npm run dev
 │   │   │   └── 🖼️ react.svg
 │   │   ├── 📁 component
 │   │   │   ├── 📁 common
+│   │   │   ├── 📁 customerSys
+│   │   │   │   ├── 📁 commonCustomer
+│   │   │   │   │   ├── 📄 card.jsx
+│   │   │   │   │   ├── 📄 cartItem.jsx
+│   │   │   │   │   ├── 📄 cartSummary.jsx
+│   │   │   │   │   ├── 📄 checkOutForm.jsx
+│   │   │   │   │   ├── 📄 checkOutItem.jsx
+│   │   │   │   │   ├── 📄 emptyCart.jsx
+│   │   │   │   │   ├── 📄 loadingSkeleton.jsx
+│   │   │   │   │   ├── 📄 menuCategory.jsx
+│   │   │   │   │   ├── 📄 menuItem.jsx
+│   │   │   │   │   ├── 📄 navbar.jsx
+│   │   │   │   │   ├── 📄 orderSummary.jsx
+│   │   │   │   │   ├── 📄 protectedRouteCustomer.jsx
+│   │   │   │   │   └── 📄 toppingModal.jsx
+│   │   │   │   ├── 📄 checkOut.jsx
+│   │   │   │   ├── 📄 loginCustomer.jsx
+│   │   │   │   ├── 📄 merchantCart.jsx
+│   │   │   │   ├── 📄 merchantList.jsx
+│   │   │   │   ├── 📄 merchantMenu.jsx
+│   │   │   │   ├── 📄 orderDetail.jsx
+│   │   │   │   ├── 📄 orderHistory.jsx
+│   │   │   │   ├── 📄 orderSuccess.jsx
+│   │   │   │   └── 📄 paymentResult.jsx
 │   │   │   └── 📁 merchantSys
 │   │   │       ├── 📁 commonMerchant
 │   │   │       │   ├── 📄 card.jsx
-│   │   │       │   └── 📄 navbar.jsx
+│   │   │       │   ├── 📄 navbar.jsx
+│   │   │       │   ├── 📄 protectedRoute.jsx
+│   │   │       │   └── 📄 text.jsx
+│   │   │       ├── 📁 merchantMenu
+│   │   │       │   ├── 📁 dialogs
+│   │   │       │   │   ├── 📄 addCategoryDialog.jsx
+│   │   │       │   │   ├── 📄 addMenuDialog.jsx
+│   │   │       │   │   ├── 📄 addOptionDialog.jsx
+│   │   │       │   │   ├── 📄 bulkAddMenuDialog.jsx
+│   │   │       │   │   ├── 📄 bulkAddToppingDialog.jsx
+│   │   │       │   │   ├── 📄 editMenuItemDialog.jsx
+│   │   │       │   │   ├── 📄 editOptionItemDialog.jsx
+│   │   │       │   │   └── 📄 linkOptionDialog.jsx
+│   │   │       │   ├── 📄 menuItemOptionTab.jsx
+│   │   │       │   ├── 📄 menuTab.jsx
+│   │   │       │   └── 📄 optionItemTab.jsx
 │   │   │       ├── 📄 merchantHome.jsx
 │   │   │       ├── 📄 merchantInfor.jsx
 │   │   │       ├── 📄 merchantLogin.jsx
-│   │   │       └── 📄 merchantMenu.jsx
+│   │   │       ├── 📄 merchantMenu.jsx
+│   │   │       ├── 📄 merchantOrders.jsx
+│   │   │       └── 📄 testOrder.jsx
 │   │   ├── 📁 routes
+│   │   │   ├── 📄 customerSys.jsx
 │   │   │   └── 📄 merhantSys.jsx
 │   │   ├── 🎨 App.css
 │   │   ├── 📄 App.jsx
@@ -211,11 +272,9 @@ npm run dev
 │   ├── ⚙️ package.json
 │   ├── 📄 vite.config.js
 │   └── 📄 vite.config.ts
-├── 📁 word
-│   ├── 📘 CNPM-Nhom16.docx
-│   └── 📄 KTPM.drawio
+├── 📁 ngrok
+│   └── ⚙️ ngrok.yml
 ├── ⚙️ .gitattributes
-├── ⚙️ .env
 ├── ⚙️ .gitignore
 ├── 📝 README.md
 └── ⚙️ docker-compose.yml
