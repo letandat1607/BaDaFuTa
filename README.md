@@ -21,32 +21,6 @@ touch .env
 cd BaDaFuTa
 docker compose up -d --build
 ```
-```bash
-## backend
-### gateway
-cd backend/gateway
-npm run dev
-
-### userService
-cd backend/userService
-npm run dev
-
-### merchantService
-cd backend/merchantService
-npm run dev
-
-### orderService
-cd backend/orderService
-npm run dev
-
-### paymentService
-cd backend/paymentService
-npm install
-
-## frontend
-cd frontend
-npm run dev
-```
 ## Kiến trúc dự án
 ```
 
