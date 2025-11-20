@@ -1,9 +1,6 @@
 import { Text, Card, Inset, Strong, Box, Switch } from "@radix-ui/themes";
 import { useState } from "react";
 
-// import { useState } from "react";
-
-
 export default function CardContent({
     item = {},
     handleChangeStatus = () => { },
@@ -11,9 +8,7 @@ export default function CardContent({
     other = "",
     handleOpenDialog = () => { },
     handleDelete = () => { },
-    handleFilterChange = () => { }, // <-- new optional prop
-
-
+    handleFilterChange = () => { },
 }) {
 
     const [showDialog, setShowDialog] = useState(false);
@@ -27,42 +22,24 @@ export default function CardContent({
         handleFilterChange(newSel);
     };
 
-    // const handleOpenFilterDialog = () => {
-    //     const existingIds = Array.isArray(item.options)
-    //         ? item.options.map(opt => opt.id)
-    //         : [];
-    //     setSelectedOptionGroups(existingIds);
-    //     setShowDialog(true);
-    // };
-
-
-
     return (
         <>
             <Box
-                // maxWidth="240px"
                 onDoubleClick={value !== "menu_item_option" ? handleOpenDialog : undefined}
-
                 style={{
-
                     width: value === "menu_item_option" ? "100%" : "260px",
                     maxWidth: value === "menu_item_option" ? "100%" : "300px",
-
                     borderRadius: "12px",
                     backgroundColor: "#ffffffff",
                     boxShadow: value === "menu_item_option" ? null : "0 4px 10px rgba(0, 0, 0, 0.1)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    position: "relative", // 👈 cần để định vị nút X
-                    overflow: "visible", // 🔥 quan trọng
-                    marginBottom: "16px", // 👈 thêm dòng này để tạo khoảng cách giữa các card
-
+                    position: "relative",
+                    overflow: "visible",
+                    marginBottom: "16px",
                 }}
             >
-
-
-
                 <Card
                     size="2"
                     style={{
@@ -71,388 +48,382 @@ export default function CardContent({
                         padding: value === "menu_item_option" ? 0 : undefined,
                         background: value === "menu_item_option" ? "transparent" : undefined,
                     }}
-                >                {value == "menu" ? (
-                    <>
-                        <button
-                            onClick={(e) => handleDelete(e, item, "menu_item")}
-                            style={{
-                                position: "absolute",
-                                top: "0px",
-                                right: "0px",
-                                background: "transparent",
-                                border: "none",
-                                fontSize: "35px",
-                                fontWeight: "bold",
-                                color: "#ffececff",
-                                cursor: "pointer",
-                                transition: "0.2s",
-                            }}
-                            onMouseEnter={(e) => (e.target.style.color = "red")}
-                            onMouseLeave={(e) => (e.target.style.color = "#ffececff")}
-                        >
-                            ×
-                        </button>
-                        <Inset clip="padding-box" side="top" pb="current">
-                            <img
-                                src={item.image_item.url}
-                                alt="Bold typography"
-                                style={{
-                                    display: "block",
-                                    objectFit: "cover",
-                                    width: "250px",
-                                    height: 140,
-                                    backgroundColor: "var(--gray-5)",
-                                }}
-                            />
-                        </Inset>
-
-                        <div style={{ padding: "10px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-around" }}>
-                                <div>
-                                    <p style={{ fontWeight: 700 }}>{item.name_item}</p>
-                                    <p>Giá: {item.price}</p>
-                                </div>
-                                <div>
-                                    <p>Đã bán: {item.sold_count}</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <Switch
-                                    color={item.status ? "cyan" : "gray"}
-                                    variant="soft"
-                                    checked={item.status}
-                                    onCheckedChange={(checked) =>
-                                        handleChangeStatus?.(checked, item, "status", value)
-                                    }
-                                />
-                            </div>
-                        </div>
-                    </>
-                ) : value == "option_item" ? (
-                    <>
-                        <button
-                            onClick={(e) => handleDelete(e, item, "option_item")}
-                            style={{
-                                position: "absolute",
-                                top: "6px",
-                                right: "10px",
-                                background: "transparent",
-                                border: "none",
-                                fontSize: "25px",
-                                fontWeight: "bold",
-                                color: "#ffececff",
-                                cursor: "pointer",
-                                transition: "0.2s",
-                            }}
-                            onMouseEnter={(e) => (e.target.style.color = "red")}
-                            onMouseLeave={(e) => (e.target.style.color = "#ffececff")}
-                        >
-                            ×
-                        </button>
-
-                        <div style={{ padding: "10px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-around" }}>
-                                <div>
-                                    <p style={{ fontWeight: 700 }}>{item.option_item_name}</p>
-                                    <p>Giá: {item.price}</p>
-                                    <p>
-                                        Trạng thái: {item.status ? "Hoạt động" : "Tạm tắt"}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p>Đã chọn: {item.status_select ? "Có" : "Không"}</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <Switch
-                                    color={item.status ? "cyan" : "gray"}
-                                    variant="soft"
-
-                                    checked={item.status}
-                                    onCheckedChange={(checked) =>
-                                        handleChangeStatus?.(checked, item, "status", value)
-                                    }
-                                />
-                            </div>
-                        </div>
-                    </>
-                ) : value == "orders" ? (
-                    <>
-                        {/* 👇 Nút X dùng chung cho tất cả value */}
-                        {value === "orders" && item.status !== "cancel" && item.status !== "complete" && (
+                >
+                    {/* ======================= MENU ======================= */}
+                    {value === "menu" ? (
+                        <>
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleChangeStatus(item, "cancel");
+                                onClick={(e) => handleDelete(e, item, "menu_item")}
+                                style={{
+                                    position: "absolute",
+                                    top: "0px",
+                                    right: "0px",
+                                    background: "transparent",
+                                    border: "none",
+                                    fontSize: "35px",
+                                    fontWeight: "bold",
+                                    color: "#ffececff",
+                                    cursor: "pointer",
+                                    transition: "0.2s",
                                 }}
+                                onMouseEnter={(e) => (e.target.style.color = "red")}
+                                onMouseLeave={(e) => (e.target.style.color = "#ffececff")}
+                            >
+                                X
+                            </button>
+                            <Inset clip="padding-box" side="top" pb="current">
+                                <img
+                                    src={item.image_item.url}
+                                    alt="Bold typography"
+                                    style={{
+                                        display: "block",
+                                        objectFit: "cover",
+                                        width: "250px",
+                                        height: 140,
+                                        backgroundColor: "var(--gray-5)",
+                                    }}
+                                />
+                            </Inset>
+
+                            <div style={{ padding: "10px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-around" }}>
+                                    <div>
+                                        <p style={{ fontWeight: 700 }}>{item.name_item}</p>
+                                        <p>Giá: {item.price}</p>
+                                    </div>
+                                    <div>
+                                        <p>Đã bán: {item.sold_count}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Switch
+                                        color={item.status ? "cyan" : "gray"}
+                                        variant="soft"
+                                        checked={item.status}
+                                        onCheckedChange={(checked) =>
+                                            handleChangeStatus?.(checked, item, "status", value)
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    ) : value === "option_item" ? (
+                        /* ======================= OPTION ITEM ======================= */
+                        <>
+                            <button
+                                onClick={(e) => handleDelete(e, item, "option_item")}
                                 style={{
                                     position: "absolute",
                                     top: "6px",
-                                    right: "6px",
-                                    background: "#fee2e2",
-                                    color: "#991b1b",
+                                    right: "10px",
+                                    background: "transparent",
                                     border: "none",
-                                    borderRadius: "50%",
-                                    width: "22px",
-                                    height: "22px",
+                                    fontSize: "25px",
                                     fontWeight: "bold",
+                                    color: "#ffececff",
                                     cursor: "pointer",
-                                    lineHeight: "18px",
-                                    textAlign: "center",
                                     transition: "0.2s",
                                 }}
-                                onMouseEnter={(e) => (e.currentTarget.style.background = "#fecaca")}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = "#fee2e2")}
-                                title="Hủy đơn"
+                                onMouseEnter={(e) => (e.target.style.color = "red")}
+                                onMouseLeave={(e) => (e.target.style.color = "#ffececff")}
                             >
-                                ×
+                                X
                             </button>
-                        )}
-                        <div
-                            style={{
-                                backgroundColor: "#f9fafb",
-                                borderRadius: "12px",
-                                padding: "12px 14px",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                                width: "200px", // tăng chiều ngang
-                                height: "320px", // cố định chiều cao (bạn đổi được)
-                                overflow: "hidden", // không để tràn
-                            }}
-                        >
-                            {/* Header */}
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                                <strong style={{ fontSize: "15px" }}>{item.full_name}</strong>
-                                <span
-                                    onClick={() => {
-                                        if (item.status === "waiting" || item.status === "accept") {
-                                            handleChangeStatus(item, item.status);
+
+                            <div style={{ padding: "10px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-around" }}>
+                                    <div>
+                                        <p style={{ fontWeight: 700 }}>{item.option_item_name}</p>
+                                        <p>Giá: {item.price}</p>
+                                        <p>
+                                            Trạng thái: {item.status ? "Hoạt động" : "Tạm tắt"}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p>Đã chọn: {item.status_select ? "Có" : "Không"}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Switch
+                                        color={item.status ? "cyan" : "gray"}
+                                        variant="soft"
+                                        checked={item.status}
+                                        onCheckedChange={(checked) =>
+                                            handleChangeStatus?.(checked, item, "status", value)
                                         }
-                                    }} style={{
-                                        fontSize: "12px",
-                                        padding: "3px 8px",
-                                        borderRadius: "6px",
-                                        backgroundColor:
-                                            item.status === "waiting"
-                                                ? "#fef3c7"
-                                                : item.status === "accept"
-                                                    ? "#cffafe"
-                                                    : item.status === "complete"
-                                                        ? "#dcfce7"
-                                                        : "#fee2e2",
-                                        color:
-                                            item.status === "waiting"
-                                                ? "#92400e"
-                                                : item.status === "accept"
-                                                    ? "#0369a1"
-                                                    : item.status === "complete"
-                                                        ? "#166534"
-                                                        : "#991b1b",
-                                        fontWeight: 600,
-                                        cursor: "pointer", // thêm con trỏ chuột để thấy nó có thể bấm
-                                        transition: "0.2s",
-                                        userSelect: "none",
-                                    }}
-                                >
-                                    {item.status === "waiting"
-                                        ? "Chờ xác nhận"
-                                        : item.status === "accept"
-                                            ? "Đang chuẩn bị"
-                                            : item.status === "complete"
-                                                ? "Hoàn thành"
-                                                : "Đã hủy"}
-                                </span>
-
+                                    />
+                                </div>
                             </div>
+                        </>
+                    ) : value === "orders" ? (
+                        /* ======================= ĐƠN HÀNG – ĐÃ SỬA HOÀN CHỈNH ======================= */
+                        <>
+                            {/* Nút hủy đơn */}
+                            {["waiting", "preparing"].includes(item.status) && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleChangeStatus(item, "cancel");
+                                    }}
+                                    style={{
+                                        position: "absolute",
+                                        top: "6px",
+                                        right: "6px",
+                                        background: "#fee2e2",
+                                        color: "#991b1b",
+                                        border: "none",
+                                        borderRadius: "50%",
+                                        width: "32px",
+                                        height: "32px",
+                                        fontWeight: "bold",
+                                        cursor: "pointer",
+                                        lineHeight: "18px",
+                                        textAlign: "center",
+                                        zIndex: 10,
+                                    }}
+                                    title="Hủy đơn"
+                                >
+                                    X
+                                </button>
+                            )}
 
-
-                            {/* Danh sách món */}
-                            {/* Danh sách món (chỉ hiện tối đa 2 món) */}
                             <div
                                 style={{
-                                    marginTop: "8px",
-                                    background: "#ffffff",
-                                    padding: "5px",
-                                    borderRadius: "8px",
-                                    width: "190px",      // 👈 chiều ngang cố định
-                                    height: "200px",     // 👈 chiều cao cố định
-                                    overflowY: "auto",   // 👈 cuộn khi nội dung vượt quá
+                                    backgroundColor: "#f9fafb",
+                                    borderRadius: "12px",
+                                    padding: "16px",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                                    height: "420px",
+                                    display: "flex",
+                                    flexDirection: "column",
                                 }}
                             >
-                                <p
-                                    style={{
-                                        fontWeight: "600",
-                                        fontSize: "13px",
-                                        marginBottom: "4px",
-                                    }}
-                                >
-                                    🍽️ Món ăn:
-                                </p>
+                                {/* Header */}
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
+                                    <strong style={{ fontSize: "15px" }}>{item.full_name || "Khách lẻ"}</strong>
+                                    <span
+                                        style={{
+                                            fontSize: "12px",
+                                            padding: "4px 10px",
+                                            borderRadius: "20px",
+                                            backgroundColor:
+                                                item.status === "waiting" ? "#fef3c7" :
+                                                    item.status === "preparing" ? "#ddd6fe" :
+                                                        item.status === "delivering" ? "#dbeafe" :
+                                                            item.status === "complete" ? "#dcfce7" : "#fee2e2",
+                                            color:
+                                                item.status === "waiting" ? "#92400e" :
+                                                    item.status === "preparing" ? "#6b21b6" :
+                                                        item.status === "delivering" ? "#1e40af" :
+                                                            item.status === "complete" ? "#166534" : "#991b1b",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        {item.status === "waiting" ? "Chờ xác nhận" :
+                                            item.status === "preparing" ? "Đang chuẩn bị" :
+                                                item.status === "delivering" ? "Drone đang giao" :
+                                                    item.status === "complete" ? "Hoàn thành" : "Đã hủy"}
+                                    </span>
+                                </div>
 
-                                {item.order_items.map((food, index) => (
-                                    <div key={index} style={{ marginBottom: "6px" }}>
-                                        <p style={{ fontSize: "13px", fontWeight: 500 }}>
-                                            - {food.menu_item_name || "Món chưa đặt tên"} ({food.quantity}x) —{" "}
-                                            {food.price.toLocaleString("vi-VN")}₫
-                                        </p>
-
-                                        {food.note && (
-                                            <p
-                                                style={{
-                                                    fontSize: "12px",
-                                                    color: "#6b7280",
-                                                    marginLeft: "10px",
-                                                }}
-                                            >
-                                                📝 {food.note}
+                                {/* Danh sách món */}
+                                <div style={{
+                                    flex: 1,
+                                    background: "#ffffff",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    overflowY: "auto",
+                                    marginBottom: "10px",
+                                }}>
+                                    {item.order_items?.map((food, index) => (
+                                        <div key={index} style={{ marginBottom: "10px", fontSize: "13px" }}>
+                                            <p style={{ margin: 0 }}>
+                                                <strong>{food.quantity}x</strong> {food.menu_item_name || "Món chưa đặt tên"}
+                                                {" "}— {food.price.toLocaleString("vi-VN")}₫
                                             </p>
-                                        )}
+                                            {food.note && (
+                                                <p style={{ margin: "4px 0 0 16px", color: "#6b7280", fontSize: "12px" }}>
+                                                    Ghi chú: {food.note}
+                                                </p>
+                                            )}
+                                            {food.options?.length > 0 && (
+                                                <p style={{ margin: "4px 0 0 16px", color: "#6b7280", fontSize: "12px" }}>
+                                                    Topping: {food.options.map(o => o.option_item_name).join(", ")}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
 
-                                        {food.options?.length > 0 && (
-                                            <p
-                                                style={{
-                                                    fontSize: "12px",
-                                                    color: "#6b7280",
-                                                    marginLeft: "10px",
-                                                }}
-                                            >
-                                                ➕ Topping:{" "}
-                                                {food.options
-                                                    .map((opt, i) => opt.option_item_name || `Topping ${i + 1}`)
-                                                    .join(", ")}
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+                                {/* Tổng tiền + thời gian */}
+                                <div style={{ textAlign: "center", padding: "8px 0", borderTop: "1px dashed #e5e7eb" }}>
+                                    <p style={{ fontSize: "18px", fontWeight: "bold", color: "#dc2626", margin: "0" }}>
+                                        {item.total_amount?.toLocaleString("vi-VN")} ₫
+                                    </p>
+                                    <small style={{ color: "#6b7280" }}>
+                                        {new Date(item.created_at).toLocaleString("vi-VN")}
+                                    </small>
+                                </div>
 
-                            {/* Tổng + Thời gian */}
-                            <div style={{ marginTop: "8px" }}>
-                                <p style={{ fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>
-                                    💰 Tổng: {item.total_amount.toLocaleString("vi-VN")} ₫
-                                </p>
-                                <p
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "#6b7280",
-                                        marginTop: "4px",
-                                        textAlign: "right",
-                                    }}
-                                >
-                                    🕒 {new Date(item.created_at).toLocaleString("vi-VN")}
-                                </p>
-                            </div>
-                        </div>
-
-
-
-                    </>
-
-
-                ) : value == "menu_item_option" ? (
-                    <div
-                        style={{
-                            width: "100%",
-                            borderRadius: "12px",
-                            backgroundColor: "#fafafa",
-                            padding: "16px",
-                            position: "relative",
-                        }}
-                    >
-                        {/* Nút xóa */}
-
-
-                        {/* Nút mở dialog */}
-                        <button
-                            onClick={handleOpenDialog}
-                            style={{
-                                position: "absolute",
-                                top: "20px",
-                                right: "100px",
-                                backgroundColor: "#352f2fff",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "8px",
-                                padding: "6px 12px",
-                                cursor: "pointer",
-                                fontSize: "14px",
-                                fontWeight: 500,
-                                transition: "background-color 0.2s",
-                            }}
-                            onMouseEnter={(e) => (e.target.style.backgroundColor = "#364b6bff")}
-                            onMouseLeave={(e) => (e.target.style.backgroundColor = "#352f2f")}
-                        >
-                            🔍 Chỉnh sửa liên kết
-                        </button>
-
-
-
-                        {/* Tiêu đề món */}
-                        <h3 style={{ marginTop: "16px", fontSize: "18px", fontWeight: 600 }}>
-                            🍔 {item.name_item || "Món không xác định"}
-                        </h3>
-                        <p style={{ margin: "4px 0", color: "#666" }}>
-                            Liên kết với:{" "}
-                            <b>
-                                {item.options && item.options.length > 0
-                                    ? item.options.map((opt) => opt.option_name).join(", ")
-                                    : "Chưa có option"}
-                            </b>
-                        </p>
-
-                        {/* Chi tiết các Option */}
-                        <div style={{ fontSize: "15px", color: "#444", lineHeight: "1.6" }}>
-                            <div>
-                                <span style={{ fontWeight: 500 }}>Món ID:</span>{" "}
-                                <code>{item.id}</code>
-                            </div>
-                            <div style={{ marginTop: "6px" }}>
-                                <span style={{ fontWeight: 500 }}>Các Option:</span>
-                                <ul
-                                    style={{
-                                        marginTop: "6px",
-                                        marginBottom: 0,
-                                        paddingLeft: "16px",
-                                    }}
-                                >
-                                    {item.options && item.options.length > 0 ? (
-                                        item.options.map((opt) => (
-                                            <li key={opt.id} style={{ marginBottom: "8px" }}>
-                                                <b>{opt.option_name}</b> —{" "}
-                                                {opt.option_items && opt.option_items.length > 0 ? (
-                                                    <span style={{ color: "#6b7280" }}>
-                                                        {opt.option_items
-                                                            .map((oi) => oi.option_item_name)
-                                                            .join(", ")}
-                                                    </span>
-                                                ) : (
-                                                    <span
-                                                        style={{ color: "#9ca3af", fontStyle: "italic" }}
-                                                    >
-                                                        Không có option_item
-                                                    </span>
-                                                )}
-                                            </li>
-                                        ))
-                                    ) : (
-                                        <li>Không có option nào</li>
+                                {/* NÚT HÀNH ĐỘNG */}
+                                <div style={{ marginTop: "12px" }}>
+                                    {item.status === "waiting" && (
+                                        <button
+                                            onClick={() => handleChangeStatus(item, "waiting")}
+                                            style={{
+                                                width: "100%",
+                                                padding: "12px",
+                                                background: "#f59e0b",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "8px",
+                                                fontWeight: "bold",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            Xác nhận đơn
+                                        </button>
                                     )}
-                                </ul>
+
+                                    {item.status === "preparing" && (
+                                        <button
+                                            onClick={() => handleChangeStatus(item, "preparing")}
+                                            style={{
+                                                width: "100%",
+                                                padding: "14px",
+                                                background: "#8b5cf6",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "8px",
+                                                fontWeight: "bold",
+                                                fontSize: "15px",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            Hoàn tất chuẩn bị → Chọn Drone
+                                        </button>
+                                    )}
+
+                                    {item.status === "delivering" && (
+                                        <button disabled style={{
+                                            width: "100%",
+                                            padding: "12px",
+                                            background: "#3b82f6",
+                                            color: "white",
+                                            borderRadius: "8px",
+                                        }}>
+                                            Drone đang giao...
+                                        </button>
+                                    )}
+
+                                    {item.status === "complete" && (
+                                        <button disabled style={{
+                                            width: "100%",
+                                            padding: "12px",
+                                            background: "#22c55e",
+                                            color: "white",
+                                            borderRadius: "8px",
+                                        }}>
+                                            Đã hoàn thành
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    ) : value === "menu_item_option" ? (
+                        /* ======================= MENU ITEM OPTION – GIỮ NGUYÊN ======================= */
+                        <div
+                            style={{
+                                width: "100%",
+                                borderRadius: "12px",
+                                backgroundColor: "#fafafa",
+                                padding: "16px",
+                                position: "relative",
+                            }}
+                        >
+                            <button
+                                onClick={handleOpenDialog}
+                                style={{
+                                    position: "absolute",
+                                    top: "20px",
+                                    right: "100px",
+                                    backgroundColor: "#352f2fff",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    padding: "6px 12px",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    fontWeight: 500,
+                                    transition: "background-color 0.2s",
+                                }}
+                                onMouseEnter={(e) => (e.target.style.backgroundColor = "#364b6bff")}
+                                onMouseLeave={(e) => (e.target.style.backgroundColor = "#352f2f")}
+                            >
+                                Chỉnh sửa liên kết
+                            </button>
+
+                            <h3 style={{ marginTop: "16px", fontSize: "18px", fontWeight: 600 }}>
+                                {item.name_item || "Món không xác định"}
+                            </h3>
+                            <p style={{ margin: "4px 0", color: "#666" }}>
+                                Liên kết với:{" "}
+                                <b>
+                                    {item.options && item.options.length > 0
+                                        ? item.options.map((opt) => opt.option_name).join(", ")
+                                        : "Chưa có option"}
+                                </b>
+                            </p>
+
+                            <div style={{ fontSize: "15px", color: "#444", lineHeight: "1.6" }}>
+                                <div>
+                                    <span style={{ fontWeight: 500 }}>Món ID:</span>{" "}
+                                    <code>{item.id}</code>
+                                </div>
+                                <div style={{ marginTop: "6px" }}>
+                                    <span style={{ fontWeight: 500 }}>Các Option:</span>
+                                    <ul
+                                        style={{
+                                            marginTop: "6px",
+                                            marginBottom: 0,
+                                            paddingLeft: "16px",
+                                        }}
+                                    >
+                                        {item.options && item.options.length > 0 ? (
+                                            item.options.map((opt) => (
+                                                <li key={opt.id} style={{ marginBottom: "8px" }}>
+                                                    <b>{opt.option_name}</b> —{" "}
+                                                    {opt.option_items && opt.option_items.length > 0 ? (
+                                                        <span style={{ color: "#6b7280" }}>
+                                                            {opt.option_items
+                                                                .map((oi) => oi.option_item_name)
+                                                                .join(", ")}
+                                                        </span>
+                                                    ) : (
+                                                        <span
+                                                            style={{ color: "#9ca3af", fontStyle: "italic" }}
+                                                        >
+                                                            Không có option_item
+                                                        </span>
+                                                    )}
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li>Không có option nào</li>
+                                        )}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <p>Không có dữ liệu</p>
-                )}
+                    ) : (
+                        <p>Không có dữ liệu</p>
+                    )}
                 </Card>
             </Box>
-            {/* <div> */}
-            {/* <div> */}
-            {/* --- Dialog nằm ngoài Card --- */}
+
+            {/* Dialog chọn nhóm option – giữ nguyên của bạn */}
             {showDialog && (
                 <div
                     style={{
@@ -481,7 +452,7 @@ export default function CardContent({
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h3 style={{ marginTop: 0, marginBottom: "12px" }}>🔍 Chọn nhóm Option</h3>
+                        <h3 style={{ marginTop: 0, marginBottom: "12px" }}>Chọn nhóm Option</h3>
                         {Array.isArray(other) && other.length > 0 ? (
                             <div
                                 style={{
@@ -535,16 +506,11 @@ export default function CardContent({
                                 fontWeight: 500,
                             }}
                         >
-                            ✅ Xong
+                            Xong
                         </button>
                     </div>
                 </div>
             )}
-            {/* </div> */}
-            {/* </div> */}
-
-
-
         </>
-    )
+    );
 }

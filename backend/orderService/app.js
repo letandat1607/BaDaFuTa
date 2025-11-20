@@ -41,7 +41,7 @@ app.get("/profile", (req, res) => {
 app.get("/getUserOrders", authenticate, getUserOrders)
 app.post("/checkOutOrder", authenticate, checkOutOrder);
 // app.post("/getAllOrder", getAllOrder);
-app.get("/updateOrderStatusPayment/:id", updateOrderStatusPayment);
+// app.get("/updateOrderStatusPayment/:id", updateOrderStatusPayment);
 
 app.get("/getOrder/:id", authenticate, getOrder);
 

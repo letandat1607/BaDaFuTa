@@ -23,7 +23,7 @@ async function startConsumers(gatewayService) {
                             case "merchant.gateway.new_order":
                                 // console.log(content);
                                 if(content.userId){
-                                    await gatewayService.pushOrderUI(content.order[0], content.userId);
+                                    await gatewayService.pushOrderUI(content.order[0], content.userId, content.location);
                                 }else{
                                     await gatewayService.pushOrderUI(content[0]);
                                 }

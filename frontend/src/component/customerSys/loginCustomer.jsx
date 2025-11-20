@@ -1,6 +1,6 @@
 import { Box, Card } from "@radix-ui/themes";
 import React, { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, Link } from "react-router-dom";
 
 export default function CustomerLogin() {
     const [email, setEmail] = useState("");
@@ -174,6 +174,26 @@ export default function CustomerLogin() {
                                 Đăng nhập
                             </button>
                         </form>
+                        <p
+                            style={{
+                                textAlign: "center",
+                                marginTop: "1rem",
+                                fontSize: "0.875rem",
+                                color: "#6b7280",
+                            }}
+                        >
+                            Chưa có tài khoản?{" "}
+                            <Link
+                                to="/customer/register"
+                                style={{
+                                    color: "#2563eb",
+                                    textDecoration: "none",
+                                    fontWeight: "500",
+                                }}
+                            >
+                                Đăng ký ngay
+                            </Link>
+                        </p>
                     </Card>
                 </Box>
             </div>

@@ -23,7 +23,7 @@ export default function BulkAddToppingDialog({ optionGroups, onSuccess, onClose 
       tempKey: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
 
-    if (!newItem.option_item_name || !newItem.price) {
+    if (!newItem.option_item_name || newItem.price < 0) {
       alert("Vui lòng điền tên topping và giá!");
       return;
     }

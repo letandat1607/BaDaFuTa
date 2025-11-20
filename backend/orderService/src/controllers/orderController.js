@@ -76,38 +76,38 @@ module.exports.checkOutOrder = async (req, res) => {
   }
 };
 
-module.exports.updateOrderStatusPayment = async (req, res) => {
-  try {
-    const { statusPayment, orderId } = req.body;
+// module.exports.updateOrderStatusPayment = async (req, res) => {
+//   try {
+//     const { statusPayment, orderId } = req.body;
 
-    if (!orderId || !statusPayment) {
-      return res.status(400).json({ message: "Thiếu orderId hoặc status" });
-    }
+//     if (!orderId || !statusPayment) {
+//       return res.status(400).json({ message: "Thiếu orderId hoặc status" });
+//     }
 
-    const order = await orderService.updateOrderStatusPayment(orderId, statusPayment);
+//     const order = await orderService.updateOrderStatusPayment(orderId, statusPayment);
 
-    const pushOrder = await fetch(`${process.env.GATEWAY_URL}/pushOrder`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        order
-      }),
-    })
+//     const pushOrder = await fetch(`${process.env.GATEWAY_URL}/pushOrder`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         order
+//       }),
+//     })
 
-    if (pushOrder.ok) console.log("Push thành công Order");
+//     if (pushOrder.ok) console.log("Push thành công Order");
 
-    return res.status(200).json({
-      message: "Cập nhật trạng thái đơn hàng thành công",
-      order_id: order.id,
-      new_status: order.status_payment,
-    });
-  } catch (err) {
-    console.error("Lỗi khi cập nhật trạng thái order:", err);
-    return res.status(500).json({ message: "Lỗi server khi cập nhật đơn hàng" });
-  }
-}
+//     return res.status(200).json({
+//       message: "Cập nhật trạng thái đơn hàng thành công",
+//       order_id: order.id,
+//       new_status: order.status_payment,
+//     });
+//   } catch (err) {
+//     console.error("Lỗi khi cập nhật trạng thái order:", err);
+//     return res.status(500).json({ message: "Lỗi server khi cập nhật đơn hàng" });
+//   }
+// }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 module.exports.getAllOrderMerchant = async (req, res) => {
   try {
@@ -122,13 +122,14 @@ module.exports.getAllOrderMerchant = async (req, res) => {
 
 module.exports.updateOrder= async (req, res) => {
   try {
-    const { data, orderId } = req.body;
+    console.log("updateOrder req.body: ", req.body);
+    const { data, orderId, location } = req.body;
 
-    if (!orderId || !data) {
-      return res.status(400).json({ message: "Thiếu orderId hoặc data" });
+    if (!orderId || !data || !location) {
+      return res.status(400).json({ message: "Thiếu orderId hoặc data hoặc location" });
     }
 
-    const order = await orderService.updateOrder(orderId, data);
+    const order = await orderService.updateOrder(orderId, data, location);
 
     // const pushOrder = await fetch(`${process.env.GATEWAY_URL}/pushOrder`, {
     //   method: "POST",

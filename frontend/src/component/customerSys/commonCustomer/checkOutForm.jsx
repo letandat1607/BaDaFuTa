@@ -1,9 +1,71 @@
-// frontend/src/components/CheckoutForm.jsx
+// src/components/CheckoutForm.jsx
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
-// import { QRCodeSVG } from "qrcode.react"; // ← ĐÚNG RỒI!
-import { QRCodeSVG } from "qrcode.react"
+import { QRCodeSVG } from "qrcode.react";
+
+// Leaflet
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix icon Leaflet cho Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
+
 let socket;
+
+// Component QUAN TRỌNG: Làm bản đồ tự động bay về vị trí mới
+function FlyToLocation({ center }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 17, {
+        animate: true,
+        duration: 1.2, // mượt như Google Maps
+      });
+    }
+  }, [center, map]);
+
+  return null;
+}
+
+// Component xử lý click và hiển thị marker
+function LocationMarker({ position, setPosition, setForm }) {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      setPosition([lat, lng]);
+      reverseGeocode(lat, lng, setForm);
+    },
+  });
+
+  return position ? <Marker position={position} /> : null;
+}
+
+// Reverse geocoding: tọa độ → địa chỉ
+async function reverseGeocode(lat, lng, setForm) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`
+    );
+    const data = await res.json();
+    if (data?.display_name) {
+      setForm((prev) => ({
+        ...prev,
+        delivery_address: data.display_name,
+        lat,
+        lng,
+      }));
+    }
+  } catch (err) {
+    console.error("Lỗi reverse geocoding:", err);
+  }
+}
 
 export default function CheckoutForm({ cartItems, merchantId }) {
   const [form, setForm] = useState({
@@ -12,7 +74,12 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     delivery_address: "",
     note: "",
     method: "MOMO",
+    lat: null,
+    lng: null,
   });
+
+  const [position, setPosition] = useState(null); // [lat, lng] – dùng làm center
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -23,6 +90,79 @@ export default function CheckoutForm({ cartItems, merchantId }) {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
 
+  // Lấy vị trí hiện tại khi load trang (giữ nguyên như cũ)
+  useEffect(() => {
+    const getCurrentLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setPosition([lat, lng]);
+            reverseGeocode(lat, lng, setForm);
+          },
+          (err) => {
+            console.log("Không lấy được vị trí:", err.message);
+            setPosition([10.7769, 106.7009]);
+            setForm((prev) => ({ ...prev, delivery_address: "Vui lòng chọn địa chỉ chính xác trên bản đồ" }));
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        setPosition([10.7769, 106.7009]);
+      }
+    };
+
+    getCurrentLocation();
+  }, []);
+
+  // Xử lý tìm kiếm địa chỉ
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchQuery + ", Việt Nam"
+        )}&limit=1&addressdetails=1`
+      );
+      const data = await res.json();
+      if (data && data[0]) {
+        const { lat, lon, display_name } = data[0];
+        const newLat = parseFloat(lat);
+        const newLng = parseFloat(lon);
+        const newPos = [newLat, newLng];
+        setPosition(newPos); // Kích hoạt FlyToLocation → bản đồ bay mượt
+        setForm((prev) => ({
+          ...prev,
+          delivery_address: display_name,
+          lat: newLat,
+          lng: newLng,
+        }));
+      } else {
+        setError("Không tìm thấy địa chỉ. Vui lòng thử lại!");
+      }
+    } catch (err) {
+      setError("Lỗi tìm kiếm. Vui lòng thử lại.");
+    }
+  };
+
+  // Dùng vị trí hiện tại
+  const handleUseCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const newPos = [lat, lng];
+          setPosition(newPos); // Bản đồ sẽ tự động bay về
+          reverseGeocode(lat, lng, setForm);
+        },
+        () => alert("Không thể lấy vị trí hiện tại. Vui lòng kiểm tra quyền truy cập vị trí.")
+      );
+    }
+  };
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -31,220 +171,299 @@ export default function CheckoutForm({ cartItems, merchantId }) {
       transports: ["websocket"],
     });
 
-    socket.on("connect", () => {
-      console.log("WebSocket connected:", socket.id);
-    });
-
+    socket.on("connect", () => console.log("Socket connected"));
     socket.on("paymentQR", (data) => {
-      console.log("QR received:", data);
       setQrUrl(data.payUrl);
       setOrderId(data.orderId);
       setPaymentStatus("waiting");
     });
-
     socket.on("paymentSuccess", (data) => {
       if (data.orderId === orderId) {
         setPaymentStatus("success");
-        const merchantId = data.merchantId;
-        if (merchantId) {
-          const allCart = JSON.parse(localStorage.getItem("cart") || "[]");
-          const updatedCart = allCart.filter(item => item.merchant_id !== merchantId);
-          localStorage.setItem("cart", JSON.stringify(updatedCart));
-          console.log(`Đã xóa giỏ hàng của merchant: ${merchantId}`);
-          setSuccess(true);
-        }
+        setSuccess(true);
+        const allCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const newCart = allCart.filter((item) => item.merchant_id !== merchantId);
+        localStorage.setItem("cart", JSON.stringify(newCart));
       }
     });
-
-    socket.on("paymentFailed", (data) => {
-      if (data.orderId === orderId) {
-        setPaymentStatus("failed");
-        setError(data.error || "Thanh toán thất bại");
-      }
+    socket.on("paymentFailed", () => {
+      setPaymentStatus("failed");
+      setError("Thanh toán thất bại");
     });
 
     return () => socket.disconnect();
-  }, [user.id, orderId]);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  }, [user.id, orderId, merchantId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.full_name || !form.phone || !form.delivery_address) {
-      setError("Vui lòng điền đầy đủ thông tin!");
+    if (!form.full_name || !form.phone || !form.lat || !form.lng) {
+      setError("Vui lòng nhập đầy đủ thông tin và chọn chính xác địa chỉ giao hàng!");
       return;
     }
 
     setLoading(true);
     setError("");
-    setQrUrl("");
-    setPaymentStatus("");
 
     const payload = {
       merchant_id: merchantId,
       user_id: user.id,
-      ...form,
+      full_name: form.full_name,
+      phone: form.phone,
+      method: form.method,
+      delivery_address: {
+        full_address: form.delivery_address,
+        lat: form.lat,
+        lng: form.lng,
+      },
       delivery_fee: 15000,
-      order_items: cartItems.map(item => ({
+      order_items: cartItems.map((item) => ({
         menu_item_id: item.menu_item_id,
         name_item: item.name_item,
         price: item.price,
         quantity: item.quantity,
         image_item: item.image_item,
         note: item.note || "",
-        options: item.options || []
+        options: item.options || [],
       })),
       total_amount: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0) + 15000,
     };
 
     try {
-      const response = await fetch("http://localhost:3000/api/order/checkOutOrder", {
+      console.log(payload);
+      const res = await fetch("http://localhost:3000/api/order/checkOutOrder", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "authorization": `${token}`
+          authorization: `${token}`,
         },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error("Không thể tạo đơn hàng");
-
-      const result = await response.json();
+      if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
+      const result = await res.json();
       setOrderId(result.orderId);
-      setLoading(false);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Lỗi hệ thống");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <style jsx>{`
-        .form-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .form-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #1f2937; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; color: #374151; }
-        .required { color: #dc2626; }
-        input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 15px; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
-        textarea { resize: vertical; min-height: 80px; }
-        .error { color: #dc2626; font-size: 14px; margin-top: 8px; }
-        .submit-btn { background: #10b981; color: white; width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; margin-top: 16px; transition: background 0.2s; }
-        .submit-btn:hover { background: #059669; }
-        .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
-      `}</style>
+    <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
+      <h3 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "20px" }}>
+        Thông tin giao hàng
+      </h3>
 
-      <div className="form-card">
-        <h3 className="form-title">Thông tin giao hàng</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Họ tên <span className="required">*</span></label>
-            <input type="text" name="full_name" value={form.full_name} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Số điện thoại <span className="required">*</span></label>
-            <input type="tel" name="phone" value={form.phone} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Địa chỉ giao hàng <span className="required">*</span></label>
-            <input type="text" name="delivery_address" value={form.delivery_address} onChange={handleChange} placeholder="Nhập địa chỉ của bạn" required />
-          </div>
-          <div className="form-group">
-            <label>Ghi chú</label>
-            <textarea name="note" value={form.note} onChange={handleChange} placeholder="Trống hẻm ạ" />
-          </div>
-          <div className="form-group">
-            <label>Phương thức thanh toán</label>
-            <select name="method" value={form.method} onChange={handleChange}>
-              <option value="MOMO">MOMO</option>
-              <option value="COD">Thanh toán khi nhận hàng</option>
-            </select>
-          </div>
+      <form onSubmit={handleSubmit}>
+        {/* Họ tên & SĐT */}
+        <div style={{ marginBottom: "16px" }}>
+          <label>Họ tên <span style={{ color: "red" }}>*</span></label>
+          <input
+            type="text"
+            required
+            value={form.full_name}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+          />
+        </div>
 
-          {error && <div className="error">{error}</div>}
+        <div style={{ marginBottom: "16px" }}>
+          <label>Số điện thoại <span style={{ color: "red" }}>*</span></label>
+          <input
+            type="tel"
+            required
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+          />
+        </div>
 
-          <button type="submit" className="submit-btn" disabled={success}>
-            {loading ? "Đang xử lý..." : "Xác nhận thanh toán"}
-          </button>
-        </form>
-
-        {qrUrl && paymentStatus === "waiting" && (
-          <div style={{
-            marginTop: "30px",
-            padding: "20px",
-            background: "#f8f9fa",
-            borderRadius: "12px",
-            textAlign: "center",
-            border: "1px solid #e5e7eb"
-          }}>
-            <h4 style={{ color: "#e41e7b", marginBottom: "12px" }}>
-              Quét mã QR để thanh toán
-            </h4>
-            <p style={{ margin: "8px 0", fontSize: "14px" }}>
-              Mã đơn: <strong>{orderId}</strong>
-            </p>
-
-            <div style={{
-              background: "white",
-              padding: "12px",
-              borderRadius: "8px",
-              display: "inline-block",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-            }}>
-              <QRCodeSVG
-                value={qrUrl}
-                size={220}
-                level="H"
-                includeMargin={true}
-              />
-            </div>
-
-            <p style={{ marginTop: "12px", color: "#666", fontSize: "14px" }}>
-              Mở app <strong>Momo</strong> → <strong>Quét mã</strong> → <strong>Xác nhận</strong>
-            </p>
-
-            <a
-              href={qrUrl}
+        {/* Thanh tìm kiếm + nút vị trí hiện tại */}
+        <div style={{ marginBottom: "12px" }}>
+          <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+            <input
+              type="text"
+              placeholder="Tìm địa chỉ: số nhà, đường, phường, quận..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               style={{
-                display: "inline-block",
-                marginTop: "12px",
-                padding: "10px 20px",
-                background: "#e41e7b",
-                color: "white",
-                textDecoration: "none",
+                flex: 1,
+                padding: "12px 16px",
+                border: "1px solid #ddd",
                 borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "600"
+                fontSize: "15px",
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleSearch}
+              style={{
+                padding: "0 20px",
+                background: "#3b82f6",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "600",
               }}
             >
-              Mở Momo ngay
-            </a>
-          </div>
-        )}
-
-        {/* SUCCESS */}
-        {paymentStatus === "success" && (
-          <div style={{ marginTop: "20px", padding: "16px", background: "#d4edda", color: "#155724", borderRadius: "8px", textAlign: "center" }}>
-            Thanh toán thành công! Đơn hàng: <strong>{orderId}</strong>
-            <button
-              onClick={() => window.location.href = `/customer/order-success/${orderId}`}
-              style={{ marginLeft: "10px", padding: "8px 16px", background: "#28a745", color: "white", border: "none", borderRadius: "6px" }}
-            > 
-              Xem chi tiết
+              Tìm
             </button>
           </div>
-        )}
 
-        {/* FAILED */}
-        {paymentStatus === "failed" && (
-          <div style={{ marginTop: "20px", padding: "16px", background: "#f8d7da", color: "#721c24", borderRadius: "8px", textAlign: "center" }}>
-            Thanh toán thất bại. Vui lòng thử lại.
+          <button
+            type="button"
+            onClick={handleUseCurrentLocation}
+            style={{
+              width: "100%",
+              padding: "10px",
+              background: "#10b981",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            Dùng vị trí hiện tại của tôi
+          </button>
+        </div>
+
+        {/* Bản đồ – ĐÃ SỬA: TỰ ĐỘNG BAY VỀ VỊ TRÍ MỚI */}
+        <div style={{ marginBottom: "16px" }}>
+          <label>Chọn địa chỉ chính xác trên bản đồ <span style={{ color: "red" }}>*</span></label>
+          <div style={{
+            height: "380px",
+            margin: "12px 0",
+            borderRadius: "12px",
+            overflow: "hidden",
+            border: "2px solid #e5e7eb",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            position: "relative",
+            zIndex: 1
+          }}>
+            {position ? (
+              <MapContainer center={position} zoom={17} style={{ height: "100%", width: "100%" }}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <LocationMarker position={position} setPosition={setPosition} setForm={setForm} />
+                <FlyToLocation center={position} />
+              </MapContainer>
+            ) : (
+              <div style={{
+                height: "100%",
+                background: "#f9fafb",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#6b7280",
+                fontSize: "16px"
+              }}>
+                Đang tải bản đồ...
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </>
+
+          <textarea
+            value={form.delivery_address}
+            onChange={(e) => setForm({ ...form, delivery_address: e.target.value })}
+            placeholder="Bạn có thể chỉnh sửa địa chỉ chi tiết tại đây..."
+            rows={3}
+            required
+            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", marginTop: "8px" }}
+          />
+
+          {form.lat && (
+            <div style={{ color: "#10b981", fontWeight: "500", marginTop: "8px", fontSize: "14px" }}>
+              GPS đã xác định: {form.lat.toFixed(6)}, {form.lng.toFixed(6)} → Drone sẽ bay đúng chỗ!
+            </div>
+          )}
+        </div>
+
+        {/* Ghi chú */}
+        <div style={{ marginBottom: "16px" }}>
+          <label>Ghi chú cho shipper (không bắt buộc)</label>
+          <textarea
+            value={form.note}
+            onChange={(e) => setForm({ ...form, note: e.target.value })}
+            placeholder="Ví dụ: Để trước cổng, gọi khi đến..."
+            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+          />
+        </div>
+
+        {/* Phương thức thanh toán */}
+        <div style={{ marginBottom: "20px" }}>
+          <label>Phương thức thanh toán</label>
+          <select
+            value={form.method}
+            onChange={(e) => setForm({ ...form, method: e.target.value })}
+            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+          >
+            <option value="MOMO">Momo</option>
+            <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+          </select>
+        </div>
+
+        {error && <div style={{ color: "#dc2626", marginBottom: "12px", fontWeight: "500" }}>{error}</div>}
+
+        <button
+          type="submit"
+          disabled={loading || success}
+          style={{
+            width: "100%",
+            padding: "16px",
+            background: success ? "#6b7280" : "#10b981",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: 600,
+            cursor: loading || success ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Đang xử lý..." : success ? "Đơn hàng đã hoàn tất" : "Xác nhận & Thanh toán"}
+        </button>
+      </form>
+
+      {/* QR Momo */}
+      {qrUrl && paymentStatus === "waiting" && (
+        <div style={{ marginTop: "30px", padding: "24px", background: "#fdf2f8", borderRadius: "12px", textAlign: "center" }}>
+          <h4 style={{ color: "#d946ef", marginBottom: "12px" }}>Quét mã QR để thanh toán Momo</h4>
+          <p>Mã đơn hàng: <strong>{orderId}</strong></p>
+          <div style={{ background: "white", padding: "16px", borderRadius: "12px", display: "inline-block" }}>
+            <QRCodeSVG value={qrUrl} size={220} level="H" includeMargin />
+          </div>
+          <a
+            href={qrUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-block",
+              marginTop: "16px",
+              padding: "12px 28px",
+              background: "#d946ef",
+              color: "white",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
+          >
+            Mở ứng dụng Momo
+          </a>
+        </div>
+      )}
+
+      {paymentStatus === "success" && (
+        <div style={{ marginTop: "20px", padding: "20px", background: "#d4edda", color: "#155724", borderRadius: "12px", textAlign: "center" }}>
+          <strong>Thanh toán thành công!</strong> Đơn hàng: <strong>{orderId}</strong>
+          <button
+            onClick={() => (window.location.href = `/customer/order-success/${orderId}`)}
+            style={{ marginLeft: "12px", padding: "10px 20px", background: "#28a745", color: "white", border: "none", borderRadius: "6px" }}
+          >
+            Xem chi tiết đơn hàng
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

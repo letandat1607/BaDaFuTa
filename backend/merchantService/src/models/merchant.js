@@ -15,7 +15,7 @@ const Merchant = sequelize.define("Merchant", {
         allowNull: false,
     },
     location:{
-        type: DataTypes.STRING(100),
+        type: DataTypes.JSONB,
         allowNull: false,
     },
     phone:{

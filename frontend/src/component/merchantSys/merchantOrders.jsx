@@ -1,1223 +1,351 @@
-// import { useState, useEffect } from "react";
 import { useCallback, useEffect, useState } from "react";
-import Navbar from "./commonMerchant/navbar";
-import { Spinner, Button, Flex, TextField, Dialog, Theme, Switch } from "@radix-ui/themes";
-import Card from "./commonMerchant/card";
 import { io } from "socket.io-client";
-
+import CardContent from "./commonMerchant/card";
 
 export default function MerchantOrders() {
-    const [orders, setOrders] = useState([]);
-    const [tab, setTab] = useState("waiting");
-    // const [newDish, setNewDish] = useState({})
-    // const orders =
-    //     [
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Nguyễn Văn A",
-    //             "phone": "0901234567",
-    //             "delivery_address": "123 Lê Lợi, Quận 1, TP.HCM",
-    //             "delivery_fee": 15000,
-    //             "note": "Giao giờ trưa",
-    //             "method": "VNPAY",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "67c9f1ab-8d0a-4c85-87aa-1a2bbf02d0f3",
-    //                     "quantity": 2,
-    //                     "price": 65000,
-    //                     "note": "ít cay",
-    //                     "options": [
-    //                         { "option_item_id": "98d2b771-1234-4acb-a21c-7c5a5d6b4a21" },
-    //                         { "option_item_id": "ab7d93f0-8bca-4e0a-9137-b6fbe92da8cd" }
-    //                     ]
-    //                 },
-    //                 {
-    //                     "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d4",
-    //                     "quantity": 1,
-    //                     "price": 120000,
-    //                     "note": "",
-    //                     "options": []
-    //                 },
-    //                 {
-    //                     "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d7",
-    //                     "quantity": 1,
-    //                     "price": 120000,
-    //                     "note": "",
-    //                     "options": [
-    //                         { "option_item_id": "98d2b771-1234-4acb-a21c-7c5a5d6b4a21" },
-    //                         { "option_item_id": "ab7d93f0-8bca-4e0a-9137-b6fbe92da8cd" }
-    //                     ]
-    //                 }
-    //             ],
-    //             "total_amount": 265000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T14:35:00Z",
-    //             "update_at": "2025-10-24T14:35:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Trần Thị B",
-    //             "phone": "0912345678",
-    //             "delivery_address": "45 Nguyễn Huệ, Quận 1, TP.HCM",
-    //             "delivery_fee": 20000,
-    //             "note": "Giao nhanh giúp mình",
-    //             "method": "CASH",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "a8c2d1a9-1bcd-46e9-8f1a-234beff5f321",
-    //                     "quantity": 3,
-    //                     "price": 50000,
-    //                     "note": "",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 170000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-23T09:15:00Z",
-    //             "update_at": "2025-10-23T09:45:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Lê Văn C",
-    //             "phone": "0987654321",
-    //             "delivery_address": "12 Võ Thị Sáu, Quận 3, TP.HCM",
-    //             "delivery_fee": 10000,
-    //             "note": "Gọi trước khi tới",
-    //             "method": "MOMO",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "c1b2e9f7-8a1d-4b31-a22f-11aa3b2ccdd1",
-    //                     "quantity": 1,
-    //                     "price": 85000,
-    //                     "note": "Không hành",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 95000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-22T17:00:00Z",
-    //             "update_at": "2025-10-22T18:00:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Phạm Duy D",
-    //             "phone": "0934123456",
-    //             "delivery_address": "88 Lý Thường Kiệt, Quận 10, TP.HCM",
-    //             "delivery_fee": 12000,
-    //             "note": "Đưa tận cửa, có chó sợ nha",
-    //             "method": "VNPAY",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "de9f8a2b-9a4c-49f9-9bbf-cc99a1a0cc33",
-    //                     "quantity": 4,
-    //                     "price": 30000,
-    //                     "note": "",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 132000,
-    //             "status": "waiting",
-    //             "status_payment": "refunded",
-    //             "created_at": "2025-10-20T13:30:00Z",
-    //             "update_at": "2025-10-20T13:50:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Đinh Thị E",
-    //             "phone": "0909988776",
-    //             "delivery_address": "56 Cách Mạng Tháng 8, Quận 10, TP.HCM",
-    //             "delivery_fee": 18000,
-    //             "note": "Cho thêm muỗng, đũa nha",
-    //             "method": "CASH",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "123a4b5c-678d-4e9f-9123-9aa4d4e8b222",
-    //                     "quantity": 2,
-    //                     "price": 70000,
-    //                     "note": "",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 158000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T08:00:00Z",
-    //             "update_at": "2025-10-24T08:05:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Bùi Văn F",
-    //             "phone": "0902345678",
-    //             "delivery_address": "27 Hai Bà Trưng, Quận 1, TP.HCM",
-    //             "delivery_fee": 10000,
-    //             "note": "Cổng số 2, chung cư A",
-    //             "method": "MOMO",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "67c9f1ab-8d0a-4c85-87aa-1a2bbf02d0f3",
-    //                     "quantity": 1,
-    //                     "price": 65000,
-    //                     "note": "Không cay",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 75000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-18T10:00:00Z",
-    //             "update_at": "2025-10-18T11:00:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Nguyễn Thị G",
-    //             "phone": "0933555777",
-    //             "delivery_address": "21 Trần Hưng Đạo, Quận 5, TP.HCM",
-    //             "delivery_fee": 16000,
-    //             "note": "Đừng bấm chuông, gọi điện",
-    //             "method": "ZALOPAY",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d4",
-    //                     "quantity": 1,
-    //                     "price": 120000,
-    //                     "note": "Không hành",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 136000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-21T15:00:00Z",
-    //             "update_at": "2025-10-21T15:45:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Phan Quốc H",
-    //             "phone": "0977123456",
-    //             "delivery_address": "90 Nguyễn Văn Cừ, Quận 5, TP.HCM",
-    //             "delivery_fee": 12000,
-    //             "note": "Cho thêm ớt sa tế",
-    //             "method": "VNPAY",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "b9a8e7d6-5a44-4d1b-b3a3-d3f44fa7c888",
-    //                     "quantity": 2,
-    //                     "price": 90000,
-    //                     "note": "",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 192000,
-    //             "status": "cancel",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-19T09:00:00Z",
-    //             "update_at": "2025-10-19T09:30:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Võ Anh I",
-    //             "phone": "0911777333",
-    //             "delivery_address": "12 Hoàng Văn Thụ, Tân Bình, TP.HCM",
-    //             "delivery_fee": 10000,
-    //             "note": "Giao trước 11h",
-    //             "method": "MOMO",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "f3b1d4e2-6a9b-45dd-aaf9-bb9d3e0e3a91",
-    //                     "quantity": 3,
-    //                     "price": 45000,
-    //                     "note": "",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 145000,
-    //             "status": "accept",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-24T07:30:00Z",
-    //             "update_at": "2025-10-24T07:50:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Ngô Thị K",
-    //             "phone": "0908877665",
-    //             "delivery_address": "100 Điện Biên Phủ, Bình Thạnh, TP.HCM",
-    //             "delivery_fee": 15000,
-    //             "note": "Không để ớt",
-    //             "method": "CASH",
-    //             "order_items": [
-    //                 {
-    //                     "menu_item_id": "77e2c1a9-9fbb-48e9-bb2b-123b4f5c9d7a",
-    //                     "quantity": 2,
-    //                     "price": 60000,
-    //                     "note": "",
-    //                     "options": []
-    //                 }
-    //             ],
-    //             "total_amount": 135000,
-    //             "status": "complete",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-16T14:00:00Z",
-    //             "update_at": "2025-10-16T14:30:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Trịnh Văn L",
-    //             "phone": "0905551111",
-    //             "delivery_address": "23 Nguyễn Trãi, Quận 5, TP.HCM",
-    //             "delivery_fee": 12000,
-    //             "note": "Giao giờ trưa, không bấm chuông",
-    //             "method": "MOMO",
-    //             "order_items": [
-    //                 { "menu_item_id": "ab1d2e3f-4a5b-678c-9d10-112233445566", "quantity": 2, "price": 55000, "note": "Không ớt", "options": [] }
-    //             ],
-    //             "total_amount": 122000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T10:15:00Z",
-    //             "update_at": "2025-10-24T10:20:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Đặng Thị M",
-    //             "phone": "0933444555",
-    //             "delivery_address": "14 Lê Văn Sỹ, Quận 3, TP.HCM",
-    //             "delivery_fee": 10000,
-    //             "note": "Gọi trước khi giao",
-    //             "method": "ZALOPAY",
-    //             "order_items": [
-    //                 { "menu_item_id": "98b7c6a5-4321-4e9f-b987-abcdef123456", "quantity": 1, "price": 85000, "note": "Không hành", "options": [] }
-    //             ],
-    //             "total_amount": 95000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-24T09:40:00Z",
-    //             "update_at": "2025-10-24T09:50:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Phạm Minh N",
-    //             "phone": "0977888999",
-    //             "delivery_address": "55 Nguyễn Kiệm, Gò Vấp, TP.HCM",
-    //             "delivery_fee": 15000,
-    //             "note": "",
-    //             "method": "CASH",
-    //             "order_items": [
-    //                 { "menu_item_id": "22334455-6677-8899-aabb-ccddeeff0011", "quantity": 3, "price": 40000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 135000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T11:10:00Z",
-    //             "update_at": "2025-10-24T11:15:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Ngô Văn O",
-    //             "phone": "0911222333",
-    //             "delivery_address": "78 Trần Quang Khải, Quận 1, TP.HCM",
-    //             "delivery_fee": 16000,
-    //             "note": "Thêm ống hút",
-    //             "method": "VNPAY",
-    //             "order_items": [
-    //                 { "menu_item_id": "33445566-7788-99aa-bbcc-ddeeff001122", "quantity": 1, "price": 120000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 136000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-24T10:30:00Z",
-    //             "update_at": "2025-10-24T10:35:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Vũ Thị P",
-    //             "phone": "0909992222",
-    //             "delivery_address": "45 Phạm Ngọc Thạch, Quận 3, TP.HCM",
-    //             "delivery_fee": 10000,
-    //             "note": "Không bỏ tiêu",
-    //             "method": "CASH",
-    //             "order_items": [
-    //                 { "menu_item_id": "44556677-8899-aabb-ccdd-eeff00112233", "quantity": 2, "price": 60000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 130000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T12:00:00Z",
-    //             "update_at": "2025-10-24T12:10:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Lâm Quốc Q",
-    //             "phone": "0933111222",
-    //             "delivery_address": "19 Nguyễn Oanh, Gò Vấp, TP.HCM",
-    //             "delivery_fee": 15000,
-    //             "note": "Cần giao sớm",
-    //             "method": "MOMO",
-    //             "order_items": [
-    //                 { "menu_item_id": "55667788-99aa-bbcc-ddee-ff0011223344", "quantity": 1, "price": 70000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 85000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-24T13:00:00Z",
-    //             "update_at": "2025-10-24T13:05:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Đỗ Thị R",
-    //             "phone": "0907333444",
-    //             "delivery_address": "88 Nguyễn Văn Linh, Quận 7, TP.HCM",
-    //             "delivery_fee": 18000,
-    //             "note": "Giao cổng phụ",
-    //             "method": "VNPAY",
-    //             "order_items": [
-    //                 { "menu_item_id": "66778899-aabb-ccdd-eeff-001122334455", "quantity": 2, "price": 90000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 198000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T14:10:00Z",
-    //             "update_at": "2025-10-24T14:15:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Phùng Minh S",
-    //             "phone": "0977333444",
-    //             "delivery_address": "35 Pasteur, Quận 1, TP.HCM",
-    //             "delivery_fee": 12000,
-    //             "note": "",
-    //             "method": "ZALOPAY",
-    //             "order_items": [
-    //                 { "menu_item_id": "778899aa-bbcc-ddee-ff00-112233445566", "quantity": 1, "price": 65000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 77000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-24T15:00:00Z",
-    //             "update_at": "2025-10-24T15:05:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Nguyễn Văn T",
-    //             "phone": "0911555666",
-    //             "delivery_address": "60 Phan Xích Long, Phú Nhuận, TP.HCM",
-    //             "delivery_fee": 15000,
-    //             "note": "Thêm nước chấm",
-    //             "method": "CASH",
-    //             "order_items": [
-    //                 { "menu_item_id": "8899aabb-ccdd-eeff-0011-223344556677", "quantity": 2, "price": 80000, "note": "", "options": [] }
-    //             ],
-    //             "total_amount": 175000,
-    //             "status": "waiting",
-    //             "status_payment": "pending",
-    //             "created_at": "2025-10-24T16:10:00Z",
-    //             "update_at": "2025-10-24T16:20:00Z"
-    //         },
-    //         {
-    //             "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //             "full_name": "Trần Thị U",
-    //             "phone": "0904111222",
-    //             "delivery_address": "22 Hoàng Diệu, Quận 4, TP.HCM",
-    //             "delivery_fee": 10000,
-    //             "note": "Không lấy đũa",
-    //             "method": "MOMO",
-    //             "order_items": [
-    //                 { "menu_item_id": "99aabbcc-ddee-ff00-1122-334455667788", "quantity": 1, "price": 95000, "note": "", "options": [] },
-    //                 { "menu_item_id": "99aabbcc-ddee-ff00-1122-334455667781", "quantity": 1, "price": 5000, "note": "", "options": [] },
-    //             ],
-    //             "total_amount": 110000,
-    //             "status": "waiting",
-    //             "status_payment": "paid",
-    //             "created_at": "2025-10-24T17:00:00Z",
-    //             "update_at": "2025-10-24T17:05:00Z"
-    //         }
+  const [orders, setOrders] = useState([]);
+  const [tab, setTab] = useState("waiting");
+  const [drones, setDrones] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedDroneId, setSelectedDroneId] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    // const orders =
-    // [
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Nguyễn Văn A",
-    //         "phone": "0901234567",
-    //         "delivery_address": "123 Lê Lợi, Quận 1, TP.HCM",
-    //         "delivery_fee": 15000,
-    //         "note": "Giao giờ trưa",
-    //         "method": "VNPAY",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "67c9f1ab-8d0a-4c85-87aa-1a2bbf02d0f3",
-    //                 "quantity": 2,
-    //                 "price": 65000,
-    //                 "note": "ít cay",
-    //                 "options": [
-    //                     { "option_item_id": "98d2b771-1234-4acb-a21c-7c5a5d6b4a21" },
-    //                     { "option_item_id": "ab7d93f0-8bca-4e0a-9137-b6fbe92da8cd" }
-    //                 ]
-    //             },
-    //             {
-    //                 "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d4",
-    //                 "quantity": 1,
-    //                 "price": 120000,
-    //                 "note": "",
-    //                 "options": []
-    //             },
-    //             {
-    //                 "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d7",
-    //                 "quantity": 1,
-    //                 "price": 120000,
-    //                 "note": "",
-    //                 "options": [
-    //                     { "option_item_id": "98d2b771-1234-4acb-a21c-7c5a5d6b4a21" },
-    //                     { "option_item_id": "ab7d93f0-8bca-4e0a-9137-b6fbe92da8cd" }
-    //                 ]
-    //             }
-    //         ],
-    //         "total_amount": 265000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T14:35:00Z",
-    //         "update_at": "2025-10-24T14:35:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Trần Thị B",
-    //         "phone": "0912345678",
-    //         "delivery_address": "45 Nguyễn Huệ, Quận 1, TP.HCM",
-    //         "delivery_fee": 20000,
-    //         "note": "Giao nhanh giúp mình",
-    //         "method": "CASH",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "a8c2d1a9-1bcd-46e9-8f1a-234beff5f321",
-    //                 "quantity": 3,
-    //                 "price": 50000,
-    //                 "note": "",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 170000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-23T09:15:00Z",
-    //         "update_at": "2025-10-23T09:45:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Lê Văn C",
-    //         "phone": "0987654321",
-    //         "delivery_address": "12 Võ Thị Sáu, Quận 3, TP.HCM",
-    //         "delivery_fee": 10000,
-    //         "note": "Gọi trước khi tới",
-    //         "method": "MOMO",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "c1b2e9f7-8a1d-4b31-a22f-11aa3b2ccdd1",
-    //                 "quantity": 1,
-    //                 "price": 85000,
-    //                 "note": "Không hành",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 95000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-22T17:00:00Z",
-    //         "update_at": "2025-10-22T18:00:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Phạm Duy D",
-    //         "phone": "0934123456",
-    //         "delivery_address": "88 Lý Thường Kiệt, Quận 10, TP.HCM",
-    //         "delivery_fee": 12000,
-    //         "note": "Đưa tận cửa, có chó sợ nha",
-    //         "method": "VNPAY",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "de9f8a2b-9a4c-49f9-9bbf-cc99a1a0cc33",
-    //                 "quantity": 4,
-    //                 "price": 30000,
-    //                 "note": "",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 132000,
-    //         "status": "waiting",
-    //         "status_payment": "refunded",
-    //         "created_at": "2025-10-20T13:30:00Z",
-    //         "update_at": "2025-10-20T13:50:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Đinh Thị E",
-    //         "phone": "0909988776",
-    //         "delivery_address": "56 Cách Mạng Tháng 8, Quận 10, TP.HCM",
-    //         "delivery_fee": 18000,
-    //         "note": "Cho thêm muỗng, đũa nha",
-    //         "method": "CASH",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "123a4b5c-678d-4e9f-9123-9aa4d4e8b222",
-    //                 "quantity": 2,
-    //                 "price": 70000,
-    //                 "note": "",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 158000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T08:00:00Z",
-    //         "update_at": "2025-10-24T08:05:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Bùi Văn F",
-    //         "phone": "0902345678",
-    //         "delivery_address": "27 Hai Bà Trưng, Quận 1, TP.HCM",
-    //         "delivery_fee": 10000,
-    //         "note": "Cổng số 2, chung cư A",
-    //         "method": "MOMO",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "67c9f1ab-8d0a-4c85-87aa-1a2bbf02d0f3",
-    //                 "quantity": 1,
-    //                 "price": 65000,
-    //                 "note": "Không cay",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 75000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-18T10:00:00Z",
-    //         "update_at": "2025-10-18T11:00:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Nguyễn Thị G",
-    //         "phone": "0933555777",
-    //         "delivery_address": "21 Trần Hưng Đạo, Quận 5, TP.HCM",
-    //         "delivery_fee": 16000,
-    //         "note": "Đừng bấm chuông, gọi điện",
-    //         "method": "ZALOPAY",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "e2a8b2f9-77dd-45b0-8b11-0d8fbc79e6d4",
-    //                 "quantity": 1,
-    //                 "price": 120000,
-    //                 "note": "Không hành",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 136000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-21T15:00:00Z",
-    //         "update_at": "2025-10-21T15:45:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Phan Quốc H",
-    //         "phone": "0977123456",
-    //         "delivery_address": "90 Nguyễn Văn Cừ, Quận 5, TP.HCM",
-    //         "delivery_fee": 12000,
-    //         "note": "Cho thêm ớt sa tế",
-    //         "method": "VNPAY",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "b9a8e7d6-5a44-4d1b-b3a3-d3f44fa7c888",
-    //                 "quantity": 2,
-    //                 "price": 90000,
-    //                 "note": "",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 192000,
-    //         "status": "cancel",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-19T09:00:00Z",
-    //         "update_at": "2025-10-19T09:30:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Võ Anh I",
-    //         "phone": "0911777333",
-    //         "delivery_address": "12 Hoàng Văn Thụ, Tân Bình, TP.HCM",
-    //         "delivery_fee": 10000,
-    //         "note": "Giao trước 11h",
-    //         "method": "MOMO",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "f3b1d4e2-6a9b-45dd-aaf9-bb9d3e0e3a91",
-    //                 "quantity": 3,
-    //                 "price": 45000,
-    //                 "note": "",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 145000,
-    //         "status": "accept",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-24T07:30:00Z",
-    //         "update_at": "2025-10-24T07:50:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Ngô Thị K",
-    //         "phone": "0908877665",
-    //         "delivery_address": "100 Điện Biên Phủ, Bình Thạnh, TP.HCM",
-    //         "delivery_fee": 15000,
-    //         "note": "Không để ớt",
-    //         "method": "CASH",
-    //         "order_items": [
-    //             {
-    //                 "menu_item_id": "77e2c1a9-9fbb-48e9-bb2b-123b4f5c9d7a",
-    //                 "quantity": 2,
-    //                 "price": 60000,
-    //                 "note": "",
-    //                 "options": []
-    //             }
-    //         ],
-    //         "total_amount": 135000,
-    //         "status": "complete",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-16T14:00:00Z",
-    //         "update_at": "2025-10-16T14:30:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Trịnh Văn L",
-    //         "phone": "0905551111",
-    //         "delivery_address": "23 Nguyễn Trãi, Quận 5, TP.HCM",
-    //         "delivery_fee": 12000,
-    //         "note": "Giao giờ trưa, không bấm chuông",
-    //         "method": "MOMO",
-    //         "order_items": [
-    //             { "menu_item_id": "ab1d2e3f-4a5b-678c-9d10-112233445566", "quantity": 2, "price": 55000, "note": "Không ớt", "options": [] }
-    //         ],
-    //         "total_amount": 122000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T10:15:00Z",
-    //         "update_at": "2025-10-24T10:20:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Đặng Thị M",
-    //         "phone": "0933444555",
-    //         "delivery_address": "14 Lê Văn Sỹ, Quận 3, TP.HCM",
-    //         "delivery_fee": 10000,
-    //         "note": "Gọi trước khi giao",
-    //         "method": "ZALOPAY",
-    //         "order_items": [
-    //             { "menu_item_id": "98b7c6a5-4321-4e9f-b987-abcdef123456", "quantity": 1, "price": 85000, "note": "Không hành", "options": [] }
-    //         ],
-    //         "total_amount": 95000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-24T09:40:00Z",
-    //         "update_at": "2025-10-24T09:50:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Phạm Minh N",
-    //         "phone": "0977888999",
-    //         "delivery_address": "55 Nguyễn Kiệm, Gò Vấp, TP.HCM",
-    //         "delivery_fee": 15000,
-    //         "note": "",
-    //         "method": "CASH",
-    //         "order_items": [
-    //             { "menu_item_id": "22334455-6677-8899-aabb-ccddeeff0011", "quantity": 3, "price": 40000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 135000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T11:10:00Z",
-    //         "update_at": "2025-10-24T11:15:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Ngô Văn O",
-    //         "phone": "0911222333",
-    //         "delivery_address": "78 Trần Quang Khải, Quận 1, TP.HCM",
-    //         "delivery_fee": 16000,
-    //         "note": "Thêm ống hút",
-    //         "method": "VNPAY",
-    //         "order_items": [
-    //             { "menu_item_id": "33445566-7788-99aa-bbcc-ddeeff001122", "quantity": 1, "price": 120000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 136000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-24T10:30:00Z",
-    //         "update_at": "2025-10-24T10:35:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Vũ Thị P",
-    //         "phone": "0909992222",
-    //         "delivery_address": "45 Phạm Ngọc Thạch, Quận 3, TP.HCM",
-    //         "delivery_fee": 10000,
-    //         "note": "Không bỏ tiêu",
-    //         "method": "CASH",
-    //         "order_items": [
-    //             { "menu_item_id": "44556677-8899-aabb-ccdd-eeff00112233", "quantity": 2, "price": 60000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 130000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T12:00:00Z",
-    //         "update_at": "2025-10-24T12:10:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Lâm Quốc Q",
-    //         "phone": "0933111222",
-    //         "delivery_address": "19 Nguyễn Oanh, Gò Vấp, TP.HCM",
-    //         "delivery_fee": 15000,
-    //         "note": "Cần giao sớm",
-    //         "method": "MOMO",
-    //         "order_items": [
-    //             { "menu_item_id": "55667788-99aa-bbcc-ddee-ff0011223344", "quantity": 1, "price": 70000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 85000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-24T13:00:00Z",
-    //         "update_at": "2025-10-24T13:05:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Đỗ Thị R",
-    //         "phone": "0907333444",
-    //         "delivery_address": "88 Nguyễn Văn Linh, Quận 7, TP.HCM",
-    //         "delivery_fee": 18000,
-    //         "note": "Giao cổng phụ",
-    //         "method": "VNPAY",
-    //         "order_items": [
-    //             { "menu_item_id": "66778899-aabb-ccdd-eeff-001122334455", "quantity": 2, "price": 90000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 198000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T14:10:00Z",
-    //         "update_at": "2025-10-24T14:15:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Phùng Minh S",
-    //         "phone": "0977333444",
-    //         "delivery_address": "35 Pasteur, Quận 1, TP.HCM",
-    //         "delivery_fee": 12000,
-    //         "note": "",
-    //         "method": "ZALOPAY",
-    //         "order_items": [
-    //             { "menu_item_id": "778899aa-bbcc-ddee-ff00-112233445566", "quantity": 1, "price": 65000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 77000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-24T15:00:00Z",
-    //         "update_at": "2025-10-24T15:05:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Nguyễn Văn T",
-    //         "phone": "0911555666",
-    //         "delivery_address": "60 Phan Xích Long, Phú Nhuận, TP.HCM",
-    //         "delivery_fee": 15000,
-    //         "note": "Thêm nước chấm",
-    //         "method": "CASH",
-    //         "order_items": [
-    //             { "menu_item_id": "8899aabb-ccdd-eeff-0011-223344556677", "quantity": 2, "price": 80000, "note": "", "options": [] }
-    //         ],
-    //         "total_amount": 175000,
-    //         "status": "waiting",
-    //         "status_payment": "pending",
-    //         "created_at": "2025-10-24T16:10:00Z",
-    //         "update_at": "2025-10-24T16:20:00Z"
-    //     },
-    //     {
-    //         "merchant_id": "b3e45d02-7755-4b78-8d2f-79f5441d2a4e",
-    //         "full_name": "Trần Thị U",
-    //         "phone": "0904111222",
-    //         "delivery_address": "22 Hoàng Diệu, Quận 4, TP.HCM",
-    //         "delivery_fee": 10000,
-    //         "note": "Không lấy đũa",
-    //         "method": "MOMO",
-    //         "order_items": [
-    //             { "menu_item_id": "99aabbcc-ddee-ff00-1122-334455667788", "quantity": 1, "price": 95000, "note": "", "options": [] },
-    //             { "menu_item_id": "99aabbcc-ddee-ff00-1122-334455667781", "quantity": 1, "price": 5000, "note": "", "options": [] },
-    //         ],
-    //         "total_amount": 110000,
-    //         "status": "waiting",
-    //         "status_payment": "paid",
-    //         "created_at": "2025-10-24T17:00:00Z",
-    //         "update_at": "2025-10-24T17:05:00Z"
-    //     }
-    //     ]
-    useEffect(() => {
-        const merchant = JSON.parse(localStorage.getItem("merchant"))
-        if (!merchant) throw new Error("Dữ liệu merchant không hợp lệ");
+  const merchant = JSON.parse(localStorage.getItem("merchant") || "{}");
+  const merchantId = merchant?.id;
 
-        const socket = io("http://localhost:3000", {
-            query: { merchantId: merchant.id }
-        });
+  // Socket.io
+  useEffect(() => {
+    if (!merchantId) return;
+    const socket = io("http://localhost:3000", { query: { merchantId } });
+    socket.on("connect", () => console.log("Socket connected"));
+    socket.on("newOrder", (incomingOrder) => {
+      setOrders((prevOrders) => {
+        const exists = prevOrders.some((order) => order.id === incomingOrder.id);
 
-        socket.on("connect", () => {
-            console.log("Connected to WebSocket server");
-        });
+        if (exists) {
+          return prevOrders.map((order) =>
+            order.id === incomingOrder.id
+              ? {
+                ...order,
+                status: incomingOrder.status || order.status,
+                // Các field có thể thay đổi realtime:
+                // drone_id: incomingOrder.drone_id ?? order.drone_id,
+                // drone: incomingOrder.drone ?? order.drone,
+                // location: incomingOrder.location ?? order.location, // nếu có gửi vị trí drone
+                // updatedAt: incomingOrder.updatedAt || order.updatedAt,
+              }
+              : order
+          );
+        } else {
+          return [incomingOrder, ...prevOrders];
+        }
+      });
+    });
+    socket.on("orders", (data) => setOrders(data));
+    return () => socket.disconnect();
+  }, [merchantId]);
 
-        socket.on("newOrder", (order) => {
-            console.log("Received new order:", order);
-            setOrders((prev) => [order, ...prev]);
-        });
-        
-        socket.on("orders", (orders) => {
-            console.log("Received orders:", orders);
-            setOrders(orders);
-        });
+  // Lấy đơn hàng ban đầu
+  useEffect(() => {
+    if (!merchantId) return;
+    fetch(`http://localhost:3000/api/order/getAllOrderMerchant/${merchantId}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setOrders(data.orders || data.orderss || []))
+      .catch(console.error);
+  }, [merchantId]);
 
-        socket.on("disconnect", () => {
-            console.log("Disconnected");
-        });
+  // Lấy danh sách drone
+  const fetchDrones = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/drone/merchant/${merchantId}`);
+      const json = await res.json();
+      console.log("Drones fetched:", json);
+      if (res.ok) {
+        setDrones(json.drones || []);
+      }
+    } catch (err) {
+      console.error("Lỗi lấy drone:", err);
+    }
+  };
 
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
-    useEffect(() => {
-        const getMerchantOrders = async () => {
-            try {
+  // Mở dialog chọn drone
+  const openDroneDialog = async (order) => {
+    setSelectedOrder(order);
+    setSelectedDroneId("");
+    await fetchDrones();
+    setIsDialogOpen(true);
+  };
 
-                const merchant = JSON.parse(localStorage.getItem("merchant"))
-                if (!merchant) throw new Error("Dữ liệu merchant không hợp lệ");
-                { console.log("ddddddddddddddddddddddddddd", merchant.id); }
-                const resOrders = await fetch(`http://localhost:3000/api/order/getAllOrderMerchant/${merchant.id}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        // "authorization": localStorage.getItem("token")
-                    },
-                });
-                if (!resOrders.ok) {
-                    throw new Error(`Lỗi server: ${resOrders.status}`);
-                }
-                // const { orderss } = await resOrders.json();
-                // setOrders(orderss);
-            } catch (err) {
-                console.error("Lỗi khi khi get merchant:", err);
-            }
-        };
+  // Giao đơn bằng drone
+  const assignDrone = async () => {
+    if (!selectedDroneId) return alert("Vui lòng chọn drone!");
 
-        getMerchantOrders();
-    }, []);
-    function handleTabButton(e) {
-        setTab(e.currentTarget.name);
+    // 1. CẬP NHẬT NGAY TRONG UI (rất quan trọng để mượt)
+    const optimisticOrder = {
+      ...selectedOrder,
+      status: "delivering",
+      drone_id: selectedDroneId,
+      drone: drones.find(d => d.id === selectedDroneId), // optional: hiện tên drone
     };
 
+    // Cập nhật ngay trong state → đơn hàng biến mất khỏi tab "preparing" và sang "delivering" ngay lập tức
+    setOrders(prev => prev.map(o => o.id === selectedOrder.id ? optimisticOrder : o));
 
-    const handleChangeStatus = useCallback(async (item, type) => {
-        try {
-            // const merchant = JSON.parse(localStorage.getItem("merchant"));
-            // if (!merchant) throw new Error("Dữ liệu merchant không hợp lệ");
+    // Đóng dialog ngay
+    setIsDialogOpen(false);
+    setSelectedDroneId("");
+    setSelectedOrder(null);
 
-            const updatedOrder = { ...item };
+    // 2. Sau đó mới gọi API (nếu lỗi thì vẫn có thể rollback, nhưng hiếm)
+    try {
+      const res = await fetch(`http://localhost:3000/api/order/updateOrder/${selectedOrder.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: localStorage.getItem("token") || "",
+        },
+        body: JSON.stringify({
+          data: optimisticOrder,
+          orderId: selectedOrder.id,
+          location: merchant.location,
+        }),
+      });
 
-            if (type === "waiting") {
+      if (!res.ok) {
+        throw new Error("Cập nhật thất bại");
+      }
 
-                const upt = {
-                    ...updatedOrder,
-                    status: "accept",
-                };
+      const updatedOrder = await res.json();
+      // Cập nhật lại chính xác từ server (nếu có thêm field nào)
+      setOrders(prev => prev.map(o => o.id === updatedOrder.id ? updatedOrder : o));
 
-                const res = await fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        authorization: localStorage.getItem("token"),
-                    },
-                    body: JSON.stringify({ data: upt, orderId: item.id }),
-                });
+      // Có thể emit socket cho khách hàng ở đây nếu backend chưa làm
+      // socket.emit("orderUpdated", { orderId: updatedOrder.id, status: "delivering", location: merchant.location });
 
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.message || "Cập nhật Option thất bại");
-                }
-                const order = await res.json();
+    } catch (err) {
+      alert("Lỗi khi giao đơn: " + err.message);
+      // Nếu lỗi → rollback về trạng thái cũ
+      setOrders(prev => prev.map(o => o.id === selectedOrder.id ? selectedOrder : o));
+    }
+  };
 
-                setOrders(prev =>
-                    prev.map(op =>
-                        op.id === order.id
-                            ? {
-                                ...op,
-                                ...order
-                            }
-                            : op
-                    )
-                );
-            }
+  const handleChangeStatus = useCallback((item, currentStatus) => {
+    if (currentStatus === "waiting") {
+      const updated = { ...item, status: "preparing" };
+      fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: localStorage.getItem("token") || "",
+        },
+        body: JSON.stringify({ data: updated, orderId: item.id, location: merchant.location }),
+      })
+        .then((r) => r.json())
+        .then((d) => setOrders((prev) => prev.map((o) => (o.id === d.id ? d : o))))
+        .catch(console.error);
+    }
+    if (currentStatus === "preparing") {
+      openDroneDialog(item);
+    }
 
-            else if (type === "accept") {
-                const upt = {
-                    ...updatedOrder,
-                    status: "complete",
-                };
+    if (currentStatus === "cancel") {
+      if (window.confirm("Bạn chắc chắn muốn hủy đơn này?")) {
+        const updated = { ...item, status: "cancelled" };
+        fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: localStorage.getItem("token") || "",
+          },
+          body: JSON.stringify({ data: updated, orderId: item.id, location: merchant.location }),
+        })
+          .then((r) => r.json())
+          .then((d) => setOrders((prev) => prev.map((o) => (o.id === d.id ? d : o))))
+          .catch(console.error);
+      }
+    }
+  }, []);
 
-                const res = await fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        authorization: localStorage.getItem("token"),
-                    },
-                    body: JSON.stringify({ data: upt, orderId: item.id }),
-                });
+  // Lọc đơn theo tab
+  const statusMap = {
+    waiting: "waiting",
+    preparing: "preparing",
+    delivering: "delivering",
+    complete: "complete",
+    cancelled: "cancelled",
+  };
+  const filteredOrders = orders.filter((o) => o.status === statusMap[tab]);
 
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.message || "Cập nhật Option thất bại");
-                }
-                const order = await res.json();
+  return (
+    <>
+      {/* Tabs */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "12px",
+          flexWrap: "wrap",
+          margin: "20px 0",
+          padding: "0 10%",
+        }}
+      >
+        {[
+          { key: "waiting", label: "Đang đợi", color: "#f59e0b" },
+          { key: "preparing", label: "Đang chuẩn bị", color: "#9333ea" },
+          { key: "delivering", label: "Đang giao", color: "#2563eb" },
+          { key: "complete", label: "Hoàn thành", color: "#16a34a" },
+          { key: "cancelled", label: "Đã hủy", color: "#dc2626" },
+        ].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            style={{
+              padding: "12px 24px",
+              border: "none",
+              borderRadius: "8px",
+              backgroundColor: tab === t.key ? t.color : "#f3f4f6",
+              color: tab === t.key ? "white" : "#374151",
+              fontWeight: "bold",
+              cursor: "pointer",
+              minWidth: "140px",
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-                setOrders(prev =>
-                    prev.map(op =>
-                        op.id === order.id
-                            ? {
-                                ...op,
-                                ...order
-                            }
-                            : op
-                    )
-                );
+      {/* Danh sách đơn hàng */}
+      <div
+        style={{
+          padding: "0 10%",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "24px",
+        }}
+      >
+        {filteredOrders.length === 0 ? (
+          <p style={{ gridColumn: "1 / -1", textAlign: "center", color: "#999", fontSize: "18px", padding: "60px 0" }}>
+            Không có đơn hàng nào ở trạng thái này
+          </p>
+        ) : (
+          filteredOrders.map((item) => (
+            <CardContent
+              key={item.id}
+              value="orders"
+              item={item}
+              handleChangeStatus={handleChangeStatus}
+            />
+          ))
+        )}
+      </div>
 
-            }
-            else if (type === "complete") {
-                console.log("Đơn hàng đã hoàn thành, không thể cập nhật trạng thái nữa.");
-            }
-            else if (type === "cancel") {
-                const upt = {
-                    ...updatedOrder,
-                    status: "cancel",
-                };
+      {/* Dialog chọn Drone (HTML + CSS thuần) */}
+      {isDialogOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+          onClick={() => setIsDialogOpen(false)}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "32px",
+              borderRadius: "16px",
+              width: "90%",
+              maxWidth: "520px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ margin: "0 0 20px", fontSize: "24px", color: "#1f2937" }}>
+              Chọn Drone giao đơn #{selectedOrder?.id?.slice(-6).toUpperCase()}
+            </h2>
 
-                const res = await fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        authorization: localStorage.getItem("token"),
-                    },
-                    body: JSON.stringify({ data: upt, orderId: item.id }),
-                });
+            {drones.filter((d) => d.status === "READY").length === 0 ? (
+              <div style={{ textAlign: "center", padding: "40px", color: "#dc2626", fontSize: "18px" }}>
+                Không có drone nào sẵn sàng!
+              </div>
+            ) : (
+              <div>
+                {drones
+                  .filter((d) => d.status === "READY")
+                  .map((drone) => (
+                    <label
+                      key={drone.id}
+                      style={{
+                        display: "block",
+                        padding: "16px",
+                        marginBottom: "12px",
+                        border: `2px solid ${selectedDroneId === drone.id ? "#2563eb" : "#e5e7eb"}`,
+                        borderRadius: "12px",
+                        backgroundColor: selectedDroneId === drone.id ? "#eff6ff" : "#ffffff",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="drone"
+                        value={drone.id}
+                        checked={selectedDroneId === drone.id}
+                        onChange={(e) => setSelectedDroneId(e.target.value)}
+                        style={{ marginRight: "12px" }}
+                      />
+                      <strong style={{ fontSize: "18px" }}>{drone.drone_name}</strong>
+                      <br />
+                      <small style={{ color: "#6b7280" }}>
+                        Vị trí: {drone.current_location.lat.toFixed(4)}, {drone.current_location.lng.toFixed(4)}
+                      </small>
+                    </label>
+                  ))}
+              </div>
+            )}
 
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.message || "Cập nhật Option thất bại");
-                }
-                const order = await res.json();
-
-                setOrders(prev =>
-                    prev.map(op =>
-                        op.id === order.id
-                            ? {
-                                ...op,
-                                ...order
-                            }
-                            : op
-                    )
-                );
-            }
-        } catch (err) {
-            console.error(" Lỗi khi cập nhật:", err);
-        }
-    }, [setOrders]);
-
-    return (
-        <Theme>
-            <main style={{ marginTop: "2%" }}>
-                <div style={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    margin: "10px 10% 10px 10%",
-                    height: "auto",
-                    padding: "2%"
-                }}>
-                    <Button name="waiting" color="indigo" variant="soft" onClick={handleTabButton}>
-                        Đang đợi
-                    </Button>
-                    <Button name="accept" color="cyan" variant="soft" onClick={handleTabButton}>
-                        Chuẩn bị
-                    </Button>
-                    <Button name="complete" color="green" variant="soft" onClick={handleTabButton}>
-                        Hoành thành
-                    </Button>
-                    <Button name="cancel" color="red" variant="soft" onClick={handleTabButton}>
-                        Đã hủy
-                    </Button>
-                </div>
-                <div style={{
-                    margin: "10px 10% 10px 10%",
-                    border: "1px solid black",
-                    borderRadius: "25px",
-                    height: "auto",
-                    padding: "2%"
-                }}>
-
-
-                    {/* ///////////////////////////////////////////////////// */}
-                    <div>
-                        {/* Tab mon */}
-                        {tab === "waiting" && (
-                            <>
-                                <div>
-                                    <div>
-                                        {/* a */}
-                                    </div>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexWrap: "wrap", // ✅ Cho phép xuống dòng
-                                            gap: "20px", // ✅ Khoảng cách giữa các card
-                                            justifyContent: "flex-start", // ✅ Căn trái
-                                            padding: "20px",
-                                        }}
-                                    >
-                                        {orders
-                                            .filter((item) => item.status === "waiting")
-                                            .map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    style={{
-                                                        flex: "1 1 calc(25% - 20px)", // ✅ 4 card mỗi hàng (100 / 4 = 25%)
-                                                        minWidth: "260px", // ✅ Giữ kích thước tối thiểu
-                                                        maxWidth: "280px",
-                                                    }}
-                                                >
-                                                    <Card value="orders" item={item} handleChangeStatus={handleChangeStatus} />
-                                                </div>
-                                            ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-
-                        {tab === "accept" && (
-                            <>
-                                <div>
-                                    <div>
-                                        {/* b */}
-                                    </div>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexWrap: "wrap", // ✅ Cho phép xuống dòng
-                                            gap: "20px", // ✅ Khoảng cách giữa các card
-                                            justifyContent: "flex-start", // ✅ Căn trái
-                                            padding: "20px",
-                                        }}
-                                    >
-                                        {orders
-                                            .filter((item) => item.status === "accept")
-                                            .map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    style={{
-                                                        flex: "1 1 calc(25% - 20px)", // ✅ 4 card mỗi hàng (100 / 4 = 25%)
-                                                        minWidth: "260px", // ✅ Giữ kích thước tối thiểu
-                                                        maxWidth: "280px",
-                                                    }}
-                                                >
-                                                    <Card value="orders" item={item} handleChangeStatus={handleChangeStatus} />
-                                                </div>
-                                            ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-
-                        {tab === "complete" && (
-                            <>
-                                <div>
-                                    <div>
-                                        {/* c */}
-                                    </div>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexWrap: "wrap", // ✅ Cho phép xuống dòng
-                                            gap: "20px", // ✅ Khoảng cách giữa các card
-                                            justifyContent: "flex-start", // ✅ Căn trái
-                                            padding: "20px",
-                                        }}
-                                    >
-                                        {orders
-                                            .filter((item) => item.status === "complete")
-                                            .map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    style={{
-                                                        flex: "1 1 calc(25% - 20px)", // ✅ 4 card mỗi hàng (100 / 4 = 25%)
-                                                        minWidth: "260px", // ✅ Giữ kích thước tối thiểu
-                                                        maxWidth: "280px",
-                                                    }}
-                                                >
-                                                    <Card value="orders" item={item} handleChangeStatus={handleChangeStatus} />
-                                                </div>
-                                            ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-
-                        {tab === "cancel" && (
-                            <>
-                                <div>
-                                    <div>
-                                    </div>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexWrap: "wrap",
-                                            gap: "20px",
-                                            justifyContent: "flex-start",
-                                            padding: "20px",
-                                        }}
-                                    >
-                                        {orders
-                                            .filter((item) => item.status === "cancel")
-                                            .map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    style={{
-                                                        flex: "1 1 calc(25% - 20px)",
-                                                        minWidth: "260px",
-                                                        maxWidth: "280px",
-                                                    }}
-                                                >
-                                                    <Card value="orders" item={item} />
-                                                </div>
-                                            ))}
-                                    </div>
-
-
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </main>
-            <>
-
-            </>
-        </Theme >
-
-    );
+            <div style={{ marginTop: "30px", textAlign: "right" }}>
+              <button
+                onClick={() => setIsDialogOpen(false)}
+                style={{
+                  padding: "12px 24px",
+                  marginRight: "12px",
+                  backgroundColor: "#e5e7eb",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={assignDrone}
+                disabled={!selectedDroneId}
+                style={{
+                  padding: "12px 32px",
+                  backgroundColor: selectedDroneId ? "#2563eb" : "#93c5fd",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: selectedDroneId ? "pointer" : "not-allowed",
+                  fontWeight: "600",
+                  fontSize: "16px",
+                }}
+              >
+                Xác nhận giao bằng Drone
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

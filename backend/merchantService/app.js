@@ -1,7 +1,8 @@
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const express = require("express");
-const app = express(); const { sequelize, connectDB } = require("./src/utils/db");
+const app = express(); 
+const { sequelize, connectDB } = require("./src/utils/db");
 const PORT = process.env.merchantServicePORT;
 const { authenticate } = require("./src/helpers/middleware");
 const {

@@ -2,6 +2,7 @@ import React from "react";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 // import './index.css'
+// import "leaflet/dist/leaflet.css"; // ← thêm ngay đầu file
 import { BrowserRouter } from "react-router-dom";
 import "@radix-ui/themes/styles.css";
 import { Theme } from '@radix-ui/themes'

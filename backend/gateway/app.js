@@ -72,6 +72,14 @@ app.use(
   })
 );
 
+app.use(
+  "/api/drone",
+  createProxyMiddleware({
+    target: process.env.DRONE_DELIVERY_SERVICE_URL,
+    changeOrigin: true,
+  })
+);
+
 server.listen(PORT, async () => {
   await start();
   console.log("API Gateway running on port", PORT);

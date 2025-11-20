@@ -15,6 +15,7 @@ import PaymentResult from "./component/customerSys/paymentResult";
 import OrderSuccess from "./component/customerSys/orderSuccess";
 import OrderHistory from "./component/customerSys/orderHistory";
 import OrderDetail from "./component/customerSys/orderDetail";
+import CustomerRegister from "./component/customerSys/registerCustomer";
 
 import ProtectedRoute from "./component/merchantSys/commonMerchant/protectedRoute";
 import ProtectedRouteCustomer from "./component/customerSys/commonCustomer/protectedRouteCustomer";
@@ -51,6 +52,7 @@ function App() {
 
       {/* ====================== CUSTOMER SYSTEM ====================== */}
       <Route path="/customer/login" element={<CustomerLogin />} />
+      <Route path="/customer/register" element={<CustomerRegister />} />
 
       <Route
         path="/customer"

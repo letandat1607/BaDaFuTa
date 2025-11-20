@@ -1,4 +1,5 @@
 const { Cart, CartItem, CartItemOption, Order, OrderItem, OrderItemOption } = require("../models/index");
+const {Op} = require('sequelize');
 
 module.exports.getUserOrders = async (userId) => {
     return await Order.findAll({
@@ -60,7 +61,12 @@ module.exports.updateField = async (orderID, data) => {
 /////////////////////////////////////////////////////////////////////////////
 module.exports.getAllOrderMerchant = async (merchant_id) => {
   const orderss = await Order.findAll({
-    where: {merchant_id},
+    where: {
+      [Op.and]: [
+        {merchant_id},
+        {status_payment: "paid"}
+      ]
+    },
     include: [
       {
         model: OrderItem,

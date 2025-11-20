@@ -14,6 +14,7 @@ services:
       - merchant_service
       - order_service
       - payment_service
+      - drone_delivery_service
     volumes:
       - ./backend/gateway:/app
       - /app/node_modules
@@ -22,6 +23,7 @@ services:
       - MERCHANT_SERVICE_URL=http://merchant_service:${merchantServicePORT}
       - ORDER_SERVICE_URL=http://order_service:${orderServicePORT}
       - PAYMENT_SERVICE_URL=http://payment_service:${paymentServicePORT}
+      - DRONE_DELIVERY_SERVICE_URL=http://drone_delivery_service:${droneDeliveryServicePORT}
     networks:
       - app-network
 
@@ -97,6 +99,25 @@ services:
       - postgres
     volumes:
       - ./backend/paymentService:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  drone_delivery_service:
+    build:
+      context: ./backend/droneDeliveryService
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    ports:
+      - "${droneDeliveryServicePORT}:3005"
+    environment:
+      - DATABASE_URL=${DATABASE_URL_DRONE_DELIVERY}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend/droneDeliveryService:/app
       - /app/node_modules
     networks:
       - app-network

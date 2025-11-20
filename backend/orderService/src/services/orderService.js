@@ -167,11 +167,20 @@ module.exports.getAllOrderMerchant = async (merchant_id) => {
     return await publishMsg({ orders, merchantId: merchant_id }, "order_exchange", "order.merchant.send_all");
 };
 
-module.exports.updateOrder = async (orderId, data) => {
+module.exports.updateOrder = async (orderId, data, location) => {
+    console.log("updateOrder service:", { orderId, data });
     const order = await orderRepo.updateField(orderId, data);
     if (!order) throw new Error('Không tìm thấy đơn hàng');
-
-    await publishMsg(order, "order_exchange", "order.status.updated");
+    
+    if (data.status === "delivering") {
+        await publishMsg({location, order, droneId: data.drone_id}, "order_exchange", "order.status.updated");
+        await publishMsg({droneId: data.drone_id, status: "DELIVERING", orderId}, "order_exchange", "order.drone.delivery_status");
+    }else if(data.status === "complete"){
+        await publishMsg({droneId: data.drone_id || null, status: "READY", orderId}, "order_exchange", "order.drone.delivery_status");
+        await publishMsg(order, "order_exchange", "order.status.updated");
+    }else{
+        await publishMsg(order, "order_exchange", "order.status.updated");
+    }
 
     return order;
 }

@@ -32,21 +32,23 @@ async function enrichOrdersWithItemNames(orders){
 }
 
 module.exports.publishOrderGateway = async (data) => {
-  // console.log(data);
-  // console.log("////////////////");
-  // console.log("////////////////");
-  // console.log("////////////////");
-  // console.log("////////////////");
-  const orderWithName = await enrichOrdersWithItemNames([data.order]);
-  // console.log(orderWithName);
+  console.log(data);
+  console.log("////////////////");
+  console.log("////////////////");
+  console.log("////////////////");
+  console.log("////////////////");
   if(data.userId){
-    await publishMsg({userId: data.userId, order: orderWithName}, "merchant_exchange", "merchant.gateway.new_order") ///////
+    const merchant = await merchantRepo.getMerchant(data.order.merchant_id);
+    const orderWithName = await enrichOrdersWithItemNames([data.order]);
+    await publishMsg({userId: data.userId, order: orderWithName, location: merchant.location}, "merchant_exchange", "merchant.gateway.new_order") ///////
   }else{
+    const orderWithName = await enrichOrdersWithItemNames([data]);
     await publishMsg(orderWithName, "merchant_exchange", "merchant.gateway.new_order");
   }
 }
 
 module.exports.publishOrdersGateway = async (data) =>{
+
   const orders = await enrichOrdersWithItemNames(data.orders);
   if(data.merchantId){
     await publishMsg({orders, merchantId: data.merchantId}, "merchant_exchange", "merchant.gateway.orders")

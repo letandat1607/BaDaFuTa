@@ -22,6 +22,7 @@ async function startConsumers() {
                     try {
                         switch (queue.bindingKey) {
                             case "order.merchant.confirmed":
+                                console.log("Received order.merchant.confirmed:", content);
                                 await merchantService.publishOrderGateway(content);
                                 break;
                             case "order.merchant.send_all":

@@ -36,8 +36,19 @@ class GatewayService {
   }
 
   pushOrderStatusUI(data) {
-    this.io.to(`User_${data.user_id}`).emit('orderUpdated', { orderId: data.id, status: data.status, updated_at: data.updated_at});
-    console.log(`pushed to customer payment success`)
+    console.log("pushOrderStatusUI data: ", data);
+    if(data.location){
+      const order = data.order
+      this.io.to(`User_${order.user_id}`).emit('orderUpdated', { orderId: order.id, status: order.status, updated_at: order.updated_at, location: data.location, droneId: data.droneId});
+    }else{
+      if(data.status === 'complete'){
+        this.io.to(`merchant_${data.merchant_id}`).emit('newOrder', data);
+        console.log(`Pushed order với id: ${data.id} → merchant_${data.merchant_id}`);
+        // console.log(`Pushed order ${order.id} → merchant_${order.merchant_id}`);
+      }
+      this.io.to(`User_${data.user_id}`).emit('orderUpdated', { orderId: data.id, status: data.status, updated_at: data.updated_at});
+      console.log(`pushed to customer success`)
+    }
   }
 
   pushPaymentSuccess(data) {
@@ -52,10 +63,10 @@ class GatewayService {
     console.log(`pushed to customer payment failed`)
   }
 
-  pushOrderUI(order, userId = null) {
-    if(userId){
+  pushOrderUI(order, userId = null, location = null) {
+    if(userId && location){
       // console.log("order: ", order);
-      this.io.to(`User_${userId}`).emit('order', order);
+      this.io.to(`User_${userId}`).emit('order', {order, location});
       console.log(`Push order to user_${userId}`);
     }else{
       this.io.to(`merchant_${order.merchant_id}`).emit('newOrder', order);

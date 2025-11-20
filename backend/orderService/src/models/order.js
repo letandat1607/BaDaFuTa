@@ -28,7 +28,7 @@ const Order = sequelize.define("Order", {
             allowNull: false
         },
         delivery_address:{
-            type: DataTypes.STRING,
+            type: DataTypes.JSONB,
             allowNull: false
         },
         delivery_fee:{
