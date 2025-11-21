@@ -1,0 +1,62 @@
+# File: docker-compose.override.test.yml
+# Cách chạy: docker-compose -f docker-compose.yml -f docker-compose.override.test.yml up --abort-on-container-exit
+
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    ports:
+      - "5434:5432"
+
+  rabbitMQ:
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  user_service:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+
+  merchant_service:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+
+  order_service:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+
+  payment_service:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+
+  drone_delivery_service:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+
+  frontend:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+
+  gateway:
+    command: echo "Gateway skipped in test mode" && exit 0
+
+  ngrok:
+    command: echo "Ngrok skipped in test mode" && exit 0
