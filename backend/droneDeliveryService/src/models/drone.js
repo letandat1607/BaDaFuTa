@@ -33,8 +33,8 @@ const Drone = sequelize.define("Drone", {
     updatedAt: "updated_at"  
 });
 
-Drone.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-  .then(() => console.log(" Table 'Drone' synced successfully"))
-  .catch(err => console.error(" Error syncing Drone table:", err));
+// Drone.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
+//   .then(() => console.log(" Table 'Drone' synced successfully"))
+//   .catch(err => console.error(" Error syncing Drone table:", err));
 
 module.exports = Drone;

@@ -15,7 +15,7 @@ CREATE TABLE merchant (
 );
 
 INSERT INTO merchant (
-    id, merchant_id, name, location, phone, email, image_logo, image_cover, opening_hours
+    id, user_id, merchant_name, location, phone, email, profile_image, cover_image, time_open
 ) VALUES
 (
     'fb325480-5b1c-4c3b-a044-2fcac7ebce02',
@@ -88,7 +88,7 @@ CREATE TABLE category (
         ON DELETE CASCADE
 );
 
-INSERT INTO categories (id, merchant_id, name) VALUES
+INSERT INTO category (id, merchant_id, category_name) VALUES
 ('21990a15-73a6-4391-9f3d-47a204006823', 'fb325480-5b1c-4c3b-a044-2fcac7ebce02', 'Pizza'),
 ('fcbdad39-5d4f-4af4-b99c-378c5ae49972', 'fb325480-5b1c-4c3b-a044-2fcac7ebce02', 'Đồ Uống'),
 ('6967bb6e-d1df-4ad0-8fbd-606f509e8feb', 'fb325480-5b1c-4c3b-a044-2fcac7ebce02', 'Cơm'),
@@ -140,7 +140,7 @@ CREATE TABLE menu_item (
         ON DELETE SET NULL
 );
 
-INSERT INTO items (
+INSERT INTO menu_item (
     id, merchant_id, category_id, name_item, price, likes, sold_count,
     description, image_item, status
 ) VALUES
@@ -195,7 +195,7 @@ CREATE TABLE option (
         ON DELETE CASCADE
 );
 
-INSERT INTO option (id, option_name, multi_select, require_select, number_select, merchant_id) VALUES
+INSERT INTO option (id, merchant_id, option_name, multi_select, require_select, number_select) VALUES
 ('972bd2f8-0bb8-4625-9e55-5b19e0a578c7', 'fb325480-5b1c-4c3b-a044-2fcac7ebce02', 'Thạch', true, false, 1),
 ('63c98bf6-5593-4200-b1b4-d342ce3f1ce5', 'fb325480-5b1c-4c3b-a044-2fcac7ebce02', 'Size', false, true, 1),
 ('54c1d542-19c8-428e-939e-12c29d5f8033', '6a53b3e2-4600-4a23-a630-fbfde8f6a6c5', 'Gà', false, true, 1),
@@ -257,7 +257,7 @@ CREATE TABLE option_item (
         ON DELETE CASCADE
 );
 
-INSERT INTO option_item (id, option_id, option_item_name, status, status_select, price) VALUES
+INSERT INTO option_item (id, option_id, option_item_name, price, status_select, status) VALUES
 ('4f649403-dffb-430e-b075-ac58ec65e778', '54c1d542-19c8-428e-939e-12c29d5f8033', 'Không cay', 0, true, true),
 ('1fdd0d9a-ee03-4a2a-8351-b2f086dffe89', '54c1d542-19c8-428e-939e-12c29d5f8033', 'Cay', 0, false, true),
 ('b19c732f-f2de-4c46-a52c-8bbf7c90d8cf', '7ecd5383-52e3-44d5-8fec-e94a6349b579', 'Cơm thêm', 5000, false, true),

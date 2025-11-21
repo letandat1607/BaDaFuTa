@@ -140,8 +140,8 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: postgres
-    restart: always
+    container_name: pgdb
+    # restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -156,8 +156,8 @@ services:
 
   rabbitMQ:
     image: rabbitmq:3-management
-    container_name: rabbitmq
-    restart: always
+    container_name: rbmq
+    # restart: always
     ports:
       - "${rabbitMQ_PORT}:5672"     
       - "${rabbitMQ_UI_PORT}:15672" 
