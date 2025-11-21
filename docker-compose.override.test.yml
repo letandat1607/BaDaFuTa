@@ -49,14 +49,30 @@ services:
       - NODE_ENV=test
       - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
       - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+  
+  gateway:
+    command: npm run test:coverage
+    environment:
+      - NODE_ENV=test
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - USER_SERVICE_URL=http://user_service:3001
+      - MERCHANT_SERVICE_URL=http://merchant_service:3002
+      - ORDER_SERVICE_URL=http://order_service:3002
+      - PAYMENT_SERVICE_URL=http://payment_service:3002
+      - DRONE_DELIVERY_SERVICE_URL=http://drone_delivery_service:3002
+    
+    depends_on:
+      - rabbitMQ
+      - user_service
+      - merchant_service
+      - order_service
+      - payment_service
+      - drone_delivery_service
 
   frontend:
     command: npm run test:coverage
     environment:
       - NODE_ENV=test 
-
-  gateway:
-    command: echo "Gateway skipped in test mode" && exit 0
 
   ngrok:
     command: echo "Ngrok skipped in test mode" && exit 0
