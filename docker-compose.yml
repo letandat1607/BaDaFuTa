@@ -193,6 +193,3 @@ networks:
 volumes:
   postgres_data:
   rabbitmq_data:
-
-
-docker compose up -d --build
