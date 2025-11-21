@@ -13,73 +13,98 @@ Hệ thống foodfast cho phép khách hàng có thể đặt đồ ăn và than
 ```bash
 git clone https://github.com/letandat1607/BaDaFuTa.git
 ```
-### Cài dependencies
-```bash
-## backend
-### gateway
-cd backend/gateway
-npm install
-
-### userService
-cd backend/userService
-npm install
-
-### merchantService
-cd backend/merchantService
-npm install
-
-### orderService
-cd backend/orderService
-npm install
-
-### paymentService
-cd backend/paymentService
-npm install
-
-## frontend
-cd frontend
-npm install
-```
-### Chạy project
+### Cài dependencies và chạy project
 ```bash
 ##Add .env
 touch .env
-## backend
-### gateway
-cd backend/gateway
-npm run dev
+```
+```
+##Copy .env mẫu dưới đây và paste vào .env vừa tạo
+GATEWAY_URL= http://gateway:3000
+gatewayPORT=3000
+userServicePORT=3001
+merchantServicePORT=3002
+orderServicePORT=3003
+paymentServicePORT=3004
+droneDeliveryServicePORT=3005
+frontendPORT=5173
 
-### userService
-cd backend/userService
-npm run dev
+rabbitMQ_PORT=5672
+rabbitMQ_UI_PORT=15672
 
-### merchantService
-cd backend/merchantService
-npm run dev
+USER_SERVICE_URL=http://user_service:3001
+MERCHANT_SERVICE_URL=http://merchant_service:3002
+ORDER_SERVICE_URL=http://order_service:3003
+PAYMENT_SERVICE_URL=http://payment_service:3004
+DRONE_DELIVERY_SERVICE_URL=http://drone_delivery_service:3005
 
-### orderService
-cd backend/orderService
-npm run dev
 
-### paymentService
-cd backend/paymentService
-npm install
+DATABASE_URL_USER=postgresql://postgres:yourpass@postgres:5432/user_service_db
+DATABASE_URL_MERCHANT=postgresql://postgres:yourpass@postgres:5432/merchant_service_db
+DATABASE_URL_ORDER=postgresql://postgres:yourpass@postgres:5432/order_service_db
+DATABASE_URL_PAYMENT=postgresql://postgres:yourpass@postgres:5432/payment_service_db
+DATABASE_URL_DRONE_DELIVERY=postgresql://postgres:yourpass@postgres:5432/drone_delivery_service_db
 
-## frontend
-cd frontend
-npm run dev
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=yourpass
+POSTGRES_PORT=5433
+TZ=Asia/Ho_Chi_Minh
+PGTZ=Asia/Ho_Chi_Minh
+
+JWT_SECRET="yoursecretkey"
+JWT_EXPIRES_IN=1d
+
+RABBITMQ_DEFAULT_USER=admin
+RABBITMQ_DEFAULT_PASS=admin
+RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+```
+
+```bash
+#Docker build và tự động chạy
+cd BaDaFuTa
+docker compose up -d --build
 ```
 ## Kiến trúc dự án
 ```
-
 ├── 📁 backend
-│   ├── 📁 gateway
+│   ├── 📁 droneDeliveryService
 │   │   ├── 📁 src
-│   │   │   └── 📁 helpers
-│   │   │       └── 📄 middleware.js
+│   │   │   ├── 📁 controllers
+│   │   │   │   └── 📄 droneDeliveryController.js
+│   │   │   ├── 📁 helpers
+│   │   │   ├── 📁 models
+│   │   │   │   └── 📄 drone.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 droneDeliveryRepository.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 droneDeliveryService.js
+│   │   │   └── 📁 utils
+│   │   │       └── 📄 db.js
 │   │   ├── 🐳 Dockerfile
 │   │   ├── 📄 Dockerfile.dev
 │   │   ├── 📄 app.js
+│   │   ├── ⚙️ package-lock.json
+│   │   └── ⚙️ package.json
+│   ├── 📁 gateway
+│   │   ├── 📁 src
+│   │   │   ├── 📁 helpers
+│   │   │   │   └── 📄 middleware.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   └── 📁 services
+│   │   │       └── 📄 gatewayService.js
+│   │   ├── 🐳 Dockerfile
+│   │   ├── 📄 Dockerfile.dev
+│   │   ├── 📄 app.js
+│   │   ├── 📄 merchant_dump.sql
 │   │   ├── ⚙️ package-lock.json
 │   │   └── ⚙️ package.json
 │   ├── 📁 merchantService
@@ -96,6 +121,15 @@ npm run dev
 │   │   │   │   ├── 📄 merchant.js
 │   │   │   │   ├── 📄 option.js
 │   │   │   │   └── 📄 optionItem.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 merchantRepository.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 merchantService.js
 │   │   │   ├── 📁 utils
 │   │   │   │   └── 📄 db.js
 │   │   │   └── 📁 validations
@@ -105,15 +139,29 @@ npm run dev
 │   │   │       ├── 📄 merchantValidation.js
 │   │   │       ├── 📄 optionItemValidation.js
 │   │   │       └── 📄 optionValidation.js
+│   │   ├── 📁 tests
+│   │   │   ├── 📁 contract
+│   │   │   │   └── 📄 merchant_event.test.js
+│   │   │   ├── 📁 integration
+│   │   │   │   └── 📄 merchant_api.test.js
+│   │   │   ├── 📁 unit
+│   │   │   │   ├── 📁 blackbox
+│   │   │   │   │   └── 📄 merchantController.test.js
+│   │   │   │   └── 📁 whitebox
+│   │   │   │       └── 📄 merchantService.test.js
+│   │   │   └── 📄 setup.js
 │   │   ├── 🐳 Dockerfile
 │   │   ├── 📄 Dockerfile.dev
 │   │   ├── 📄 app.js
+│   │   ├── 📄 jest.config.js
 │   │   ├── ⚙️ package-lock.json
 │   │   └── ⚙️ package.json
 │   ├── 📁 orderService
 │   │   ├── 📁 src
 │   │   │   ├── 📁 controllers
 │   │   │   │   └── 📄 orderController.js
+│   │   │   ├── 📁 helpers
+│   │   │   │   └── 📄 middleware.js
 │   │   │   ├── 📁 models
 │   │   │   │   ├── 📄 cart.js
 │   │   │   │   ├── 📄 cartItem.js
@@ -122,8 +170,18 @@ npm run dev
 │   │   │   │   ├── 📄 order.js
 │   │   │   │   ├── 📄 orderItem.js
 │   │   │   │   └── 📄 otherItemOption.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 orderRepository.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 orderService.js
 │   │   │   ├── 📁 utils
-│   │   │   │   └── 📄 db.js
+│   │   │   │   ├── 📄 db.js
+│   │   │   │   └── ⚙️ seedOrderData.json
 │   │   │   └── 📁 validations
 │   │   │       ├── 📄 cartItemOptionValidation.js
 │   │   │       ├── 📄 cartItemValidation.js
@@ -131,9 +189,21 @@ npm run dev
 │   │   │       ├── 📄 orderItemOptionValidation.js
 │   │   │       ├── 📄 orderItemValidation.js
 │   │   │       └── 📄 orderValidation.js
+│   │   ├── 📁 tests
+│   │   │   ├── 📁 contract
+│   │   │   │   └── 📄 order_event.test.js
+│   │   │   ├── 📁 integration
+│   │   │   │   └── 📄 order_api.test.js
+│   │   │   ├── 📁 unit
+│   │   │   │   ├── 📁 blackbox
+│   │   │   │   │   └── 📄 orderController.test.js
+│   │   │   │   └── 📁 whitebox
+│   │   │   │       └── 📄 orderService.test.js
+│   │   │   └── 📄 setup.js
 │   │   ├── 🐳 Dockerfile
 │   │   ├── 📄 Dockerfile.dev
 │   │   ├── 📄 app.js
+│   │   ├── 📄 jest.config.js
 │   │   ├── ⚙️ package-lock.json
 │   │   └── ⚙️ package.json
 │   ├── 📁 paymentService
@@ -142,13 +212,33 @@ npm run dev
 │   │   │   │   └── 📄 paymentController.js
 │   │   │   ├── 📁 models
 │   │   │   │   └── 📄 payment.js
+│   │   │   ├── 📁 rabbitMQ
+│   │   │   │   ├── 📄 rabbitConfig.js
+│   │   │   │   ├── 📄 rabbitConnect.js
+│   │   │   │   ├── 📄 rabbitConsumer.js
+│   │   │   │   └── 📄 rabbitFunction.js
+│   │   │   ├── 📁 repositories
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 paymentService.js
 │   │   │   ├── 📁 untils
 │   │   │   │   └── 📄 db.js
 │   │   │   └── 📁 validations
 │   │   │       └── 📄 paymentValidation.js
+│   │   ├── 📁 tests
+│   │   │   ├── 📁 contract
+│   │   │   │   └── 📄 payment_event.test.js
+│   │   │   ├── 📁 integration
+│   │   │   │   └── 📄 payment_api.test.js
+│   │   │   ├── 📁 unit
+│   │   │   │   ├── 📁 blackbox
+│   │   │   │   │   └── 📄 paymentController.test.js
+│   │   │   │   └── 📁 whitebox
+│   │   │   │       └── 📄 paymentService.test.js
+│   │   │   └── 📄 setup.js
 │   │   ├── 🐳 Dockerfile
 │   │   ├── 📄 Dockerfile.dev
 │   │   ├── 📄 app.js
+│   │   ├── 📄 jest.config.js
 │   │   ├── ⚙️ package-lock.json
 │   │   └── ⚙️ package.json
 │   ├── 📁 userService
@@ -163,22 +253,43 @@ npm run dev
 │   │   │   │   ├── 📄 roles.js
 │   │   │   │   ├── 📄 userRole.js
 │   │   │   │   └── 📄 users.js
+│   │   │   ├── 📁 repositories
+│   │   │   │   └── 📄 userRepository.js
 │   │   │   ├── 📁 routes
 │   │   │   │   ├── 📄 protected.js
 │   │   │   │   └── 📄 public.js
+│   │   │   ├── 📁 services
+│   │   │   │   └── 📄 userService.js
 │   │   │   ├── 📁 utils
 │   │   │   └── 📁 validation
 │   │   │       ├── 📄 addressValidation.js
 │   │   │       ├── 📄 roleValidation.js
 │   │   │       └── 📄 userValidation.js
+│   │   ├── 📁 tests
+│   │   │   ├── 📁 contract
+│   │   │   │   └── 📄 user_event.test.js
+│   │   │   ├── 📁 integration
+│   │   │   │   └── 📄 user_api.test.js
+│   │   │   ├── 📁 unit
+│   │   │   │   ├── 📁 blackbox
+│   │   │   │   │   └── 📄 userController.test.js
+│   │   │   │   └── 📁 whitebox
+│   │   │   │       └── 📄 userService.test.js
+│   │   │   └── 📄 setup.js
 │   │   ├── 🐳 Dockerfile
 │   │   ├── 📄 Dockerfile.dev
 │   │   ├── 📄 app.js
 │   │   ├── 📄 db.js
+│   │   ├── 📄 jest.config.js
 │   │   ├── ⚙️ package-lock.json
 │   │   ├── ⚙️ package.json
 │   │   └── 📄 seeds.js
 │   └── ⚙️ .gitignore
+├── 📁 data
+│   ├── 📄 drone_delivery_service_db.sql
+│   ├── 📄 merchant_service_db.sql
+│   ├── 📄 order_service_db.sql
+│   └── 📄 user_service_db.sql
 ├── 📁 frontend
 │   ├── 📁 public
 │   │   └── 🖼️ vite.svg
@@ -186,21 +297,67 @@ npm run dev
 │   │   ├── 📁 assets
 │   │   │   └── 🖼️ react.svg
 │   │   ├── 📁 component
+│   │   │   ├── 📁 __tests__
+│   │   │   │   └── 📄 Hello.test.tsx
 │   │   │   ├── 📁 common
+│   │   │   ├── 📁 customerSys
+│   │   │   │   ├── 📁 commonCustomer
+│   │   │   │   │   ├── 📄 card.jsx
+│   │   │   │   │   ├── 📄 cartItem.jsx
+│   │   │   │   │   ├── 📄 cartSummary.jsx
+│   │   │   │   │   ├── 📄 checkOutForm.jsx
+│   │   │   │   │   ├── 📄 checkOutItem.jsx
+│   │   │   │   │   ├── 📄 emptyCart.jsx
+│   │   │   │   │   ├── 📄 loadingSkeleton.jsx
+│   │   │   │   │   ├── 📄 menuCategory.jsx
+│   │   │   │   │   ├── 📄 menuItem.jsx
+│   │   │   │   │   ├── 📄 navbar.jsx
+│   │   │   │   │   ├── 📄 orderSummary.jsx
+│   │   │   │   │   ├── 📄 protectedRouteCustomer.jsx
+│   │   │   │   │   └── 📄 toppingModal.jsx
+│   │   │   │   ├── 📄 checkOut.jsx
+│   │   │   │   ├── 📄 loginCustomer.jsx
+│   │   │   │   ├── 📄 merchantCart.jsx
+│   │   │   │   ├── 📄 merchantList.jsx
+│   │   │   │   ├── 📄 merchantMenu.jsx
+│   │   │   │   ├── 📄 orderDetail.jsx
+│   │   │   │   ├── 📄 orderHistory.jsx
+│   │   │   │   ├── 📄 orderSuccess.jsx
+│   │   │   │   ├── 📄 paymentResult.jsx
+│   │   │   │   └── 📄 registerCustomer.jsx
 │   │   │   └── 📁 merchantSys
 │   │   │       ├── 📁 commonMerchant
 │   │   │       │   ├── 📄 card.jsx
-│   │   │       │   └── 📄 navbar.jsx
+│   │   │       │   ├── 📄 navbar.jsx
+│   │   │       │   ├── 📄 protectedRoute.jsx
+│   │   │       │   └── 📄 text.jsx
+│   │   │       ├── 📁 merchantMenu
+│   │   │       │   ├── 📁 dialogs
+│   │   │       │   │   ├── 📄 addCategoryDialog.jsx
+│   │   │       │   │   ├── 📄 addMenuDialog.jsx
+│   │   │       │   │   ├── 📄 addOptionDialog.jsx
+│   │   │       │   │   ├── 📄 bulkAddMenuDialog.jsx
+│   │   │       │   │   ├── 📄 bulkAddToppingDialog.jsx
+│   │   │       │   │   ├── 📄 editMenuItemDialog.jsx
+│   │   │       │   │   ├── 📄 editOptionItemDialog.jsx
+│   │   │       │   │   └── 📄 linkOptionDialog.jsx
+│   │   │       │   ├── 📄 menuItemOptionTab.jsx
+│   │   │       │   ├── 📄 menuTab.jsx
+│   │   │       │   └── 📄 optionItemTab.jsx
 │   │   │       ├── 📄 merchantHome.jsx
 │   │   │       ├── 📄 merchantInfor.jsx
 │   │   │       ├── 📄 merchantLogin.jsx
-│   │   │       └── 📄 merchantMenu.jsx
+│   │   │       ├── 📄 merchantMenu.jsx
+│   │   │       ├── 📄 merchantOrders.jsx
+│   │   │       └── 📄 testOrder.jsx
 │   │   ├── 📁 routes
+│   │   │   ├── 📄 customerSys.jsx
 │   │   │   └── 📄 merhantSys.jsx
 │   │   ├── 🎨 App.css
 │   │   ├── 📄 App.jsx
 │   │   ├── 🎨 index.css
-│   │   └── 📄 main.jsx
+│   │   ├── 📄 main.jsx
+│   │   └── 📄 setupTests.ts
 │   ├── ⚙️ .gitignore
 │   ├── 🐳 Dockerfile
 │   ├── 📄 Dockerfile.dev
@@ -210,12 +367,11 @@ npm run dev
 │   ├── ⚙️ package-lock.json
 │   ├── ⚙️ package.json
 │   ├── 📄 vite.config.js
-│   └── 📄 vite.config.ts
-├── 📁 word
-│   ├── 📘 CNPM-Nhom16.docx
-│   └── 📄 KTPM.drawio
+│   ├── 📄 vite.config.ts
+│   └── 📄 vitest.config.ts
+├── 📁 ngrok
+│   └── ⚙️ ngrok.yml
 ├── ⚙️ .gitattributes
-├── ⚙️ .env
 ├── ⚙️ .gitignore
 ├── 📝 README.md
 └── ⚙️ docker-compose.yml
