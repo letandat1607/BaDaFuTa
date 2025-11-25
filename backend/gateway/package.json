@@ -13,7 +13,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/app.js",
@@ -27,7 +29,10 @@
         "statements": 85
       }
     },
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "transformIgnorePatterns": [
+      "node_modules/(?!uuid/)"
+    ]
   },
   "keywords": [],
   "author": "",

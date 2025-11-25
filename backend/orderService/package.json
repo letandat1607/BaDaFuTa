@@ -13,7 +13,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/app.js",
@@ -27,7 +29,10 @@
         "statements": 85
       }
     },
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "transformIgnorePatterns": [
+      "node_modules/(?!uuid/)"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -45,7 +50,7 @@
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
-    "uuid": "^13.0.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

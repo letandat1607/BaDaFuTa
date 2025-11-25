@@ -31,7 +31,7 @@ module.exports.signInUser = async (req, res) => {
     })
   }catch(err){
     console.log("userController login error", err);
-    res.status(500).json({ err });
+    res.status(401).json({ err });
   }
 }
 

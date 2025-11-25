@@ -18,6 +18,7 @@ services:
     volumes:
       - ./backend/gateway:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - USER_SERVICE_URL=http://user_service:${userServicePORT}
       - MERCHANT_SERVICE_URL=http://merchant_service:${merchantServicePORT}
@@ -43,6 +44,7 @@ services:
     volumes:
       - ./backend/userService:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
   
@@ -62,6 +64,7 @@ services:
     volumes:
       - ./backend/merchantService:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
 
@@ -81,6 +84,7 @@ services:
     volumes:
       - ./backend/orderService:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
     
@@ -100,6 +104,7 @@ services:
     volumes:
       - ./backend/paymentService:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
 
@@ -119,6 +124,7 @@ services:
     volumes:
       - ./backend/droneDeliveryService:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
 

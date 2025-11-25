@@ -75,4 +75,5 @@ services:
       - NODE_ENV=test 
 
   ngrok:
-    command: echo "Ngrok skipped in test mode" && exit 0
+    # command: echo "Ngrok skipped in test mode" && exit 0
+    profiles: ["production"]
