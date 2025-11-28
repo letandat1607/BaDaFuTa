@@ -29,10 +29,7 @@
         "statements": 85
       }
     },
-    "testTimeout": 30000,
-    "transformIgnorePatterns": [
-      "node_modules/(?!uuid/)"
-    ]
+    "testTimeout": 30000
   },
   "keywords": [],
   "author": "",

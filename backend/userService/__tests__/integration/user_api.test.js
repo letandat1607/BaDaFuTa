@@ -1,114 +1,156 @@
-// // tests/integration/auth.integration.test.js
-// const request = require('supertest');
-// const app = require('../../app');
-// const { sequelize } = require('../../db');
-// const { v4: uuidv4 } = require('uuid');
+// __tests__/integration/user_api.test.js
 
-// beforeAll(async () => {
-//   // setup.js đã sync DB rồi → không cần sync lại
-//   console.log('DB đã sẵn sàng cho test auth');
-// });
+const request = require('supertest');
+const app = require('../../app'); // ← giờ đã an toàn vì app.js không tự listen
+const { sequelize } = require('../../db');
+const { User } = require('../../src/models/index');
+const bcrypt = require('bcrypt');
+let server;
 
-// afterEach(async () => {
-//   // XÓA SẠCH dữ liệu sau mỗi test → đảm bảo độc lập
-//   await sequelize.truncate({ cascade: true, restartIdentity: true });
-// });
+describe('User API Integration Tests (Login & Register)', () => {
+  beforeAll(async () => {
+    await sequelize.sync({ force: true });
+    console.log('Database synced for integration test.');
 
-// afterAll(async () => {
-//   await sequelize.close();
-// });
+    server = app.listen(0)
+  });
 
-// describe('AUTH MODULE - Integration Test', () => {
-//   const generateEmail = () => `test_${uuidv4()}@example.com`;
+  afterEach(async () => {
+    await User.destroy({ where: {} });
+  });
 
-//   // REG-001: Đăng ký thành công
-//   it('REG-001: Should register successfully - Happy Path', async () => {
-//     const email = generateEmail();
-//     const res = await request(app).post('/register').send({
-//       user_name: 'happyuser',
-//       full_name: 'Happy User',
-//       email,
-//       phone_number: '0909123456',
-//       password: '123456',
-//       role: 'customer'
-//     });
+  afterAll(async () => {
+    await sequelize.close();
+    console.log('Database connection closed.');
+    server.close();
+  });
 
-//     expect(res.status).toBe(201);
-//     expect(res.body.message).toContain('created');
-//     expect(res.body.user.email).toBe(email);
-//   });
-
-//   // REG-002: Email đã tồn tại
-//   it('REG-002: Should reject duplicate email', async () => {
-//     const email = generateEmail();
-
-//     await request(app).post('/register').send({
-//       user_name: 'user1', full_name: 'A', email, phone_number: '0909111222', password: '123456', role: 'customer'
-//     });
-
-//     const res = await request(app).post('/register').send({
-//       user_name: 'user2', full_name: 'B', email, phone_number: '0909333444', password: '123456', role: 'customer'
-//     });
-
-//     expect(res.status).toBe(400);
-//     expect(res.body.error).toContain('tồn tại');
-//   });
-
-//   // REG-006: Password < 6 ký tự
-//   it('REG-006: Should reject password < 6 characters', async () => {
-//     const res = await request(app).post('/register').send({
-//       user_name: 'short', full_name: 'Short', email: generateEmail(),
-//       password: '12345', phone_number: '0909999999', role: 'customer'
-//     });
-//     expect(res.status).toBe(400);
-//     expect(res.body.error).toContain('mật khẩu');
-//   });
-
-//   // REG-012: Password = 6 ký tự → OK
-//   it('REG-012: Should accept password = 6 characters', async () => {
-//     const res = await request(app).post('/register').send({
-//       user_name: 'exact6', full_name: 'Exact', email: generateEmail(),
-//       password: '123456', phone_number: '0908887777', role: 'customer'
-//     });
-//     expect(res.status).toBe(201);
-//   });
-
-//   // LOG-001: Đăng nhập thành công
-//   it('LOG-001: Should login successfully and return token', async () => {
-//     const email = generateEmail();
-//     await request(app).post('/register').send({
-//       user_name: 'loginuser', full_name: 'Login User', email,
-//       phone_number: '0909998888', password: '123456', role: 'customer'
-//     });
-
-//     const res = await request(app).post('/login').send({
-//       email, password: '123456'
-//     });
-
-//     expect(res.status).toBe(200);
-//     expect(res.body.token).toBeDefined();
-//     expect(res.body.user.password).toBeUndefined(); // không trả password
-//   });
-
-//   // LOG-003: Sai mật khẩu → 401
-//   it('LOG-003: Should reject wrong password → 401', async () => {
-//     const email = generateEmail();
-//     await request(app).post('/register').send({
-//       user_name: 'wp', full_name: 'Wrong Pass', email,
-//       password: 'correct123', phone_number: '0901112222', role: 'customer'
-//     });
-
-//     const res = await request(app).post('/login').send({
-//       email, password: 'wrong123'
-//     });
-
-//     expect(res.status).toBe(401); // SỬA THÀNH 401
-//     expect(res.body.message).toContain('không đúng');
-//   });
-// });
-
-describe('User API Integration Tests - TODO', () => {
-    it('should write integration tests here', () => {
-      expect(true).toBe(true);
+  // ==================== ĐĂNG NHẬP =====================
+  describe('POST /login', () => {
+    beforeEach(async () => {
+      const hashedPassword = await bcrypt.hash("123456", 10);
+      await User.create({
+        id: "123e4567-e89b-12d3-a456-426614174000",
+        user_name: "user1",
+        full_name: "User One",
+        email: "user1@gmail.com",
+        password: hashedPassword,
+        phone_number: "0909123456",
+        role: "customer",
+      });
     });
-  })
+
+    it('should login successfully with valid credentials', async () => {
+      const res = await request(server)
+        .post('/login')
+        .send({
+          email: "user1@gmail.com",
+          password: "123456",
+          role: "customer"
+        });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toHaveProperty('token');
+      expect(res.body.user.email).toBe("user1@gmail.com");
+      expect(res.body.user).not.toHaveProperty('password');
+    });
+
+    it('should fail with wrong password', async () => {
+      const res = await request(server)
+        .post('/login')
+        .send({
+          email: "user1@gmail.com",
+          password: "wrongpassword",
+          role: "customer"
+        });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe("Email hoặc mật khẩu không đúng");
+    });
+
+    it('should fail with wrong role', async () => {
+      const res = await request(server)
+        .post('/login')
+        .send({
+          email: "user1@gmail.com",
+          password: "123456",
+          role: "merchant"
+        });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe("Email hoặc mật khẩu không đúng");
+    });
+
+    it('should fail with invalid format email', async () => {
+      const res = await request(server)
+        .post('/login')
+        .send({
+          email: "user1gmail.com",
+          password: "123456",
+          role: "customer"
+        });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe("\"email\" must be a valid email");
+    });
+
+    it('should fail with non exist user', async () => {
+      const res = await request(server)
+        .post('/login')
+        .send({
+          email: "userNonExist@gmail.com",
+          password: "123456",
+          role: "customer"
+        });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.error).toBe("Email hoặc mật khẩu không đúng");
+    });
+  });
+
+  // ==================== ĐĂNG KÝ =====================
+  // describe('POST /register', () => {
+  //   it('should register a new user successfully', async () => {
+  //     const res = await request(app)
+  //       .post('/register')
+  //       .send({
+  //         user_name: "newuser",
+  //         full_name: "New User",
+  //         email: "newuser@gmail.com",
+  //         phone_number: "0909888777",
+  //         password: "123456",
+  //         role: "customer"
+  //       });
+
+  //     expect(res.statusCode).toBe(201);
+  //     expect(res.body.message).toBe("User created");
+  //     expect(res.body.user.email).toBe("newuser@gmail.com");
+  //   });
+
+  //   it('should fail if email already exists', async () => {
+  //     // Tạo user trước
+  //     await User.create({
+  //       id: "999",
+  //       user_name: "exist",
+  //       full_name: "Exist",
+  //       email: "exist@gmail.com",
+  //       password: await bcrypt.hash("123456", 10),
+  //       role: "customer"
+  //     });
+
+  //     const res = await request(app)
+  //       .post('/register')
+  //       .send({
+  //         user_name: "exist2",
+  //         full_name: "Exist Two",
+  //         email: "exist@gmail.com", // trùng email
+  //         phone_number: "0909111222",
+  //         password: "123456",
+  //         role: "customer"
+  //       });
+
+  //     expect(res.statusCode).toBe(400);
+  //     expect(res.body.error).toBe("Email hoặc số điện thoại đã tồn tại");
+  //   });
+  // });
+});
