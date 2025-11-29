@@ -29,14 +29,16 @@ jobs:
         run: |
           docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
             --build \
-            --abort-on-container-exit \
-            postgres rabbitMQ user_service merchant_service order_service payment_service drone_delivery_service gateway
-
-          docker inspect $(docker compose -f docker-compose.yml -f docker-compose.override.test.yml ps -q) --format='{{.Name}} {{.State.ExitCode}}' | grep -v ' 0$'
-          if [ $? -eq 0 ]; then
-            echo "Some services failed!"
-            exit 1
-          fi
+            postgres \
+            rabbitMQ \
+            user_service \
+            merchant_service \
+            order_service \
+            payment_service \
+            drone_delivery_service \
+            gateway
+            
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up --abort-on-container-exit
 
       - name: Wait for all tests to complete
         run: |
