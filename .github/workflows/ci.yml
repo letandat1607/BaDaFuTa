@@ -25,18 +25,30 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Build & Run Tests (docker compose)
+      - name: Run Backend Tests
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
-            --build \
-            postgres \
-            rabbitMQ \
-            user_service \
-            merchant_service \
-            order_service \
-            payment_service \
-            drone_delivery_service \
-            gateway
+          services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
+          failed=false
+
+          for service in $services; do
+            echo "=================================================="
+            echo "Running tests for: $service"
+            echo "=================================================="
+            
+            if docker compose run --rm "$service" npm run test:coverage; then
+              echo "$service: PASSED"
+            else
+              echo "$service: FAILED"
+              failed=true
+            fi
+          done
+
+          if [ "$failed" = true ]; then
+            echo "One or more services failed!"
+            exit 1
+          else
+            echo "All backend services passed!"
+          fi
 
       - name: Wait for all tests to complete
         run: |
