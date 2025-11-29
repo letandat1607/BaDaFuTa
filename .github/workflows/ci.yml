@@ -41,14 +41,14 @@ jobs:
             gateway
 
       - name: Extract backend coverage
-          if: always()
-          run: |
-            mkdir -p coverage-output/backend
-            
-            for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
-              echo "📊 Extracting coverage from $service..."
-              docker compose cp $service:/app/coverage coverage-output/backend/$service 2>/dev/null || echo "⚠️  No coverage for $service"
-            done
+        if: always()
+        run: |
+          mkdir -p coverage-output/backend
+          
+          for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
+            echo "Extracting coverage from $service..."
+            docker compose cp $service:/app/coverage coverage-output/backend/$service 2>/dev/null || echo "⚠️  No coverage for $service"
+          done
 
       - name: Show logs on failure
         if: failure()
