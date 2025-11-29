@@ -27,27 +27,21 @@ jobs:
 
       - name: Run Backend Tests
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up -d \
             --build \
-            --abort-on-container-exit \
-            postgres \
-            rabbitMQ \
             user_service \
             merchant_service \
             order_service \
             payment_service \
             drone_delivery_service \
             gateway
-            
-      - name: Wait for all tests to complete
-        run: |
+
+          echo "Waiting for all tests to complete..."
           services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
           
           for service in $services; do
-            echo "Waiting for $service to finish..."
-            
-            # Đợi container exit (timeout 30 minutes)
-            timeout 1800 bash -c "until [ \$(docker compose ps -q $service | xargs docker inspect -f '{{.State.Running}}') == 'false' ]; do sleep 5; done" || echo "$service might still be running"
+            echo "Waiting for $service..."
+            docker compose wait $service || true
           done
           
           echo "All services completed"
