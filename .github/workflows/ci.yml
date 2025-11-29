@@ -78,7 +78,7 @@ jobs:
           
           echo "=== Cleanup completed ==="
 
-  test-frontend:
+  test_frontend:
     name: Test Frontend
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -146,7 +146,7 @@ jobs:
 
   test-summary:
     name: Generate Test Summary
-    needs: [test-backend, test-frontend]
+    needs: [test_backend, test_frontend]
     runs-on: ubuntu-latest
     if: always()
 
