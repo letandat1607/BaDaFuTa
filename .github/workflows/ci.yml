@@ -104,7 +104,7 @@ jobs:
 
       - name: Test frontend
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.yml --profile frontend-test up \
+          docker compose -f docker-compose.yml -f docker-compose.override.yml --profile frontend up \
             --build \
             --abort-on-container-exit \
             --exit-code-from frontend \
