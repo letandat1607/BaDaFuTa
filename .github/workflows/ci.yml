@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  test_backend:
+    name: Test Backend Services
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
@@ -29,21 +30,38 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
             --build \
             --abort-on-container-exit \
-            --exit-code-from gateway
+            --exit-code-from gateway \
+            postgres \
+            rabbitMQ \
+            user_service \
+            merchant_service \
+            order_service \
+            payment_service \
+            drone_delivery_service \
+            gateway
+
+      - name: Extract backend coverage
+          if: always()
+          run: |
+            mkdir -p coverage-output/backend
+            
+            for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
+              echo "📊 Extracting coverage from $service..."
+              docker compose cp $service:/app/coverage coverage-output/backend/$service 2>/dev/null || echo "⚠️  No coverage for $service"
+            done
 
       - name: Show logs on failure
         if: failure()
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml logs
+          echo "=== Backend Logs ==="
+          docker compose logs --tail=200
 
       - name: Upload Coverage Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-all-services
-          path: |
-            backend/*/coverage/**
-            frontend/coverage/**
+          name: backend-coverage-${{ github.run_number }}
+          path: coverage-output/backend/
           retention-days: 14
       
       - name: Cleanup Docker & .env
@@ -60,33 +78,127 @@ jobs:
           
           echo "=== Cleanup completed ==="
 
-  # cd:
-  #   needs: ci
-  #   runs-on: ubuntu-latest
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.ci.result == 'success'
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '16'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  #     - name: Create .env file
-  #       run: |
-  #         echo "${{ secrets.ENV_FILE }}" > .env
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-frontend-${{ hashFiles('frontend/Dockerfile.dev') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-frontend-
 
-  #     - name: Deploy to Production (docker compose)
-  #       run: |
-  #         docker compose -f docker-compose.yml -f docker-compose.override.prod.yml up \
-  #           --build -d
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
 
-  #     - name: Cleanup .env
-  #       if: always()
-  #       run: |
-  #         echo "=== Remove temporary .env file ==="
-  #         rm -f .env || true
+      - name: Test frontend
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.override.yml --profile frontend-test up \
+            --build \
+            --abort-on-container-exit \
+            --exit-code-from frontend \
+            frontend
+
+      - name: Check frontend exit code
+        if: always()
+        run: |
+          echo "=== Frontend Container Status ==="
+          docker compose ps -a frontend
+
+      - name: Extract frontend coverage
+        if: always()
+        run: |
+          mkdir -p coverage-output/frontend
           
-  #         echo "=== Cleanup completed ==="
+          echo "Extracting coverage from frontend..."
+          docker compose cp frontend:/app/coverage coverage-output/frontend 2>/dev/null || echo "No coverage for frontend"
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Frontend Logs ==="
+          docker compose logs frontend --tail=200
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-${{ github.run_number }}
+          path: coverage-output/frontend/
+          retention-days: 14
+
+      - name: Cleanup frontend
+        if: always()
+        run: |
+          docker compose --profile frontend-test down -v --remove-orphans
+          rm -f .env
+
+  test-summary:
+    name: Generate Test Summary
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage-${{ github.run_number }}
+          path: coverage-backend/
+        continue-on-error: true
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage-${{ github.run_number }}
+          path: coverage-frontend/
+        continue-on-error: true
+
+      - name: Generate summary
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Backend Services" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.test-backend.result }}" == "success" ]; then
+            echo "Backend tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Backend tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Frontend" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.test-frontend.result }}" == "success" ]; then
+            echo "Frontend tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Frontend tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Coverage Reports" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "coverage-backend" ]; then
+            for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
+              if [ -d "coverage-backend/$service" ]; then
+                echo "**$service** - Coverage generated" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          fi
+          
+          if [ -d "coverage-frontend" ]; then
+            echo "**frontend** - Coverage generated" >> $GITHUB_STEP_SUMMARY
+          fi
