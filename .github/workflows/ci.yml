@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Backend Tests
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up -d \
             --build \
             postgres \
             rabbitMQ \
