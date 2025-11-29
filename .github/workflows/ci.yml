@@ -27,8 +27,9 @@ jobs:
 
       - name: Run Backend Tests
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up -d \
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
             --build \
+            --abort-on-container-exit \
             postgres \
             rabbitMQ \
             user_service \
@@ -38,8 +39,6 @@ jobs:
             drone_delivery_service \
             gateway
             
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up --abort-on-container-exit
-
       - name: Wait for all tests to complete
         run: |
           services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
