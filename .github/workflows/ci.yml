@@ -1,0 +1,92 @@
+name: CI - Test all services
+
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Build & Run Tests (docker compose)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.override.yml up \
+            --build \
+            --abort-on-container-exit \
+            --exit-code-from gateway
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.override.yml logs
+
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-all-services
+          path: |
+            backend/*/coverage/**
+            frontend/coverage/**
+          retention-days: 14
+      
+      - name: Cleanup Docker & .env
+        if: always()
+        run: |
+          echo "=== Cleaning up containers, volumes, networks ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.yml down -v --remove-orphans || true
+          
+          echo "=== Prune dangling images & build cache ==="
+          docker system prune -f || true
+          
+          echo "=== Remove temporary .env file ==="
+          rm -f .env || true
+          
+          echo "=== Cleanup completed ==="
+
+  # cd:
+  #   needs: ci
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.ci.result == 'success'
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: '16'
+
+  #     - name: Create .env file
+  #       run: |
+  #         echo "${{ secrets.ENV_FILE }}" > .env
+
+  #     - name: Deploy to Production (docker compose)
+  #       run: |
+  #         docker compose -f docker-compose.yml -f docker-compose.override.prod.yml up \
+  #           --build -d
+
+  #     - name: Cleanup .env
+  #       if: always()
+  #       run: |
+  #         echo "=== Remove temporary .env file ==="
+  #         rm -f .env || true
+          
+  #         echo "=== Cleanup completed ==="
