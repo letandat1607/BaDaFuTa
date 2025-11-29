@@ -26,7 +26,7 @@ jobs:
 
       - name: Build & Run Tests (docker compose)
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.yml up \
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
             --build \
             --abort-on-container-exit \
             --exit-code-from gateway
@@ -34,7 +34,7 @@ jobs:
       - name: Show logs on failure
         if: failure()
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.yml logs
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml logs
 
       - name: Upload Coverage Reports
         if: always()
