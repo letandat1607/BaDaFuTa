@@ -29,8 +29,6 @@ jobs:
         run: |
           docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
             --build \
-            --abort-on-container-exit \
-            --exit-code-from gateway \
             postgres \
             rabbitMQ \
             user_service \
@@ -39,6 +37,43 @@ jobs:
             payment_service \
             drone_delivery_service \
             gateway
+
+      - name: Wait for all tests to complete
+        run: |
+          services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
+          
+          for service in $services; do
+            echo "Waiting for $service to finish..."
+            
+            # Đợi container exit (timeout 30 minutes)
+            timeout 1800 bash -c "until [ \$(docker compose ps -q $service | xargs docker inspect -f '{{.State.Running}}') == 'false' ]; do sleep 5; done" || echo "$service might still be running"
+          done
+          
+          echo "All services completed"
+
+      - name: Check test results
+        run: |
+          echo "=== Test Results ==="
+          
+          services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
+          all_passed=true
+          
+          for service in $services; do
+            exit_code=$(docker compose ps -a $service --format json | jq -r '.ExitCode')
+            
+            if [ "$exit_code" = "0" ]; then
+              echo "$service: PASSED"
+            else
+              echo "$service: FAILED (exit code: $exit_code)"
+              all_passed=false
+            fi
+          done
+          
+          if [ "$all_passed" = "false" ]; then
+            echo ""
+            echo "Some tests failed. Check logs above."
+            exit 1
+          fi
 
       - name: Extract backend coverage
         if: always()
@@ -104,7 +139,7 @@ jobs:
 
       - name: Test frontend
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.yml --profile frontend up \
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml --profile frontend up \
             --build \
             --abort-on-container-exit \
             --exit-code-from frontend \
