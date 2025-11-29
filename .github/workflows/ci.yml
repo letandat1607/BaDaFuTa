@@ -27,28 +27,16 @@ jobs:
 
       - name: Run Backend Tests
         run: |
-          services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
-          failed=false
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up -d --build
 
-          for service in $services; do
-            echo "=================================================="
-            echo "Running tests for: $service"
-            echo "=================================================="
-            
-            if docker compose run --rm "$service" npm run test:coverage; then
-              echo "$service: PASSED"
-            else
-              echo "$service: FAILED"
-              failed=true
-            fi
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up --abort-on-container-exit
+          
+          exit_code=0
+          for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
+            code=$(docker inspect $(docker compose -f docker-compose.yml -f docker-compose.override.test.yml ps -q $service) --format='{{.State.ExitCode}}' 2>/dev/null || echo 1)
+            [ "$code" != "0" ] && exit_code=1
           done
-
-          if [ "$failed" = true ]; then
-            echo "One or more services failed!"
-            exit 1
-          else
-            echo "All backend services passed!"
-          fi
+          exit $exit_code
 
       - name: Wait for all tests to complete
         run: |
