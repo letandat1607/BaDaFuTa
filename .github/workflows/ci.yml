@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Backend Tests
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up -d \
+          docker compose -f docker-compose.yml -f docker-compose.override.test.yml up \
             --build \
             user_service \
             merchant_service \
@@ -35,14 +35,6 @@ jobs:
             payment_service \
             drone_delivery_service \
             gateway
-
-          echo "Waiting for all tests to complete..."
-          services="user_service merchant_service order_service payment_service drone_delivery_service gateway"
-          
-          for service in $services; do
-            echo "Waiting for $service..."
-            docker compose wait $service || true
-          done
           
           echo "All services completed"
 
@@ -69,16 +61,6 @@ jobs:
             echo "Some tests failed. Check logs above."
             exit 1
           fi
-
-      - name: Extract backend coverage
-        if: always()
-        run: |
-          mkdir -p coverage-output/backend
-          
-          for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
-            echo "Extracting coverage from $service..."
-            docker compose cp $service:/app/coverage coverage-output/backend/$service 2>/dev/null || echo "⚠️  No coverage for $service"
-          done
 
       - name: Show logs on failure
         if: failure()
