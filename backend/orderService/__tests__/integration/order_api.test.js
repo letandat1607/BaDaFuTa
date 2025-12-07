@@ -14,7 +14,7 @@ let server;
 jest.mock('../../src/helpers/middleware', () => ({
     authenticate: jest.fn((req, res, next) => {
         req.user = {
-            id: "user-123e4567-e89b-12d3-a456-426614174000",
+            id: "5324c950-d209-44b7-9e1b-2c3d859auser",
             email: "testuser@gmail.com",
             role: "customer"
         };
@@ -35,8 +35,8 @@ describe('Order API Integration Tests', () => {
 
         server = app.listen(0);
 
-        mockUserId = "user-123e4567-e89b-12d3-a456-426614174000";
-        mockMerchantId = "merchant-123e4567-e89b-12d3-a456-426614174000";
+        mockUserId = "5324c950-d209-44b7-9e1b-2c3d859auser";
+        mockMerchantId = "fb325480-5b1c-4c3b-a044-2fcamerchant";
         validToken = "Bearer mock-valid-token";
     });
 
@@ -56,8 +56,8 @@ describe('Order API Integration Tests', () => {
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
         const validOrderPayload = {
-            user_id: "user-123e4567-e89b-12d3-a456-426614174000",
-            merchant_id: "merchant-123e4567-e89b-12d3-a456-426614174000",
+            user_id: "5324c950-d209-44b7-9e1b-2c3d859auser",
+            merchant_id: "fb325480-5b1c-4c3b-a044-2fcamerchant",
             full_name: "Nguyễn Văn A",
             phone: "0909111222",
             delivery_address: "123 Đường Láng, Hà Nội",
@@ -67,16 +67,16 @@ describe('Order API Integration Tests', () => {
             total_amount: 215000,
             order_items: [
                 {
-                    menu_item_id: "phobo-123e4567-e89b-12d3-a456-426614174000",
+                    menu_item_id: "6434ea82-1629-4178-8d67-a0ac8e9039e9",
                     quantity: 2,
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        { option_item_id: "xuongbo-123e4567-e89b-12d3-a456-426614174000" }
+                        { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
                     ]
                 },
                 {
-                    menu_item_id: "nuocmia-123e4567-e89b-12d3-a456-426614174000",
+                    menu_item_id: "31d17dbf-5ba4-4c82-b3a8-e3ef1eb8c467",
                     quantity: 1,
                     price: 20000,
                     note: "",
