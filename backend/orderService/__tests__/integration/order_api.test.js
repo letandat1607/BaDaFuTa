@@ -52,24 +52,21 @@ describe('Order API Integration Tests', () => {
     });
 
     afterAll(async () => {
+        // Đóng server với callback
         if (server) {
-            await new Promise((resolve, reject) => {
-                server.close((err) => {
-                    if (err) reject(err);
-                    else resolve();
+            await new Promise((resolve) => {
+                server.close(() => {
+                    console.log('Server closed.');
+                    resolve();
                 });
             });
-            console.log('Server closed.');
         }
-
+    
+        // Đóng database
         if (sequelize) {
             await sequelize.connectionManager.close();
             console.log('Database connection closed.');
         }
-
-        // await sequelize.close();
-        // console.log('Database connection closed.');
-        // server.close();
     }, 15000);
 
     // ==================== TẠO ĐƠN HÀNG =====================
