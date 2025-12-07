@@ -353,7 +353,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send({ ...validOrderPayload, order_id: "fake-order-123" }, mockUserId);
+                .send({ ...validOrderPayload, order_id: "5424c950-d209-44b7-9e1b-2c3d859a17af" }, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không tồn tại hoặc đã được thanh toán");
