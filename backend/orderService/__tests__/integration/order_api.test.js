@@ -14,7 +14,7 @@ let server;
 jest.mock('../../src/helpers/middleware', () => ({
     authenticate: jest.fn((req, res, next) => {
         req.user = {
-            id: "5324c950-d209-44b7-9e1b-2c3d859auser",
+            id: "5324c950-d209-44b7-9e1b-2c3d859a17af",
             email: "testuser@gmail.com",
             role: "customer"
         };
@@ -35,7 +35,7 @@ describe('Order API Integration Tests', () => {
 
         server = app.listen(0);
 
-        mockUserId = "a1b2c3d4-5678-4abc-def0-123456789abc";
+        mockUserId = "5324c950-d209-44b7-9e1b-2c3d859a17af";
         mockMerchantId = "e5f6g7h8-9012-4def-ghi3-456789abcdef";
         validToken = "Bearer mock-valid-token";
     });
@@ -56,8 +56,8 @@ describe('Order API Integration Tests', () => {
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
         const validOrderPayload = {
-            user_id: "a1b2c3d4-5678-4abc-def0-123456789abc",    
-            merchant_id: "e5f6g7h8-9012-4def-ghi3-456789abcdef",  
+            user_id: "5324c950-d209-44b7-9e1b-2c3d859a17af",    
+            merchant_id: "fb325480-5b1c-4c3b-a044-2fcac7ebce02",  
             full_name: "Nguyễn Văn A",
             phone: "0909111222",
             delivery_address: "123 Đường Láng, Hà Nội",
@@ -67,16 +67,16 @@ describe('Order API Integration Tests', () => {
             total_amount: 215000,
             order_items: [
                 {
-                    menu_item_id: "b2c3d4e5-f6a7-48b9-c0d1-23456789abcd", 
+                    menu_item_id: "6434ea82-1629-4178-8d67-a0ac8e9039e9", 
                     quantity: 2,
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        { option_item_id: "d4e5f6a7-b8c9-49d0-e1f2-3456789abcde" }
+                        { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
                     ]
                 },
                 {
-                    menu_item_id: "f1a2b3c4-d5e6-47f8-9a0b-56789abcdef0", 
+                    menu_item_id: "31d17dbf-5ba4-4c82-b3a8-e3ef1eb8c467", 
                     quantity: 1,
                     price: 20000,
                     note: "",
@@ -88,7 +88,7 @@ describe('Order API Integration Tests', () => {
         beforeEach(() => {
             middleware.authenticate.mockImplementation((req, res, next) => {
                 req.user = {
-                    id: "user-123e4567-e89b-12d3-a456-426614174000",
+                    id: "5324c950-d209-44b7-9e1b-2c3d859a17af",
                     email: "testuser@gmail.com",
                     role: "customer"
                 };
@@ -209,7 +209,7 @@ describe('Order API Integration Tests', () => {
 
         it('should fail when menu_item_id does not exist', async () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
-            payload.order_items[0].menu_item_id = "fake-item-999";
+            payload.order_items[0].menu_item_id = "6434ea82-1629-4178-8d67-a0ac8e9039e8";
 
             merchantClient.validateOrder.mockRejectedValue(
                 new Error("Có món hoặc tùy chọn không hợp lệ")
@@ -226,7 +226,7 @@ describe('Order API Integration Tests', () => {
 
         it('should fail when option_item_id does not exist', async () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
-            payload.order_items[0].options[0].option_item_id = "fake-opt-999";
+            payload.order_items[0].options[0].option_item_id = "fcef3d18-4aec-4623-8ace-5a6c7ddf83ef";
 
             merchantClient.validateOrder.mockRejectedValue(
                 new Error("Có món hoặc tùy chọn không hợp lệ")
