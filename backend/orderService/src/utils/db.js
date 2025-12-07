@@ -2,7 +2,15 @@ const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../../../.env") });
 const { Sequelize } = require("sequelize");
 
-const sequelize = new Sequelize(process.env.DATABASE_URL_ORDER, {
+// const sequelize = new Sequelize(process.env.DATABASE_URL_ORDER, {
+//   dialect: "postgres",
+//   logging: false,
+// });
+
+const databaseUrl = process.env.DATABASE_URL || process.env.DATABASE_URL_ORDER;
+
+
+const sequelize = new Sequelize(databaseUrl, {
   dialect: "postgres",
   logging: false,
 });

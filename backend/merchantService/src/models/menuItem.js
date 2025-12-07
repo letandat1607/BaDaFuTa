@@ -52,9 +52,4 @@ Merchant.hasMany(MenuItem, {foreignKey: "merchant_id"});
 MenuItem.belongsTo(Category, {foreignKey: "category_id", onDelete: "SET NULL"});
 Category.hasMany(MenuItem, {foreignKey: "category_id", as: "menu_items"});
 
-// MenuItem.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'MenuItem' synced successfully"))
-//   .catch(err => console.error(" Error syncing MenuItem table:", err));
-
-
 module.exports = MenuItem;

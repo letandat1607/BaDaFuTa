@@ -4,134 +4,105 @@ const { sequelize } = require("../utils/db");
 const { v4 } = require("uuid");
 const orderRepo = require('../repositories/orderRepository');
 const { publishMsg } = require('../rabbitMQ/rabbitFunction');
+const { validateOrder } = require('../grpc/merchantClient');
+const orderSchema = require("../validations/orderValidation");
+const orderItemValidation = require("../validations/orderItemValidation");
 
 module.exports.getUserOrders = async (userId) => {
     const orders = await orderRepo.getUserOrders(userId);
-    return await publishMsg({userId, orders}, "order_exchange", "order.merchant.send_all");
+    return await publishMsg({ userId, orders }, "order_exchange", "order.merchant.send_all");
 }
 
-module.exports.getOrder = async (orderId) => {
-    const order = await orderRepo.getOneOrder(orderId);
+module.exports.getOrder = async (orderId, userId) => {
+    const order = await orderRepo.getOneOrder(orderId, userId);
     // console.log(order);
-    return await publishMsg({userId: order.user_id, order}, "order_exchange", "order.merchant.confirmed")
+    await publishMsg({ userId: order.user_id, order }, "order_exchange", "order.merchant.confirmed");
+    return order;
 }
 
-module.exports.createOrder = async (order, userId) => {
+module.exports.createOrder = async (data, userId) => {
     const transaction = await sequelize.transaction();
     try {
-        const newOrder = await orderRepo.createOrder(
-            {
-                id: v4(),
-                merchant_id: order.merchant_id,
-                user_id: userId,
-                full_name: order.full_name,
-                phone: order.phone,
-                delivery_address: order.delivery_address,
-                delivery_fee: order.delivery_fee,
-                note: order.note || null,
-                payment_method: order.method,
-                total_amount: order.total_amount,
-                status_payment: "pending",
-                status: "waiting",
-                method: order.method,
-            },
-            transaction
-        );
+        const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
+        if (error) throw new Error('Đơn hàng không hợp lệ');
 
-        // for (const item of order.order_items) {
-        //     const newOrderItem = await orderRepo.createOderItem(
-        //         {
-        //             id: v4(),
-        //             order_id: newOrder.id,
-        //             menu_item_id: item.menu_item_id,
-        //             quantity: item.quantity,
-        //             price: item.price,
-        //             note: item.note || null,
-        //         },
-        //         transaction 
-        //     );
-        //     console.log("new items done");
-        //     if (item.options && item.options.length > 0) {
-        //         for (const opt of item.options.items) {
-        //             await orderRepo.createOderItemOption(
-        //                 {
-        //                     id: v4(),
-        //                     order_item_id: newOrderItem.id,
-        //                     option_item_id: opt.option_item_id,
-        //                 },
-        //                 transaction
-        //             );
-        //             console.log("new op done");
-        //         }
-        //     }
-        // }
-
-        for (const item of order.order_items) {
-            console.log("newOrderItem:", {
-                id: v4(),
-                order_id: newOrder.id,
-                menu_item_id: item.menu_item_id,
-                quantity: item.quantity,
-                price: item.price,
-                note: item.note.length > 0 ? item.note : null,
-            })
-            const newOrderItem = await orderRepo.createOderItem(
+        const { server_total } = await validateOrder(data);
+        console.log("server_total:", server_total, "client_total:", data.total_amount);
+        if (Number(server_total) !== Number(data.total_amount)) {
+            throw new Error("Tổng tiền không hợp lệ");
+        }
+        let dataOrder = data || null;
+        if (data.order_id) {
+            const existingOrderUser = await orderRepo.getOneOrderPayment(data.order_id, userId);
+            if (!existingOrderUser) {
+                throw new Error("Đơn hàng không tồn tại hoặc đã được thanh toán");
+            }
+            dataOrder = existingOrderUser;
+        }
+        else {
+            const newOrder = await orderRepo.createOrder(
                 {
                     id: v4(),
-                    order_id: newOrder.id,
-                    menu_item_id: item.menu_item_id,
-                    quantity: item.quantity,
-                    price: item.price,
-                    note: item.note.length > 0 ? item.note : null,
+                    ...value,
+                    status_payment: "pending",
                 },
                 transaction
             );
-            // console.log(newOrderItem)
-            console.log("new item done");
 
-            if (item.options && Array.isArray(item.options)) {
-                for (const group of item.options) {
-                    if (group.items && Array.isArray(group.items)) {
-                        for (const opt of group.items) {
-                            console.log("do đc items:", opt)
-                            if (!opt.option_item_id) {
-                                console.warn("Missing option_item_id:", opt);
-                                continue;
+            for (const item of data.order_items) {
+                const { value: itemValue, error: itemError } = orderItemValidation.validate(item, { stripUnknown: true });
+                if (itemError) throw new Error(itemError.message);
+                const newOrderItem = await orderRepo.createOderItem(
+                    {
+                        id: v4(),
+                        ...itemValue,
+                    },
+                    transaction
+                );
+
+                if (item.options && Array.isArray(item.options)) {
+                    for (const group of item.options) {
+                        if (group.items && Array.isArray(group.items)) {
+                            for (const opt of group.items) {
+                                if (!opt.option_item_id) {
+                                    console.warn("Missing option_item_id:", opt);
+                                    continue;
+                                }
+
+                                await orderRepo.createOderItemOption(
+                                    {
+                                        order_item_id: newOrderItem.id,
+                                        option_item_id: opt.option_item_id,
+                                    },
+                                    transaction
+                                );
                             }
-
-                            await orderRepo.createOderItemOption(
-                                {
-                                    order_item_id: newOrderItem.id,
-                                    option_item_id: opt.option_item_id,
-                                },
-                                transaction
-                            );
-                            console.log("new option done");
                         }
                     }
                 }
             }
+            await transaction.commit();
+            dataOrder = newOrder;
+        }
+        if (!dataOrder.id) {
+            throw new Error("Tạo đơn hàng thất bại");
         }
 
-        console.log("all done")
-        await transaction.commit();
-
         const payload = {
-            order_id: newOrder.id,
-            user_id: newOrder.user_id,
-            merchant_id: newOrder.merchant_id,
-            total_amount: newOrder.total_amount,
-            method: newOrder.method,
+            order_id: dataOrder.id,
+            user_id: dataOrder.user_id,
+            merchant_id: dataOrder.merchant_id,
+            total_amount: dataOrder.total_amount,
+            method: dataOrder.method,
             created_at: new Date(),
         };
 
         await publishMsg(payload, "order_exchange", "order.payment.process");
-        return newOrder;
-
+        return dataOrder;
     } catch (err) {
         await transaction.rollback();
-        console.log("orderService checkOutDer err ")
-        console.log(err);
+        // console.log("orderService checkOutDer err ")
+        throw err;
     }
 }
 
@@ -171,14 +142,14 @@ module.exports.updateOrder = async (orderId, data, location) => {
     console.log("updateOrder service:", { orderId, data });
     const order = await orderRepo.updateField(orderId, data);
     if (!order) throw new Error('Không tìm thấy đơn hàng');
-    
+
     if (data.status === "delivering") {
-        await publishMsg({location, order, droneId: data.drone_id}, "order_exchange", "order.status.updated");
-        await publishMsg({droneId: data.drone_id, status: "DELIVERING", orderId}, "order_exchange", "order.drone.delivery_status");
-    }else if(data.status === "complete"){
-        await publishMsg({droneId: data.drone_id || null, status: "READY", orderId}, "order_exchange", "order.drone.delivery_status");
+        await publishMsg({ location, order, droneId: data.drone_id }, "order_exchange", "order.status.updated");
+        await publishMsg({ droneId: data.drone_id, status: "DELIVERING", orderId }, "order_exchange", "order.drone.delivery_status");
+    } else if (data.status === "complete") {
+        await publishMsg({ droneId: data.drone_id || null, status: "READY", orderId }, "order_exchange", "order.drone.delivery_status");
         await publishMsg(order, "order_exchange", "order.status.updated");
-    }else{
+    } else {
         await publishMsg(order, "order_exchange", "order.status.updated");
     }
 

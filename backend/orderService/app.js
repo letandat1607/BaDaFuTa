@@ -29,15 +29,6 @@ const start = async () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/profile", (req, res) => {
-    res.json({
-        id: 1,
-        name: "Nguyen Van A",
-        role: "User Service"
-    });
-});
-
-
 app.get("/getUserOrders", authenticate, getUserOrders)
 app.post("/checkOutOrder", authenticate, checkOutOrder);
 // app.post("/getAllOrder", getAllOrder);
@@ -49,8 +40,11 @@ app.get("/getAllOrderMerchant/:id", getAllOrderMerchant);
 
 app.post("/updateOrder/:id", updateOrder);
 
+module.exports = app;
 
-app.listen(PORT, async () => {
-    await start();
-    console.log("API OrderService run on port:", PORT)
-})
+if (require.main === module) {    
+    app.listen(PORT, async () => {
+        await start();
+        console.log("API OrderService run on port:", PORT)
+    })
+  }

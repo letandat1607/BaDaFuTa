@@ -31,8 +31,4 @@ const Address = sequelize.define("Address", {
 Address.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
 User.hasMany(Address, { foreignKey: "user_id" });
 
-// Address.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'Address' synced successfully"))
-//   .catch(err => console.error(" Error syncing Address table:", err));
-
 module.exports = Address;

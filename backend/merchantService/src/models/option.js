@@ -34,9 +34,6 @@ const Option = sequelize.define("Option",{
     timestamps: false
 });
 
-// Option.sync({ alter: true })
-//   .then(() => console.log(" Table 'Option' synced successfully"))
-//   .catch(err => console.error(" Error syncing Option table:", err));
 
 Option.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
 Merchant.hasMany(Option, {foreignKey: "merchant_id", as: "options"});

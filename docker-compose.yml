@@ -56,14 +56,17 @@ services:
       - .env
     ports:
       - "${merchantServicePORT}:3002"
+      - "50051:50051"
     environment:
       - DATABASE_URL=${DATABASE_URL_MERCHANT}
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - GRPC_PORT=50051
     depends_on:
       - postgres
     volumes:
       - ./backend/merchantService:/app
       - /app/node_modules
+      - ./backend/proto:/app/proto
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
@@ -79,11 +82,14 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL_ORDER}
       - RABBITMQ_URL=${RABBITMQ_URL}
+      - MERCHANT_GRPC_URL=merchant_service:50051
     depends_on:
       - postgres
+      - merchant_service
     volumes:
       - ./backend/orderService:/app
       - /app/node_modules
+      - ./backend/proto:/app/proto
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network

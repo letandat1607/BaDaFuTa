@@ -35,15 +35,15 @@ MenuItem.belongsToMany(Option, {
   onDelete: "CASCADE"
 });
 
-MenuItemOption.belongsTo(MenuItem, {
-  foreignKey: "menu_item_id",
-  as: "menu_item"
-});
+// MenuItemOption.belongsTo(MenuItem, {
+//   foreignKey: "menu_item_id",
+//   as: "menu_item"
+// });
 
-MenuItemOption.belongsTo(Option, {
-  foreignKey: "option_id",
-  as: "option"
-});
+// MenuItemOption.belongsTo(Option, {
+//   foreignKey: "option_id",
+//   as: "option"
+// });
 
 
 module.exports = MenuItemOption;

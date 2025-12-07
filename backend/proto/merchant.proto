@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package merchant;
+
+message Status {
+  bool success = 1;
+  string message = 2;
+}
+
+message SelectedOption {
+  string option_item_id = 1;
+}
+
+message ValidateOrderRequest {
+  string merchant_id = 1;
+  int64 delivery_fee = 2;
+  repeated OrderItem items = 3;
+}
+
+message OrderItem {
+  string menu_item_id = 1;
+  int32 quantity = 2;
+  int64 client_price = 3;
+  repeated SelectedOption options = 4;
+}
+
+message ValidateOrderResponse {
+  Status status = 1;
+  int64 server_total = 2;
+  repeated string invalid_menu_items = 3;
+  repeated string invalid_options = 4;
+}
+
+service MerchantService {
+  rpc ValidateOrder (ValidateOrderRequest) returns (ValidateOrderResponse);
+}

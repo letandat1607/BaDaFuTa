@@ -101,3 +101,5 @@ app.listen(PORT, async () => {
     await start();
     console.log("API MerchantService run on port:", PORT)
 })
+
+require('./src/grpc/server');

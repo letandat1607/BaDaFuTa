@@ -8,7 +8,6 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-lea
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix icon Leaflet cho Vite
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
@@ -18,7 +17,6 @@ L.Icon.Default.mergeOptions({
 
 let socket;
 
-// Component QUAN TRỌNG: Làm bản đồ tự động bay về vị trí mới
 function FlyToLocation({ center }) {
   const map = useMap();
 
@@ -26,7 +24,7 @@ function FlyToLocation({ center }) {
     if (center) {
       map.setView(center, 17, {
         animate: true,
-        duration: 1.2, // mượt như Google Maps
+        duration: 1.2,
       });
     }
   }, [center, map]);
@@ -34,7 +32,6 @@ function FlyToLocation({ center }) {
   return null;
 }
 
-// Component xử lý click và hiển thị marker
 function LocationMarker({ position, setPosition, setForm }) {
   useMapEvents({
     click(e) {
@@ -47,7 +44,6 @@ function LocationMarker({ position, setPosition, setForm }) {
   return position ? <Marker position={position} /> : null;
 }
 
-// Reverse geocoding: tọa độ → địa chỉ
 async function reverseGeocode(lat, lng, setForm) {
   try {
     const res = await fetch(
@@ -78,7 +74,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     lng: null,
   });
 
-  const [position, setPosition] = useState(null); // [lat, lng] – dùng làm center
+  const [position, setPosition] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -90,8 +86,10 @@ export default function CheckoutForm({ cartItems, merchantId }) {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
 
-  // Lấy vị trí hiện tại khi load trang (giữ nguyên như cũ)
   useEffect(() => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const merchantCart = cart.filter((item) => item.merchant_id === merchantId);
+    setOrderId(merchantCart.orderId || "");
     const getCurrentLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -230,18 +228,24 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
     try {
       console.log(payload);
-      const res = await fetch("http://localhost:3000/api/order/checkOutOrder", {
+      
+      const res = await fetch(`http://localhost:3000/api/order/checkOutOrder`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           authorization: `${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({payload, order_id: orderId || null}),
       });
 
       if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
       const result = await res.json();
       setOrderId(result.orderId);
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart = cart.filter((item) => item.merchant_id !== merchantId);
+      const newCart = {...cart, orderId: result.orderId};
+      localStorage.setItem("cart", JSON.stringify(newCart));
+
     } catch (err) {
       setError(err.message || "Lỗi hệ thống");
     } finally {

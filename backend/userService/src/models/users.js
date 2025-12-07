@@ -40,10 +40,6 @@ const User = sequelize.define("User", {
     updatedAt: "updated_at",
 });
 
-// User.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'User' synced successfully"))
-//   .catch(err => console.error(" Error syncing User table:", err));
-
 module.exports = User;
 
 

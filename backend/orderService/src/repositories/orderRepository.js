@@ -1,27 +1,32 @@
-const { Cart, CartItem, CartItemOption, Order, OrderItem, OrderItemOption } = require("../models/index");
-const {Op} = require('sequelize');
+const { Order, OrderItem, OrderItemOption } = require("../models/index");
+const { Op } = require('sequelize');
 
 module.exports.getUserOrders = async (userId) => {
-    return await Order.findAll({
-        where: {user_id: userId},
+  return await Order.findAll({
+    where: { user_id: userId },
+    include: [
+      {
+        model: OrderItem,
+        as: "order_items",
         include: [
           {
-            model: OrderItem,
-            as:"order_items",
-            include: [
-              {
-                model: OrderItemOption,
-                as:"options",
-              }
-            ]
+            model: OrderItemOption,
+            as: "options",
           }
         ]
-    });
+      }
+    ]
+  });
 }
 
-module.exports.getOneOrder = async (orderId) => {
+module.exports.getOneOrder = async (orderId, userId) => {
   return await Order.findOne({
-    where: {id: orderId},
+    where: {
+      [Op.and]: [
+        { id: orderId },
+        { user_id: userId }
+      ]
+    },
     include: [
       {
         model: OrderItem,
@@ -37,25 +42,48 @@ module.exports.getOneOrder = async (orderId) => {
   });
 }
 
+module.exports.getOneOrderPayment = async (orderId, userId) => {
+  return await Order.findOne({
+    where: {
+      [Op.and]: [
+        { id: orderId },
+        { user_id: userId },
+        { status_payment: "pending" || "failed" }
+      ]
+    },
+    include: [
+      {
+        model: OrderItem,
+        as: "order_items",
+        include: [
+          {
+            model: OrderItemOption,
+            as: "options"
+          }
+        ]
+      }
+    ]
+  });
+}
 
 module.exports.createOrder = async (data, transaction) => {
-    return await Order.create(data, {transaction});
+  return await Order.create(data, { transaction });
 }
 
 module.exports.createOderItem = async (data, transaction) => {
-    return await OrderItem.create(data, {transaction});
+  return await OrderItem.create(data, { transaction });
 }
 
 module.exports.createOderItemOption = async (data, transaction) => {
-    return await OrderItemOption.create(data, {transaction});
+  return await OrderItemOption.create(data, { transaction });
 }
 
 module.exports.updateField = async (orderID, data) => {
-    const order = await Order.findByPk(orderID);
-    if(!order) return null;
+  const order = await Order.findByPk(orderID);
+  if (!order) return null;
 
-    await order.update(data);
-    return order;
+  await order.update(data);
+  return order;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -63,18 +91,18 @@ module.exports.getAllOrderMerchant = async (merchant_id) => {
   const orderss = await Order.findAll({
     where: {
       [Op.and]: [
-        {merchant_id},
-        {status_payment: "paid"}
+        { merchant_id },
+        { status_payment: "paid" }
       ]
     },
     include: [
       {
         model: OrderItem,
-        as:"order_items",
+        as: "order_items",
         include: [
           {
             model: OrderItemOption,
-            as:"options",
+            as: "options",
           }
         ]
       }

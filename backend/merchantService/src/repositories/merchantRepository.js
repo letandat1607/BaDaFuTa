@@ -309,7 +309,7 @@ module.exports.updateMenuItemOption = async (id, data) => {
 
 
 module.exports.getMenuItemWithOption = async (id, merchant_id) => {
-  return MenuItem.findOne({
+  return await MenuItem.findOne({
     where: { id, merchant_id },
     include: [
       {

@@ -2,7 +2,6 @@ const request = require('supertest');
 const express = require('express');
 
 const userController = require('../../../src/controllers/userController');
-const { use } = require('passport');
 
 jest.mock('../../../src/services/userService');
 

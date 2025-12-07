@@ -12,9 +12,10 @@ module.exports.getOrder = async (req, res) =>{
 
     const {id} = req.params;
 
-    await orderService.getOrder(id);
+    const order = await orderService.getOrder(id, user.id);
     return res.status(200).json({
       message: "Get order success",
+      order
     });
   }catch(err){
     return res.status(500).json({
@@ -58,15 +59,15 @@ module.exports.getUserOrders = async (req, res) => {
 
 module.exports.checkOutOrder = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const user = req.user;
     if(!user) return res.status(404).json({error: "Cần đăng nhập người dùng"});
  
     const newOrder = await orderService.createOrder(req.body, user.id);
 
     return res.status(201).json({
-      message: "Order created successfully waiting payment process",
-      status_payment: newOrder.status_payment, 
+      message: "Tạo đơn hàng thành công chờ thanh toán",
+      status_payment: newOrder.status_payment,
       order_id: newOrder.id,
     });
   } catch (err) {

@@ -39,8 +39,5 @@ const OptionItem = sequelize.define("OptionItem", {
 OptionItem.belongsTo(Option, { foreignKey: "option_id", onDelete: "CASCADE", as: 'options' });
 Option.hasMany(OptionItem, { foreignKey: "option_id", as: `option_items` });
 
-// OptionItem.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'OptionItem' synced successfully"))
-//   .catch(err => console.error(" Error syncing OptionItem table:", err));
 
 module.exports = OptionItem;

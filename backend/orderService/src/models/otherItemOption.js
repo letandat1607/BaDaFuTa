@@ -2,8 +2,6 @@ const {DataTypes} = require("sequelize");
 const {sequelize} = require("../utils/db");
 const OrderItem = require("./orderItem.js");
 
-
-
 const OrderItemOption = sequelize.define("OrderItemOption", {
         order_item_id:{
             type: DataTypes.UUID,
@@ -21,7 +19,5 @@ const OrderItemOption = sequelize.define("OrderItemOption", {
         timestamps: false
     }
 );
-OrderItemOption.belongsTo(OrderItem, {foreignKey: "order_item_id", onDelete: "CASCADE"});
-OrderItem.hasMany(OrderItemOption, {foreignKey: "order_item_id", as: "options"});
 
 module.exports = OrderItemOption;

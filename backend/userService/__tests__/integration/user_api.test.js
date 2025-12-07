@@ -1,7 +1,5 @@
-// __tests__/integration/user_api.test.js
-
 const request = require('supertest');
-const app = require('../../app'); // ← giờ đã an toàn vì app.js không tự listen
+const app = require('../../app'); 
 const { sequelize } = require('../../db');
 const { User } = require('../../src/models/index');
 const bcrypt = require('bcrypt');
