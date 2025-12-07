@@ -22,6 +22,10 @@ jest.mock('../../src/helpers/middleware', () => ({
     })
 }));
 
+jest.mock('../../src/rabbitMQ/rabbitFunction', () => ({
+    publishMsg: jest.fn().mockResolvedValue(true)
+}));
+
 const merchantClient = require('../../src/grpc/merchantClient');
 
 describe('Order API Integration Tests', () => {
@@ -66,7 +70,7 @@ describe('Order API Integration Tests', () => {
         // await sequelize.close();
         // console.log('Database connection closed.');
         // server.close();
-    }, 10000);
+    }, 15000);
 
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
