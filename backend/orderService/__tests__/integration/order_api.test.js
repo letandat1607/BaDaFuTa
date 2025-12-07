@@ -2,8 +2,20 @@ const request = require('supertest');
 const app = require('../../app');
 const { sequelize } = require('../../src/utils/db');
 const { Order, OrderItem, OrderItemOption } = require('../../src/models/index');
+const middleware = require('../../src/helpers/middleware');
 
 let server;
+
+jest.mock('../../src/helpers/middleware', () => ({
+    authenticate: jest.fn((req, res, next) => {
+        req.user = {
+            id: "user-123e4567-e89b-12d3-a456-426614174000",
+            email: "testuser@gmail.com",
+            role: "customer"
+        };
+        next();
+    })
+}));
 
 describe('Order API Integration Tests', () => {
     let mockUserId;
@@ -25,6 +37,7 @@ describe('Order API Integration Tests', () => {
         await OrderItemOption.destroy({ where: {} });
         await OrderItem.destroy({ where: {} });
         await Order.destroy({ where: {} });
+        jest.clearAllMocks();
     });
 
     afterAll(async () => {
@@ -36,6 +49,7 @@ describe('Order API Integration Tests', () => {
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
         const validOrderPayload = {
+            user_id: "user-123e4567-e89b-12d3-a456-426614174000",
             merchant_id: "merchant-123e4567-e89b-12d3-a456-426614174000",
             full_name: "Nguyễn Văn A",
             phone: "0909111222",
@@ -66,6 +80,17 @@ describe('Order API Integration Tests', () => {
             ]
         };
 
+        beforeEach(() => {
+            middleware.authenticate.mockImplementation((req, res, next) => {
+                req.user = {
+                    id: "user-123e4567-e89b-12d3-a456-426614174000",
+                    email: "testuser@gmail.com",
+                    role: "customer"
+                };
+                next();
+            });
+        });
+
         it('should create order successfully with valid data', async () => {
             const res = await request(server)
                 .post('/checkOutOrder')
@@ -79,6 +104,10 @@ describe('Order API Integration Tests', () => {
         });
 
         it('should fail when user is not authenticated', async () => {
+            middleware.authenticate.mockImplementation((req, res) => {
+                return res.status(401).json({ error: "Cần đăng nhập người dùng" });
+            });
+
             const res = await request(server)
                 .post('/checkOutOrder')
                 .send(validOrderPayload);
@@ -153,7 +182,7 @@ describe('Order API Integration Tests', () => {
 
         it('should fail when item price is invalid', async () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
-            payload.order_items[0].price = 1000;
+            payload.order_items[0].price = 1000; 
 
             const res = await request(server)
                 .post('/checkOutOrder')
@@ -222,7 +251,7 @@ describe('Order API Integration Tests', () => {
 
             const res = await request(server)
                 .post('/checkOutOrder')
-                .set('Authorization', validToken)
+                .set('authorization', validToken)
                 .send(payload);
 
             expect(res.statusCode).toBe(500);
@@ -268,6 +297,7 @@ describe('Order API Integration Tests', () => {
         });
 
         it('should retry payment for existing order with valid order_id', async () => {
+            // Tạo order trước
             const firstRes = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
@@ -276,6 +306,7 @@ describe('Order API Integration Tests', () => {
             expect(firstRes.statusCode).toBe(201);
             const orderId = firstRes.body.order_id;
 
+            // Thử thanh toán lại
             const retryRes = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
