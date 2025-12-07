@@ -7,6 +7,7 @@ jest.mock('../../src/grpc/merchantClient', () => ({
 const app = require('../../app');
 const { sequelize } = require('../../src/utils/db');
 const { Order, OrderItem, OrderItemOption } = require('../../src/models/index');
+const {closeRabbitMQ} = require('../../src/rabbitMQ/rabbitConnect');
 const middleware = require('../../src/helpers/middleware');
 
 let server;
@@ -52,7 +53,6 @@ describe('Order API Integration Tests', () => {
     });
 
     afterAll(async () => {
-        // Đóng server với callback
         if (server) {
             await new Promise((resolve) => {
                 server.close(() => {
@@ -61,8 +61,14 @@ describe('Order API Integration Tests', () => {
                 });
             });
         }
+
+        try {
+            await closeRabbitMQ();
+            console.log('RabbitMQ closed.');
+        } catch (err) {
+            console.warn('Error closing RabbitMQ (ignore if not used):', err.message);
+        }
     
-        // Đóng database
         if (sequelize) {
             await sequelize.connectionManager.close();
             console.log('Database connection closed.');

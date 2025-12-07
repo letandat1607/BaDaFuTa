@@ -17,6 +17,24 @@ function connectRabbitMQ() {
     return connection;
 }
 
+async function closeRabbitMQ() {
+    if (!connection) {
+        console.log("No RabbitMQ connection to close.");
+        return;
+    }
+
+    try {
+        console.log("Closing RabbitMQ connection...");
+        await connection.close();    // ← amqp-connection-manager hỗ trợ close() trực tiếp
+        console.log("RabbitMQ connection closed successfully");
+    } catch (err) {
+        console.warn("Error while closing RabbitMQ connection:", err.message);
+    } finally {
+        connection = null;  // reset lại để lần chạy test sau tạo mới
+    }
+}
+
 module.exports = {
     connectRabbitMQ,
+    closeRabbitMQ
 };
