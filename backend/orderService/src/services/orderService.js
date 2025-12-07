@@ -7,6 +7,7 @@ const { publishMsg } = require('../rabbitMQ/rabbitFunction');
 const { validateOrder } = require('../grpc/merchantClient');
 const orderSchema = require("../validations/orderValidation");
 const orderItemValidation = require("../validations/orderItemValidation");
+const e = require("express");
 
 module.exports.getUserOrders = async (userId) => {
     const orders = await orderRepo.getUserOrders(userId);
@@ -26,7 +27,7 @@ module.exports.createOrder = async (data, userId) => {
         console.log("Create order service data:", data);
 
         const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
-        if (error) throw new Error('Đơn hàng không hợp lệ');
+        if (error) throw new Error(error.message);
 
         const { server_total } = await validateOrder(data);
         console.log("server_total:", server_total, "client_total:", data.total_amount);

@@ -67,16 +67,16 @@ describe('Order API Integration Tests', () => {
             total_amount: 215000,
             order_items: [
                 {
-                    menu_item_id: "item-pho-bo",
+                    menu_item_id: "phobo-123e4567-e89b-12d3-a456-426614174000",
                     quantity: 2,
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        { option_item_id: "opt-tranchau" }
+                        { option_item_id: "xuongbo-123e4567-e89b-12d3-a456-426614174000" }
                     ]
                 },
                 {
-                    menu_item_id: "item-nuocmia",
+                    menu_item_id: "nuocmia-123e4567-e89b-12d3-a456-426614174000",
                     quantity: 1,
                     price: 20000,
                     note: "",
