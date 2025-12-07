@@ -299,13 +299,13 @@ describe('orderService createOrder - Whitebox Tests', () => {
 
     it('should throw error when order item validation fails', async () => {
         orderItemValidation.validate = jest.fn().mockReturnValue({
-            error: { message: "Invalid order item" },
+            error: { message: "Đơn hàng không hợp lệ" },
             value: null
         });
 
         await expect(orderService.createOrder(mockOrder, mockUserId))
             .rejects
-            .toThrow("Invalid order item");
+            .toThrow("Đơn hàng không hợp lệ");
 
         expect(orderRepo.createOrder).toHaveBeenCalledTimes(1);
         expect(mockTransaction.rollback).toHaveBeenCalledTimes(1);

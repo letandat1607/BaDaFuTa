@@ -50,19 +50,7 @@ module.exports.getOneOrderPayment = async (orderId, userId) => {
         { user_id: userId },
         { status_payment: "pending" || "failed" }
       ]
-    },
-    include: [
-      {
-        model: OrderItem,
-        as: "order_items",
-        include: [
-          {
-            model: OrderItemOption,
-            as: "options"
-          }
-        ]
-      }
-    ]
+    }
   });
 }
 

@@ -107,7 +107,7 @@ describe('Order API Integration Tests', () => {
                 .set('authorization', validToken)
                 .send(validOrderPayload, mockUserId);
 
-            // expect(res.statusCode).toBe(201);
+            expect(res.statusCode).toBe(201);
             expect(res.body).toHaveProperty('message', 'Tạo đơn hàng thành công chờ thanh toán');
             expect(res.body).toHaveProperty('order_id');
             expect(res.body).toHaveProperty('status_payment', 'pending');
