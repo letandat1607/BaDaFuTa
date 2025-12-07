@@ -35,8 +35,8 @@ describe('Order API Integration Tests', () => {
 
         server = app.listen(0);
 
-        mockUserId = "5324c950-d209-44b7-9e1b-2c3d859auser";
-        mockMerchantId = "fb325480-5b1c-4c3b-a044-2fcamerchant";
+        mockUserId = "a1b2c3d4-5678-4abc-def0-123456789abc";
+        mockMerchantId = "e5f6g7h8-9012-4def-ghi3-456789abcdef";
         validToken = "Bearer mock-valid-token";
     });
 
@@ -56,8 +56,8 @@ describe('Order API Integration Tests', () => {
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
         const validOrderPayload = {
-            user_id: "5324c950-d209-44b7-9e1b-2c3d859auser",
-            merchant_id: "fb325480-5b1c-4c3b-a044-2fcamerchant",
+            user_id: "a1b2c3d4-5678-4abc-def0-123456789abc",    
+            merchant_id: "e5f6g7h8-9012-4def-ghi3-456789abcdef",  
             full_name: "Nguyễn Văn A",
             phone: "0909111222",
             delivery_address: "123 Đường Láng, Hà Nội",
@@ -67,16 +67,16 @@ describe('Order API Integration Tests', () => {
             total_amount: 215000,
             order_items: [
                 {
-                    menu_item_id: "6434ea82-1629-4178-8d67-a0ac8e9039e9",
+                    menu_item_id: "b2c3d4e5-f6a7-48b9-c0d1-23456789abcd", 
                     quantity: 2,
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+                        { option_item_id: "d4e5f6a7-b8c9-49d0-e1f2-3456789abcde" }
                     ]
                 },
                 {
-                    menu_item_id: "31d17dbf-5ba4-4c82-b3a8-e3ef1eb8c467",
+                    menu_item_id: "f1a2b3c4-d5e6-47f8-9a0b-56789abcdef0", 
                     quantity: 1,
                     price: 20000,
                     note: "",
