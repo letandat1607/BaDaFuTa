@@ -23,10 +23,10 @@ module.exports.getOrder = async (orderId, userId) => {
 module.exports.createOrder = async (data, userId) => {
     const transaction = await sequelize.transaction();
     try {
-        console.log("Create order service data:", data);
+        // console.log("Create order service data:", data);
 
         const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
-        if (error) throw new Error('Đơn hàng không hợp lệ');
+        if (error) throw new Error(error.message);
 
         const { server_total } = await validateOrder(data);
         console.log("server_total:", server_total, "client_total:", data.total_amount);
