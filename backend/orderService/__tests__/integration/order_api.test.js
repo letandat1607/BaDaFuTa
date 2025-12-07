@@ -327,7 +327,7 @@ describe('Order API Integration Tests', () => {
                 .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
-            expect(res.body.error).toBe("Đơn hàng không hợp lệ");
+            expect(res.body.error).toBe("Tổng tiền không hợp lệ");
         });
 
         it('should retry payment for existing order with valid order_id', async () => {

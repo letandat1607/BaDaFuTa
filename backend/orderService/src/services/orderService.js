@@ -26,7 +26,7 @@ module.exports.createOrder = async (data, userId) => {
         // console.log("Create order service data:", data);
 
         const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
-        if (error) throw new Error("Đơn hàng không hợp lệ");
+        if (error || !data.order_items || !data.order_items.length > 0) throw new Error("Đơn hàng không hợp lệ");
 
         const { server_total } = await validateOrder(data);
         console.log("server_total:", server_total, "client_total:", data.total_amount);
@@ -53,7 +53,7 @@ module.exports.createOrder = async (data, userId) => {
 
             for (const item of data.order_items) {
                 const { value: itemValue, error: itemError } = orderItemValidation.validate({order_id: newOrder.id, ...item}, { stripUnknown: true });
-                if (itemError) throw new Error(itemError.message);
+                if (itemError) throw new Error("Đơn hàng không hợp lệ");
                 const newOrderItem = await orderRepo.createOderItem(
                     {
                         id: v4(),
