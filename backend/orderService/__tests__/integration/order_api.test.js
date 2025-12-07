@@ -6,6 +6,7 @@ const middleware = require('../../src/helpers/middleware');
 
 let server;
 
+// Mock authenticate middleware
 jest.mock('../../src/helpers/middleware', () => ({
     authenticate: jest.fn((req, res, next) => {
         req.user = {
@@ -16,6 +17,13 @@ jest.mock('../../src/helpers/middleware', () => ({
         next();
     })
 }));
+
+// Mock merchantClient để không cần database merchant service
+jest.mock('../../src/grpc/merchantClient', () => ({
+    validateOrder: jest.fn()
+}));
+
+const merchantClient = require('../../src/grpc/merchantClient');
 
 describe('Order API Integration Tests', () => {
     let mockUserId;
@@ -65,9 +73,7 @@ describe('Order API Integration Tests', () => {
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        {
-                            items: [{ option_item_id: "opt-tranchau" }]
-                        }
+                        { option_item_id: "opt-tranchau" }
                     ]
                 },
                 {
@@ -89,15 +95,20 @@ describe('Order API Integration Tests', () => {
                 };
                 next();
             });
+
+
+            merchantClient.validateOrder.mockResolvedValue({
+                server_total: 215000
+            });
         });
 
         it('should create order successfully with valid data', async () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(validOrderPayload);
+                .send(validOrderPayload, mockUserId);
 
-            // expect(res.statusCode).toBe(201);
+            expect(res.statusCode).toBe(201);
             expect(res.body).toHaveProperty('message', 'Tạo đơn hàng thành công chờ thanh toán');
             expect(res.body).toHaveProperty('order_id');
             expect(res.body).toHaveProperty('status_payment', 'pending');
@@ -110,7 +121,7 @@ describe('Order API Integration Tests', () => {
 
             const res = await request(server)
                 .post('/checkOutOrder')
-                .send(validOrderPayload);
+                .send(validOrderPayload, mockUserId);
 
             expect(res.statusCode).toBe(401);
             expect(res.body.error).toBe("Cần đăng nhập người dùng");
@@ -123,7 +134,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -135,7 +146,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -148,7 +159,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -161,7 +172,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -174,7 +185,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -182,12 +193,16 @@ describe('Order API Integration Tests', () => {
 
         it('should fail when item price is invalid', async () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
-            payload.order_items[0].price = 1000; 
+            payload.order_items[0].price = 1000;
+
+            merchantClient.validateOrder.mockRejectedValue(
+                new Error("Giá món không hợp lệ")
+            );
 
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Giá món không hợp lệ");
@@ -197,10 +212,14 @@ describe('Order API Integration Tests', () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
             payload.order_items[0].menu_item_id = "fake-item-999";
 
+            merchantClient.validateOrder.mockRejectedValue(
+                new Error("Có món hoặc tùy chọn không hợp lệ")
+            );
+
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Có món hoặc tùy chọn không hợp lệ");
@@ -210,10 +229,14 @@ describe('Order API Integration Tests', () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
             payload.order_items[0].options[0].items[0].option_item_id = "fake-opt-999";
 
+            merchantClient.validateOrder.mockRejectedValue(
+                new Error("Có món hoặc tùy chọn không hợp lệ")
+            );
+
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Có món hoặc tùy chọn không hợp lệ");
@@ -223,10 +246,14 @@ describe('Order API Integration Tests', () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
             payload.total_amount = 1000;
 
+            merchantClient.validateOrder.mockResolvedValue({
+                server_total: 215000
+            });
+
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Tổng tiền không hợp lệ");
@@ -236,10 +263,14 @@ describe('Order API Integration Tests', () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
             payload.order_items[0].options = [];
 
+            merchantClient.validateOrder.mockResolvedValue({
+                server_total: 215000
+            });
+
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(201);
             expect(res.body.message).toBe("Tạo đơn hàng thành công chờ thanh toán");
@@ -252,7 +283,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -262,10 +293,14 @@ describe('Order API Integration Tests', () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
             payload.order_items[0].quantity = 1;
 
+            merchantClient.validateOrder.mockResolvedValue({
+                server_total: 215000
+            });
+
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(201);
             expect(res.body.message).toBe("Tạo đơn hàng thành công chờ thanh toán");
@@ -278,7 +313,7 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
@@ -290,38 +325,36 @@ describe('Order API Integration Tests', () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(payload);
+                .send(payload, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
         });
 
         it('should retry payment for existing order with valid order_id', async () => {
-            // Tạo order trước
             const firstRes = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send(validOrderPayload);
+                .send(validOrderPayload, mockUserId);
 
             expect(firstRes.statusCode).toBe(201);
             const orderId = firstRes.body.order_id;
 
-            // Thử thanh toán lại
             const retryRes = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send({ ...validOrderPayload, order_id: orderId });
+                .send({ ...validOrderPayload, order_id: orderId }, mockUserId);
 
             expect(retryRes.statusCode).toBe(201);
             expect(retryRes.body.order_id).toBe(orderId);
             expect(['pending', 'failed']).toContain(retryRes.body.status_payment);
         });
 
-        it('should fail when order_id does not exist', async () => {
+        it('should fail when order_id does not exist or order_id does not belong to user', async () => {
             const res = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send({ ...validOrderPayload, order_id: "fake-order-123" });
+                .send({ ...validOrderPayload, order_id: "fake-order-123" }, mockUserId);
 
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không tồn tại hoặc đã được thanh toán");
