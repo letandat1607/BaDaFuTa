@@ -48,10 +48,25 @@ describe('Order API Integration Tests', () => {
     });
 
     afterAll(async () => {
-        await sequelize.close();
-        console.log('Database connection closed.');
-        server.close();
-    });
+        if (server) {
+            await new Promise((resolve, reject) => {
+                server.close((err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+            console.log('Server closed.');
+        }
+
+        if (sequelize) {
+            await sequelize.connectionManager.close();
+            console.log('Database connection closed.');
+        }
+
+        // await sequelize.close();
+        // console.log('Database connection closed.');
+        // server.close();
+    }, 10000);
 
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
