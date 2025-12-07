@@ -53,27 +53,17 @@ describe('Order API Integration Tests', () => {
     });
 
     afterAll(async () => {
-        if (server) {
-            await new Promise((resolve) => {
-                server.close(() => {
-                    console.log('Server closed.');
-                    resolve();
-                });
-            });
-        }
-
+        server?.closeAllConnections?.();
+        server?.close();
+    
         try {
             await closeRabbitMQ();
-            console.log('RabbitMQ closed.');
-        } catch (err) {
-            console.warn('Error closing RabbitMQ (ignore if not used):', err.message);
-        }
+        } catch {}
     
-        if (sequelize) {
-            await sequelize.connectionManager.close();
-            console.log('Database connection closed.');
-        }
-    }, 15000);
+        sequelize?.close?.();
+
+        setTimeout(() => process.exit(0), 4000);
+    }, 30000);
 
     // ==================== TẠO ĐƠN HÀNG =====================
     describe('POST /checkOutOrder', () => {
