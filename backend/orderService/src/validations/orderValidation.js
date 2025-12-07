@@ -7,6 +7,7 @@ const orderSchema = Joi.object({
   full_name: Joi.string().max(100).required(),
   note: Joi.string().allow(null, "").optional(),
   phone: Joi.string().max(20).required(),
+  method: Joi.string().required(),
   delivery_address: Joi.string().required(),
   delivery_fee: Joi.number().integer().min(0).required(),
   total_amount: Joi.number().integer().min(0).required(),

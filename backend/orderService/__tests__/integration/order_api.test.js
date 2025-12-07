@@ -6,7 +6,6 @@ const middleware = require('../../src/helpers/middleware');
 
 let server;
 
-// Mock authenticate middleware
 jest.mock('../../src/helpers/middleware', () => ({
     authenticate: jest.fn((req, res, next) => {
         req.user = {
@@ -18,7 +17,6 @@ jest.mock('../../src/helpers/middleware', () => ({
     })
 }));
 
-// Mock merchantClient để không cần database merchant service
 jest.mock('../../src/grpc/merchantClient', () => ({
     validateOrder: jest.fn()
 }));

@@ -20,7 +20,7 @@ const client = new proto.MerchantService(
 );
 
 function validateOrder(data) {
-  console.log("Validating order with merchant gRPC service:", data.order_items);
+  // console.log("Validating order with merchant gRPC service:", data.order_items);
   return new Promise((resolve, reject) => {
     const request = {
       merchant_id: data.merchant_id,

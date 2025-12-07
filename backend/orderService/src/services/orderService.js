@@ -50,7 +50,7 @@ module.exports.createOrder = async (data, userId) => {
             );
 
             for (const item of data.order_items) {
-                const { value: itemValue, error: itemError } = orderItemValidation.validate(item, { stripUnknown: true });
+                const { value: itemValue, error: itemError } = orderItemValidation.validate({order_id: newOrder.id, ...item}, { stripUnknown: true });
                 if (itemError) throw new Error(itemError.message);
                 const newOrderItem = await orderRepo.createOderItem(
                     {
@@ -101,7 +101,6 @@ module.exports.createOrder = async (data, userId) => {
         return dataOrder;
     } catch (err) {
         await transaction.rollback();
-        // console.log("orderService checkOutDer err ")
         throw err;
     }
 }
