@@ -23,6 +23,8 @@ module.exports.getOrder = async (orderId, userId) => {
 module.exports.createOrder = async (data, userId) => {
     const transaction = await sequelize.transaction();
     try {
+        console.log("Create order service data:", data);
+
         const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
         if (error) throw new Error('Đơn hàng không hợp lệ');
 
