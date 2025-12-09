@@ -166,7 +166,6 @@ describe('orderService createOrder - Whitebox Tests', () => {
                 merchant_id: mockMerchantId,
                 total_amount: 200000,
                 method: "MOMO",
-                created_at: expect.any(Date),
             }, "order_exchange", "order.payment.process");
         expect(result).toEqual({ id: mockNewOrderId, ...mockOrder });
     });
@@ -192,7 +191,6 @@ describe('orderService createOrder - Whitebox Tests', () => {
                 merchant_id: mockMerchantId,
                 total_amount: 200000,
                 method: "MOMO",
-                created_at: expect.any(Date),
             }, "order_exchange", "order.payment.process");
         expect(result).toEqual(mockExistingOrder);
     });

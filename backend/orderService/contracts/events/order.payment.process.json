@@ -8,8 +8,7 @@
       "user_id": { "type": "string", "minLength": 1 },
       "merchant_id": { "type": "string", "minLength": 1 },
       "total_amount": { "type": "number", "minimum": 0 },
-      "method": { "type": "string", "enum": ["MOMO", "COD"] },
-      "created_at": { "type": "string", "format": "date-time" }
+      "method": { "type": "string", "enum": ["MOMO", "COD"] }
     },
     "required": ["order_id", "user_id", "merchant_id", "total_amount", "method"],
     "additionalProperties": false

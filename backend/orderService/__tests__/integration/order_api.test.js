@@ -28,6 +28,7 @@ jest.mock('../../src/rabbitMQ/rabbitFunction', () => ({
 }));
 
 const merchantClient = require('../../src/grpc/merchantClient');
+const { or } = require('../../src/validations/orderValidation');
 
 describe('Order API Integration Tests', () => {
     let mockUserId;
@@ -375,7 +376,35 @@ describe('Order API Integration Tests', () => {
     // ==================== CẬP NHẬT ĐƠN HÀNG =====================
     describe('POST /updateOrder/:id', () => {
         let createdOrderId;
-
+        const validOrderPayload = {
+            user_id: "5324c950-d209-44b7-9e1b-2c3d859a17af",    
+            merchant_id: "fb325480-5b1c-4c3b-a044-2fcac7ebce02",  
+            full_name: "Nguyễn Văn A",
+            phone: "0909111222",
+            delivery_address: "123 Đường Láng, Hà Nội",
+            delivery_fee: 15000,
+            note: "Giao nhanh giúp mình",
+            method: "MOMO",
+            total_amount: 215000,
+            order_items: [
+                {
+                    menu_item_id: "6434ea82-1629-4178-8d67-a0ac8e9039e9", 
+                    quantity: 2,
+                    price: 80000,
+                    note: "Không hành",
+                    options: [
+                        { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+                    ]
+                },
+                {
+                    menu_item_id: "31d17dbf-5ba4-4c82-b3a8-e3ef1eb8c467", 
+                    quantity: 1,
+                    price: 20000,
+                    note: "",
+                    options: []
+                }
+            ]
+        };
         beforeEach(async () => {
             middleware.authenticate.mockImplementation((req, res, next) => {
                 req.user = {
@@ -393,26 +422,7 @@ describe('Order API Integration Tests', () => {
             const createRes = await request(server)
                 .post('/checkOutOrder')
                 .set('authorization', validToken)
-                .send({
-                    user_id: "5324c950-d209-44b7-9e1b-2c3d859a17af",
-                    merchant_id: "fb325480-5b1c-4c3b-a044-2fcac7ebce02",
-                    full_name: "Nguyễn Văn A",
-                    phone: "0909111222",
-                    delivery_address: "123 Đường Láng, Hà Nội",
-                    delivery_fee: 15000,
-                    note: "Giao nhanh",
-                    method: "MOMO",
-                    total_amount: 215000,
-                    order_items: [
-                        {
-                            menu_item_id: "6434ea82-1629-4178-8d67-a0ac8e9039e9",
-                            quantity: 2,
-                            price: 80000,
-                            note: "Không hành",
-                            options: [{ option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }]
-                        }
-                    ]
-                });
+                .send(validOrderPayload, mockUserId);
 
             createdOrderId = createRes.body.order_id;
         });
@@ -428,7 +438,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(200);
@@ -445,7 +456,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             expect(res.statusCode).toBe(400);
@@ -459,7 +471,8 @@ describe('Order API Integration Tests', () => {
                 .send({
                     data: {
                         status: "confirmed"
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             expect(res.statusCode).toBe(400);
@@ -477,7 +490,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(500);
@@ -496,7 +510,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(200);
@@ -515,7 +530,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(500);
@@ -534,7 +550,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(200);
@@ -553,7 +570,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(500);
@@ -573,7 +591,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(200);
@@ -593,7 +612,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             // expect(res.statusCode).toBe(500);
@@ -608,7 +628,8 @@ describe('Order API Integration Tests', () => {
                     data: {
                         status: "confirmed"
                     },
-                    location: "invalid location string"
+                    location: "invalid location string",
+                    orderId: createdOrderId
                 });
 
             expect(res.statusCode).toBe(500);
@@ -629,7 +650,8 @@ describe('Order API Integration Tests', () => {
                     location: {
                         lat: 21.0285,
                         lng: 105.8542
-                    }
+                    },
+                    orderId: createdOrderId
                 });
 
             expect(res.statusCode).toBe(401);
