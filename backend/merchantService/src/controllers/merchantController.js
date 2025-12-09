@@ -47,7 +47,6 @@ module.exports.getMerchant = async (req, res) => {
 
 module.exports.getMenuNoneCategory = async (req, res) => {
   try {
-    console.log("Bắt đầu api");
     const { id } = req.params;
 
     const menuItems = await merchantService.getMenuNoneCategory(id);
@@ -73,9 +72,6 @@ module.exports.getMenuClient = async (req, res) => {
         {
           model: MenuItem,
           as: "menu_items",
-          // where: {
-          //   merchant_id: id  // BẮT BUỘC THÊM DÒNG NÀY
-          // },
         }
       ]
     });
@@ -98,7 +94,10 @@ module.exports.createMenuItem = async (req, res) => {
     };
 
     const menu = await merchantService.createMenuItem(newMenu);
-    res.status(201).json({ message: "MenuItem created", menu });
+    res.status(201).json({ 
+      message: "Tạo món ăn thành công", 
+      menu 
+    });
  
 
   } catch (err) {
@@ -115,7 +114,7 @@ module.exports.updateMenuItem = async (req, res) => {
       ...newItem
     };
     const menu = await merchantService.updateMenuItem(id, up);
-    res.json({ message: "MenuItem updated", it: menu });
+    res.json({ message: "Cập nhật món ăn thành công", it: menu });
   } catch (err) {
     console.log("merchantController updateMenuItem error", err);
     res.status(500).json({ error: err.message });
@@ -292,7 +291,7 @@ module.exports.updateMenuItemOption = async (req, res) => {
 
 module.exports.deleteMenuItemOption = async (req, res) => {
   try {
-    const { menuItemId, optionId } = req.body; // ✅ nhận cặp menuItemId + optionId
+    const { menuItemId, optionId } = req.body;
     const deleted = await merchantService.deleteMenuItemOption({ menuItemId, optionId });
     res.json({ message: "MenuItemOption deleted", opi: deleted });
   } catch (err) {

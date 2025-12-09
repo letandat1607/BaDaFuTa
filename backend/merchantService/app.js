@@ -47,15 +47,6 @@ const start = async () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/profile", (req, res) => {
-    res.json({
-        id: 1,
-        name: "Nguyen Van A",
-        role: "User Service"
-    });
-    // console.log("AAAAAAAAAAAAAAAAAAAAAa")
-});
-
 // getAllMerchant,
 // getMenuMerchant, 
 // getMenuClient, 
@@ -76,25 +67,25 @@ app.post("/getMenuWithOption/:id", getMenuItemWithOption)
 app.get("/getMenuItemOption/:id", getMenuItemOption);
 app.get("/getMenuNoneItemOption/:id", getMenuNoneItemOption);
 
-app.post("/createCategory/", createCategory);
-app.post("/deleteCategory/:id", deleteCategory);
-app.post("/updateCategory/:id", updateCategory);
+app.post("/createCategory/", authenticate, createCategory);
+app.post("/deleteCategory/:id", authenticate, deleteCategory);
+app.post("/updateCategory/:id", authenticate, updateCategory);
 
-app.post("/createMenuItem", createMenuItem);
-app.post("/updateMenuItem/:id", updateMenuItem);
-app.post("/deleteMenuItem/:id", deleteMenuItem);
+app.post("/createMenuItem", authenticate, createMenuItem);
+app.post("/updateMenuItem/:id", authenticate, updateMenuItem);
+app.post("/deleteMenuItem/:id", authenticate, deleteMenuItem);
 
-app.post("/deleteOption/:id", deleteOption);
-app.post("/updateOption/:id", updateOption);
-app.post("/createOption/", createOption);
+app.post("/deleteOption/:id", authenticate, deleteOption);
+app.post("/updateOption/:id", authenticate, updateOption);
+app.post("/createOption/", authenticate, createOption);
 
-app.post("/updateOptionItem/:id", updateOptionItem);
-app.post("/createOptionItem/", createOptionItem);
+app.post("/updateOptionItem/:id", authenticate, updateOptionItem);
+app.post("/createOptionItem/", authenticate, createOptionItem);
 app.post("/deleteOptionItem/:id", deleteOptionItem);
 
-app.post("/updateMenuItemOption/", updateMenuItemOption);
-app.post("/createMenuItemOption/", createMenuItemOption);
-app.delete("/deleteMenuItemOption/", deleteMenuItemOption);
+app.post("/updateMenuItemOption/", authenticate, updateMenuItemOption);
+app.post("/createMenuItemOption/", authenticate, createMenuItemOption);
+app.delete("/deleteMenuItemOption/", authenticate, deleteMenuItemOption);
 
 
 app.listen(PORT, async () => {

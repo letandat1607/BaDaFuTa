@@ -5,8 +5,9 @@ const { v4 } = require("uuid");
 const orderRepo = require('../repositories/orderRepository');
 const { publishMsg } = require('../rabbitMQ/rabbitFunction');
 const { validateOrder } = require('../grpc/merchantClient');
-const orderSchema = require("../validations/orderValidation");
+const {orderSchema, orderUpdateSchema} = require("../validations/orderValidation");
 const orderItemValidation = require("../validations/orderItemValidation");
+const { isObject } = require("util");
 
 module.exports.getUserOrders = async (userId) => {
     const orders = await orderRepo.getUserOrders(userId);
@@ -107,12 +108,12 @@ module.exports.createOrder = async (data, userId) => {
     }
 }
 
-module.exports.updateOrderStatusPayment = async (orderId, statusPayment) => {
-    const orderExists = await orderRepo.updateField(orderId, { status_payment: statusPayment });
-    if (!orderExists) throw new Error('Không tìm thấy đơn hàng');
+// module.exports.updateOrderStatusPayment = async (orderId, statusPayment) => {
+//     const orderExists = await orderRepo.updateField(orderId, { status_payment: statusPayment });
+//     if (!orderExists) throw new Error('Không tìm thấy đơn hàng');
 
-    return orderExists;
-}
+//     return orderExists;
+// }
 
 module.exports.publishOrderMerchant = async (orderId) => {
     const order = await orderRepo.getOneOrder(orderId);
@@ -124,12 +125,12 @@ module.exports.publishOrderMerchant = async (orderId) => {
 }
 
 
-module.exports.updateOrderStatus = async (orderId, status) => {
-    const order = await orderRepo.updateField(orderId, { status: status });
-    if (!order) throw new Error('Không tìm thấy đơn hàng');
+// module.exports.updateOrderStatus = async (orderId, status) => {
+//     const order = await orderRepo.updateField(orderId, { status: status });
+//     if (!order) throw new Error('Không tìm thấy đơn hàng');
 
-    return order;
-}
+//     return order;
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 module.exports.getAllOrderMerchant = async (merchant_id) => {
@@ -140,14 +141,22 @@ module.exports.getAllOrderMerchant = async (merchant_id) => {
 };
 
 module.exports.updateOrder = async (orderId, data, location) => {
-    console.log("updateOrder service:", { orderId, data });
-    const order = await orderRepo.updateField(orderId, data);
+    const { value, error } = orderUpdateSchema.validate(data, { stripUnknown: true });
+    if (error || !location.isObject()) throw new Error("Dữ liệu cập nhật đơn hàng không hợp lệ");
+
+    const order = await orderRepo.updateField(orderId, value);
     if (!order) throw new Error('Không tìm thấy đơn hàng');
 
     if (data.status === "delivering") {
+        if(!data.drone_id) {
+            throw new Error("Thiếu dữ liệu khi giao hàng đơn hàng");
+        }
         await publishMsg({ location, order, droneId: data.drone_id }, "order_exchange", "order.status.updated");
         await publishMsg({ droneId: data.drone_id, status: "DELIVERING", orderId }, "order_exchange", "order.drone.delivery_status");
     } else if (data.status === "complete") {
+        if(!data.drone_id) {
+            throw new Error("Thiếu dữ liệu khi hoàn thành đơn hàng");
+        }
         await publishMsg({ droneId: data.drone_id || null, status: "READY", orderId }, "order_exchange", "order.drone.delivery_status");
         await publishMsg(order, "order_exchange", "order.status.updated");
     } else {

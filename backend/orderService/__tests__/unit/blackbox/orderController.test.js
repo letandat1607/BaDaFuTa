@@ -12,6 +12,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/checkOutOrder', authenticate, orderController.checkOutOrder);
+app.post('/updateOrder', authenticate, orderController.updateOrder);
 
 describe('Order Controller Black Box Tests - POST /checkOutOrder', () => {
 
@@ -358,5 +359,189 @@ describe('Order Controller Black Box Tests - POST /checkOutOrder', () => {
             expect(res.statusCode).toBe(500);
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
         });
+    });
+});
+
+//////////////////////////////////////////////////
+
+describe("Order Controller Black Box Tests - POST /updateOrder", () => {
+    const mockUpdatedOrder = {
+        id: "order-123e4567-e89b-12d3-a456-426614174000",
+        status: "delivering",
+        status_payment: "paid",
+        total_amount: 175000,
+        full_name: "Nguyễn Văn A",
+        phone: "0909111222",
+        delivery_address: "123 Đường Láng",
+        location: { lat: 10.7769, lng: 106.7009 },
+        updated_at: new Date().toISOString()
+      };
+
+    const validToken = "valid-jwt-token-mock";
+
+    const validPayload = {
+        orderId: "order-123e4567-e89b-12d3-a456-426614174000",
+        data: { status: "preparing" },
+        location: { lat: 10.7769, lng: 106.7009 }
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+
+        authenticate.mockImplementation((req, res, next) => {
+            req.user = { id: "merchant-123", role: "merchant" };
+            next();
+        });
+    });
+
+    it('UpdateOrder-001_EP - Cập nhật trạng thái đơn hàng thành công', async () => {
+        require('../../../src/services/orderService').updateOrder.mockResolvedValue(mockUpdatedOrder);
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(validPayload);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.message).toBe("Cập nhật trạng thái đơn hàng thành công");
+        expect(res.body.order).toEqual(mockUpdatedOrder);
+    });
+
+    it('UpdateOrder-002_EP - Thiếu orderId -> lỗi 400', async () => {
+        const payload = { ...validPayload, orderId: undefined };
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(payload);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toBe("Dữ liệu không hợp lệ");
+    });
+
+    it('UpdateOrder-003_EP - Thiếu data -> lỗi 400', async () => {
+        const payload = { ...validPayload, data: undefined };
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(payload);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toBe("Dữ liệu không hợp lệ");
+    });
+
+    it('UpdateOrder-004_EP - Thiếu location -> lỗi 400', async () => {
+        const payload = { ...validPayload, location: undefined };
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(payload);
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toBe("Dữ liệu không hợp lệ");
+    });
+
+    it('UpdateOrder-005_EP - orderId không tồn tại -> lỗi 500 từ service', async () => {
+        require('../../../src/services/orderService').updateOrder.mockRejectedValue(
+            new Error("Không tìm thấy đơn hàng")
+        );
+
+        const payload = { ...validPayload, orderId: "fake-order-999" };
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(payload);
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.error).toBe("Không tìm thấy đơn hàng");
+    });
+
+    it('UpdateOrder-006_EP - Người dùng chưa đăng nhập -> lỗi 404', async () => {
+        authenticate.mockImplementation((req, res) => {
+            return res.status(404).json({ error: "Cần đăng nhập người dùng" });
+        });
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .send(validPayload);
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body.error).toBe("Cần đăng nhập người dùng");
+    });
+
+    it('DT-001_DT & BVA - Thiếu cả 3 trường → vẫn trả 400 đúng', async () => {
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send({});
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toBe("Dữ liệu không hợp lệ");
+    });
+
+    it('BVA-001_BVA - orderId sai định dạng UUID', async () => {
+        require('../../../src/services/orderService').updateOrder.mockRejectedValue(
+            new Error("Dữ liệu cập nhật không hợp lệ")
+        );
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send({ ...validPayload, orderId: "abc123" });
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.error).toBe("Dữ liệu cập nhật không hợp lệ");
+    });
+
+    it('EG-001_EG - Body null', async () => {
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(null);
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.error).toBe("Cannot destructure property 'data' of 'req.body' as it is undefined.");
+    });
+
+    it('EG-002_EG - Gửi JSON sai cú pháp -> lỗi 400', async () => {
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .set('Content-Type', 'application/json')
+            .send('{"orderId": "123", "data": {');
+
+        expect(res.statusCode).toBe(400);
+    });
+
+    it('EG-003_EG - location không phải object -> lỗi 400', async () => {
+        const payload = { ...validPayload, location: "string-instead-of-object" };
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(payload);
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.error).toBe("Dữ liệu cập nhật không hợp lệ");
+    });
+
+    it('EG-004_EG - data có field lạ nhưng vẫn thành công (không ảnh hưởng)', async () => {
+        require('../../../src/services/orderService').updateOrder.mockResolvedValue(mockUpdatedOrder);
+
+        const payload = {
+            ...validPayload,
+            data: { status: "delivering", extra_field: "should-be-ignored" }
+        };
+
+        const res = await request(app)
+            .post('/updateOrder')
+            .set('authorization', `${validToken}`)
+            .send(payload);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.order.status).toBe("delivering");
     });
 });

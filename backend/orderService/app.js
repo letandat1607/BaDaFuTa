@@ -38,7 +38,7 @@ app.get("/getOrder/:id", authenticate, getOrder);
 
 app.get("/getAllOrderMerchant/:id", getAllOrderMerchant);
 
-app.post("/updateOrder/:id", updateOrder);
+app.post("/updateOrder/:id", authenticate, updateOrder);
 
 module.exports = app;
 

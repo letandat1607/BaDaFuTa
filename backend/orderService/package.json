@@ -7,6 +7,9 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "jest --detectOpenHandles --forceExit",
+    "test:contract": "jest __tests__/contract",
+    "test:whitebox": "jest __tests__/unit/whitebox",
+    "test:blackbox": "jest __tests__/unit/blackbox",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --runInBand --detectOpenHandles --forceExit",
     "test:docker": "jest --coverage --runInBand --detectOpenHandles --forceExit"
@@ -53,6 +56,8 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",

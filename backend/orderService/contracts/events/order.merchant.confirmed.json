@@ -1,0 +1,16 @@
+{
+    "$id": "order.merchant.confirmed",
+    "title": "Order Confirmed Event",
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "user_id": { "type": "string" },
+      "merchant_id": { "type": "string" },
+      "status": { "type": "string" },
+      "status_payment": { "type": "string" },
+      "total_amount": { "type": "number" },
+      "order_items": { "type": "array" }
+    },
+    "required": ["id", "merchant_id", "status"],
+    "additionalProperties": true
+}

@@ -20,9 +20,6 @@ const Category = sequelize.define("Category", {
     tableName: "category",
     timestamps: false
 });
-// Category.sync({ alter: true }) // 👈 Tạo bảng nếu chưa có, cập nhật nếu có
-//   .then(() => console.log(" Table 'Category' synced successfully"))
-//   .catch(err => console.error(" Error syncing Category table:", err));
 
 Category.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
 Merchant.hasMany(Category, {foreignKey: "merchant_id"});

@@ -1,0 +1,17 @@
+{
+    "$id": "order.status.updated",
+    "title": "Order Status Updated",
+    "type": "object",
+    "properties": {
+      "order": { "type": "object" },
+      "location": {
+        "type": "object",
+        "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
+        }
+      },
+      "droneId": { "type": ["string", "null"] }
+    },
+    "required": ["order"]
+}
