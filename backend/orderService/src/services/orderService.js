@@ -97,7 +97,7 @@ module.exports.createOrder = async (data, userId) => {
             merchant_id: dataOrder.merchant_id,
             total_amount: dataOrder.total_amount,
             method: dataOrder.method,
-            created_at: new Date(),
+            // created_at: new Date(),
         };
 
         await publishMsg(payload, "order_exchange", "order.payment.process");

@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const orderSchema = Joi.object({
   // id: Joi.string().uuid().optional(),
-  merchant_id: Joi.string().uuid().optional(),
+  merchant_id: Joi.string().uuid().required(),
   user_id: Joi.string().uuid().required(),
   full_name: Joi.string().max(100).required(),
   note: Joi.string().allow(null, "").optional(),
