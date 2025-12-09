@@ -5,7 +5,8 @@ const { v4 } = require("uuid");
 const orderRepo = require('../repositories/orderRepository');
 const { publishMsg } = require('../rabbitMQ/rabbitFunction');
 const { validateOrder } = require('../grpc/merchantClient');
-const {orderSchema, orderUpdateSchema} = require("../validations/orderValidation");
+const orderSchema = require("../validations/orderValidation");
+const orderUpdateSchema = require("../validations/orderUpdateValidation");
 const orderItemValidation = require("../validations/orderItemValidation");
 
 module.exports.getUserOrders = async (userId) => {

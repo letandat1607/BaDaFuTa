@@ -119,7 +119,6 @@ describe('OrderService - Message Contract Tests (XANH 100%)', () => {
     }
   });
 
-  // BỎ COMMENT KHI BẠN CÓ FILE order.merchant.confirmed.json
   it('publishOrderMerchant → publish đúng contract order.merchant.confirmed', async () => {
     const mockOrder = {
       id: 'ord-999',
