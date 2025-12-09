@@ -7,7 +7,6 @@ const { publishMsg } = require('../rabbitMQ/rabbitFunction');
 const { validateOrder } = require('../grpc/merchantClient');
 const {orderSchema, orderUpdateSchema} = require("../validations/orderValidation");
 const orderItemValidation = require("../validations/orderItemValidation");
-const { isObject } = require("util");
 
 module.exports.getUserOrders = async (userId) => {
     const orders = await orderRepo.getUserOrders(userId);
@@ -142,7 +141,7 @@ module.exports.getAllOrderMerchant = async (merchant_id) => {
 
 module.exports.updateOrder = async (orderId, data, location) => {
     const { value, error } = orderUpdateSchema.validate(data, { stripUnknown: true });
-    if (error || !location.isObject()) throw new Error("Dữ liệu cập nhật đơn hàng không hợp lệ");
+    if (error || !(location && typeof location === 'object')) throw new Error("Dữ liệu cập nhật đơn hàng không hợp lệ");
 
     const order = await orderRepo.updateField(orderId, value);
     if (!order) throw new Error('Không tìm thấy đơn hàng');
