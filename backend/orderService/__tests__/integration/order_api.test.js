@@ -247,7 +247,7 @@ describe('Order API Integration Tests', () => {
 
         it('should fail when option_item_id does not exist', async () => {
             const payload = JSON.parse(JSON.stringify(validOrderPayload));
-            payload.order_items[0].options[0].option_item_id = "fcef3d18-4aec-4623-8ace-5a6c7ddf83ef";
+            payload.order_items[0].options[0].items[0].option_item_id = "fcef3d18-4aec-4623-8ace-5a6c7ddf83ef";
 
             merchantClient.validateOrder.mockRejectedValue(
                 new Error("Có món hoặc tùy chọn không hợp lệ")

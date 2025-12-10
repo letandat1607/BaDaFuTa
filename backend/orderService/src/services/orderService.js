@@ -33,8 +33,8 @@ module.exports.createOrder = async (data, userId) => {
     const transaction = await sequelize.transaction();
     try {
         const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
-        if (error || !data.order_items || !data.order_items.length > 0) throw new Error(error.message);
-        // if (error || !data.order_items || !data.order_items.length > 0) throw new Error("Đơn hàng không hợp lệ");
+        // if (error || !data.order_items || !data.order_items.length > 0) throw new Error(error.message);
+        if (error || !data.order_items || !data.order_items.length > 0) throw new Error("Đơn hàng không hợp lệ");
 
         // console.log("Validating order with merchant service:", data.order_items[0].options[0].items);
         const { server_total } = await validateOrder(data);
@@ -62,7 +62,7 @@ module.exports.createOrder = async (data, userId) => {
             for (const item of data.order_items) {
                 const { value: itemValue, error: itemError } = orderItemValidation.validate({order_id: newOrder.id, ...item}, { stripUnknown: true });
                 // if (itemError) throw new Error("Đơn hàng không hợp lệ");
-                if (itemError) throw new Error("Đơn hàng không hợp lệ:", itemError.message);
+                if (itemError) throw new Error("Đơn hàng không hợp lệ");
                 const newOrderItem = await orderRepo.createOderItem(
                     {
                         id: v4(),
