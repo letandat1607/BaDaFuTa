@@ -68,7 +68,13 @@ const validOrderInput = {
       quantity: 2,
       price: 80000,
       note: "Không hành",
-      options: [{ option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }]
+      options: [
+        {   
+            items: [
+                { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+            ]
+        }
+    ]
     },
     {
       menu_item_id: "31d17dbf-5ba4-4c82-b3a8-e3ef1eb8c467",
@@ -119,7 +125,7 @@ describe('OrderService - Message Contract Tests (XANH 100%)', () => {
     }
   });
 
-  it('publishOrderMerchant → publish đúng contract order.merchant.confirmed', async () => {
+  it('publishOrderMerchant -> publish đúng contract order.merchant.confirmed', async () => {
     const mockOrder = {
       id: 'ord-999',
       user_id: 'usr-001',
