@@ -30,7 +30,11 @@ describe('orderService createOrder - Whitebox Tests', () => {
         merchant_id: mockMerchantId,
         full_name: "John Doe",
         phone: "0901113334",
-        delivery_address: "123 ABC Street",
+        delivery_address: {
+            lat: 10.123456,
+            lng: 106.123456,
+            full_address: "123 ABC Street"
+        },
         delivery_fee: 5000,
         note: "Leave at door",
         method: "MOMO",

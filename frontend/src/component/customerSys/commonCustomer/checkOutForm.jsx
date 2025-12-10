@@ -170,7 +170,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     });
 
     socket.on("connect", () => console.log("Socket connected"));
-    socket.on("paymentQR", (data) => {
+    socket.on(`paymentQR_${orderId}`, (data) => {
       setQrUrl(data.payUrl);
       setOrderId(data.orderId);
       setPaymentStatus("waiting");
@@ -228,14 +228,13 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
     try {
       console.log(payload);
-      
-      const res = await fetch(`http://localhost:3000/api/order/checkOutOrder`, {
+      const res = await fetch("http://localhost:3000/api/order/checkOutOrder", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          authorization: `${token}`,
+          authorization: token,
         },
-        body: JSON.stringify({payload, order_id: orderId || null}),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
@@ -268,7 +267,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             required
             value={form.full_name}
             onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+            style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd" }}
           />
         </div>
 
@@ -279,7 +278,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             required
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+            style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd" }}
           />
         </div>
 
@@ -374,7 +373,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             placeholder="Bạn có thể chỉnh sửa địa chỉ chi tiết tại đây..."
             rows={3}
             required
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", marginTop: "8px" }}
+            style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd", marginTop: "8px" }}
           />
 
           {form.lat && (
@@ -391,7 +390,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             value={form.note}
             onChange={(e) => setForm({ ...form, note: e.target.value })}
             placeholder="Ví dụ: Để trước cổng, gọi khi đến..."
-            style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
+            style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd" }}
           />
         </div>
 

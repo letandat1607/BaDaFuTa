@@ -27,7 +27,7 @@ class GatewayService {
       return;
     }
 
-    this.io.to(`User_${userId}`).emit('paymentQR', {
+    this.io.to(`User_${userId}`).emit(`paymentQR_${orderId}`, {
       orderId,
       payUrl,
     });
@@ -43,8 +43,8 @@ class GatewayService {
     }else{
       if(data.status === 'complete'){
         this.io.to(`merchant_${data.merchant_id}`).emit('newOrder', data);
-        console.log(`Pushed order với id: ${data.id} → merchant_${data.merchant_id}`);
-        // console.log(`Pushed order ${order.id} → merchant_${order.merchant_id}`);
+        console.log(`Pushed order với id: ${data.id} -> merchant_${data.merchant_id}`);
+        // console.log(`Pushed order ${order.id} -> merchant_${order.merchant_id}`);
       }
       this.io.to(`User_${data.user_id}`).emit('orderUpdated', { orderId: data.id, status: data.status, updated_at: data.updated_at});
       console.log(`pushed to customer success`)

@@ -8,7 +8,11 @@ const orderSchema = Joi.object({
   note: Joi.string().allow(null, "").optional(),
   phone: Joi.string().max(20).required(),
   method: Joi.string().required(),
-  delivery_address: Joi.string().required(),
+  delivery_address: Joi.object({
+    lat: Joi.number().required(),
+    lng: Joi.number().required(),
+    full_address: Joi.string().required()
+  }).required(),
   delivery_fee: Joi.number().integer().min(0).required(),
   total_amount: Joi.number().integer().min(0).required(),
   status: Joi.string().required(),

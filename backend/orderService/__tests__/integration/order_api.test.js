@@ -73,7 +73,11 @@ describe('Order API Integration Tests', () => {
             merchant_id: "fb325480-5b1c-4c3b-a044-2fcac7ebce02",  
             full_name: "Nguyễn Văn A",
             phone: "0909111222",
-            delivery_address: "123 Đường Láng, Hà Nội",
+            delivery_address: {
+                lat: 10.123456,
+                lng: 106.123456,
+                full_address: "123 ABC Street"
+            },
             delivery_fee: 15000,
             note: "Giao nhanh giúp mình",
             method: "MOMO",
@@ -381,7 +385,11 @@ describe('Order API Integration Tests', () => {
             merchant_id: "fb325480-5b1c-4c3b-a044-2fcac7ebce02",  
             full_name: "Nguyễn Văn A",
             phone: "0909111222",
-            delivery_address: "123 Đường Láng, Hà Nội",
+            delivery_address: {
+                lat: 10.123456,
+                lng: 106.123456,
+                full_address: "123 ABC Street"
+            },
             delivery_fee: 15000,
             note: "Giao nhanh giúp mình",
             method: "MOMO",

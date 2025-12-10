@@ -154,7 +154,7 @@ export default function CustomerLogin() {
                                     onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                                 />
                             </div>
-\
+                            
                             <button
                                 type="submit"
                                 style={{

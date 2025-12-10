@@ -1,7 +1,6 @@
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../../../.env") });
 const orderService = require('../services/orderService');
-const { error } = require("console");
 
 module.exports.getOrder = async (req, res) =>{
   try{
@@ -57,7 +56,7 @@ module.exports.getUserOrders = async (req, res) => {
 
 module.exports.checkOutOrder = async (req, res) => {
   try {
-    // console.log(req.body);
+    console.log(req.body);
     const user = req.user;
     if(!user) return res.status(404).json({error: "Cần đăng nhập người dùng"});
  
@@ -69,6 +68,7 @@ module.exports.checkOutOrder = async (req, res) => {
       order_id: newOrder.id,
     });
   } catch (err) {
+    console.log("orderController checkOutOrder error", err);
     return res.status(500).json({
       error: err.message,
     });
