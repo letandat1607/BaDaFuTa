@@ -61,7 +61,7 @@ module.exports.createOrder = async (data, userId) => {
             );
             for (const item of data.order_items) {
                 const { value: itemValue, error: itemError } = orderItemValidation.validate({order_id: newOrder.id, ...item}, { stripUnknown: true });
-                if (itemError) throw new Error("Đơn hàng không hợp lllệ");
+                if (itemError) throw new Error("Đơn hàng không hợp lệ");
                 const newOrderItem = await orderRepo.createOderItem(
                     {
                         id: v4(),

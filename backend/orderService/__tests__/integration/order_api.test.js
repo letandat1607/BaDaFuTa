@@ -89,7 +89,11 @@ describe('Order API Integration Tests', () => {
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+                        {   
+                            items: [
+                                { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+                            ]
+                        }
                     ]
                 },
                 {
@@ -401,7 +405,11 @@ describe('Order API Integration Tests', () => {
                     price: 80000,
                     note: "Không hành",
                     options: [
-                        { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+                        {   
+                            items: [
+                                { option_item_id: "fcef3d18-4aec-4623-8ace-5a6c7ddf82ef" }
+                            ]
+                        }
                     ]
                 },
                 {
