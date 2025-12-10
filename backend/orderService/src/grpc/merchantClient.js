@@ -29,7 +29,9 @@ function validateOrder(data) {
         menu_item_id: item.menu_item_id,
         quantity: item.quantity,
         client_price: item.price,
-        options: (item.options || [])
+        options: (item.options.map(opt => ({
+          items: (opt.items || [])
+        })) || [])
       }))
     };
 

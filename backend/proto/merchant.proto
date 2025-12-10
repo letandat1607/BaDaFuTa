@@ -7,8 +7,12 @@ message Status {
   string message = 2;
 }
 
-message SelectedOption {
+message OrderItemOption {
   string option_item_id = 1;
+}
+
+message SelectedOption {
+  repeated OrderItemOption items = 1;
 }
 
 message ValidateOrderRequest {

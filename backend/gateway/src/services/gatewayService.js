@@ -27,7 +27,9 @@ class GatewayService {
       return;
     }
 
-    this.io.to(`User_${userId}`).emit(`paymentQR_${orderId}`, {
+    const emitName = `paymentQR`;
+
+    this.io.to(`User_${userId}`).emit(emitName, {
       orderId,
       payUrl,
     });

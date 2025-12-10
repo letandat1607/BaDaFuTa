@@ -30,8 +30,8 @@ export default function MerchantMenu() {
   useEffect(() => {
     const updateCartCount = () => {
       const allCart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const count = allCart.filter(item => item.merchant_id === id).length;
-      setCartCount(count);
+      // const count = allCart.filter(item => item.merchant_id === id);
+      // setCartCount(count);
     };
 
     updateCartCount();

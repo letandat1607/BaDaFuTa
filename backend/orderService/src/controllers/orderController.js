@@ -23,14 +23,17 @@ module.exports.getOrder = async (req, res) =>{
 
 module.exports.getUserOrders = async (req, res) => {
   try {
+    console.log("orderController getUserOrders called");
     const user = req.user;
     if (!user) return res.status(400).json({ message: "Người dùng chưa đăng nhập" });
 
-    await orderService.getUserOrders(user.id);
+    const orders = await orderService.getUserOrders(user.id);
+    console.log("Orders fetched:", orders);
     return res.status(200).json({
       message: "Get orders success",
     });
   } catch (err) {
+    console.log("orderController getUserOrders error", err);
     return res.status(500).json({
       error: err.message,
     });
@@ -56,7 +59,7 @@ module.exports.getUserOrders = async (req, res) => {
 
 module.exports.checkOutOrder = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const user = req.user;
     if(!user) return res.status(404).json({error: "Cần đăng nhập người dùng"});
  

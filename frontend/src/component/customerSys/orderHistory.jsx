@@ -21,7 +21,7 @@ export default function OrderHistory() {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "authorization": `${token}`
+                        authorization: token,
                     }
                 });
                 if (!res.ok) throw new Error("Không thể lấy đơn hàng");

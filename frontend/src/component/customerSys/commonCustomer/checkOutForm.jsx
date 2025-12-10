@@ -89,7 +89,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const merchantCart = cart.filter((item) => item.merchant_id === merchantId);
-    setOrderId(merchantCart.orderId || "");
+    setOrderId(merchantCart.order_id || "");
     const getCurrentLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -163,14 +163,16 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
   useEffect(() => {
     if (!user?.id) return;
-
+    console.log("orderId:", orderId);
+    const emitName = `paymentQR_${orderId}`;
     socket = io("http://localhost:3000", {
       query: { userId: user.id },
       transports: ["websocket"],
     });
 
-    socket.on("connect", () => console.log("Socket connected"));
-    socket.on(`paymentQR_${orderId}`, (data) => {
+    socket.on("connect", () => console.log("Socket connected :", socket.id));
+    socket.on(`paymentQR`, (data) => {
+      console.log("Nhận QR Momo:", data);
       setQrUrl(data.payUrl);
       setOrderId(data.orderId);
       setPaymentStatus("waiting");
@@ -180,6 +182,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
         setPaymentStatus("success");
         setSuccess(true);
         const allCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        console.log("Giỏ hàng hiện tại sau khi thanh toán thành công:", allCart);
         const newCart = allCart.filter((item) => item.merchant_id !== merchantId);
         localStorage.setItem("cart", JSON.stringify(newCart));
       }
@@ -239,11 +242,14 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
       if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
       const result = await res.json();
-      setOrderId(result.orderId);
+      console.log("Kết quả tạo đơn hàng:", result.order_id);
+      setOrderId(result.order_id);
       let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      console.log("Giỏ hàng hiện tại:", cart);
       cart = cart.filter((item) => item.merchant_id !== merchantId);
       const newCart = {...cart, orderId: result.orderId};
-      localStorage.setItem("cart", JSON.stringify(newCart));
+      console.log("Cập nhật giỏ hàng sau khi tạo đơn:", newCart);
+      localStorage.setItem("cart", JSON.stringify([newCart]));
 
     } catch (err) {
       setError(err.message || "Lỗi hệ thống");

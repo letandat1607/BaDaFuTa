@@ -10,8 +10,16 @@ const orderUpdateSchema = require("../validations/orderUpdateValidation");
 const orderItemValidation = require("../validations/orderItemValidation");
 
 module.exports.getUserOrders = async (userId) => {
+    console.log("Fetching orders for user:", userId);
+    console.log("Calling orderRepo.getUserOrders with userId:", userId);
     const orders = await orderRepo.getUserOrders(userId);
-    return await publishMsg({ userId, orders }, "order_exchange", "order.merchant.send_all");
+    console.log("Orders fetched:", orders);
+    if(!orders || orders.length === 0) {
+        console.log("No orders found for user:", userId);
+        throw new Error("Không tìm thấy đơn hàng nào");
+    }
+    await publishMsg({ userId, orders }, "order_exchange", "order.merchant.send_all");
+    return orders;
 }
 
 module.exports.getOrder = async (orderId, userId) => {
@@ -24,12 +32,11 @@ module.exports.getOrder = async (orderId, userId) => {
 module.exports.createOrder = async (data, userId) => {
     const transaction = await sequelize.transaction();
     try {
-        // console.log("Create order service data:", data);
-
         const { value, error } = orderSchema.validate({status: "waiting", ...data}, {stripUnknown: true});
         // if (error || !data.order_items || !data.order_items.length > 0) throw new Error(error.message);
         if (error || !data.order_items || !data.order_items.length > 0) throw new Error("Đơn hàng không hợp lệ");
 
+        console.log("Validating order with merchant service:", data.order_items[0].options[0].items);
         const { server_total } = await validateOrder(data);
         console.log("server_total:", server_total, "client_total:", data.total_amount);
         if (Number(server_total) !== Number(data.total_amount)) {
@@ -52,10 +59,9 @@ module.exports.createOrder = async (data, userId) => {
                 },
                 transaction
             );
-
             for (const item of data.order_items) {
                 const { value: itemValue, error: itemError } = orderItemValidation.validate({order_id: newOrder.id, ...item}, { stripUnknown: true });
-                if (itemError) throw new Error("Đơn hàng không hợp lệ");
+                if (itemError) throw new Error("Đơn hàng không hợp lllệ");
                 const newOrderItem = await orderRepo.createOderItem(
                     {
                         id: v4(),
@@ -100,6 +106,7 @@ module.exports.createOrder = async (data, userId) => {
             method: dataOrder.method,
             // created_at: new Date(),
         };
+        console.log("Publishing order payment process:", payload);
 
         await publishMsg(payload, "order_exchange", "order.payment.process");
         return dataOrder;

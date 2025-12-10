@@ -47,48 +47,53 @@ async function ValidateOrder(call, callback) {
 
             serverTotal += Number(menuItem.price) * item.quantity;
             validPriceItem += Number(menuItem.price);
-
+            console.log("menu item option:", item.options);
             for (const opt of item.options) {
-                if(!opt.option_item_id) {
-                    return callback(null, {
-                        status: { success: false, message: 'Đơn hàng không hợp lệ' }
-                    });
+                if (opt.items && Array.isArray(opt.items)) {
+                    console.log("Validating option group", opt.items[0]);
+                    for (const optItem of opt.items) {
+                        if (!optItem.option_item_id) {
+                            return callback(null, {
+                                status: { success: false, message: 'Đơn hàng merchant không hợp lệ' }
+                            });
+                        }
+                        const optionItem = await OptionItem.findOne({
+                            where: {
+                                id: optItem.option_item_id,
+                                status: true
+                            },
+                            include: [{
+                                model: Option,
+                                as: 'options',
+                                where: { merchant_id },
+                                required: true,
+                                attributes: ['id'],
+                                include: [{
+                                    model: MenuItem,
+                                    as: 'option_menu_items',
+                                    where: { id: item.menu_item_id },
+                                    through: { attributes: [] },
+                                    required: true
+                                }]
+                            }],
+                            attributes: ['id', 'price']
+                        });
+                        if (!optionItem) {
+                            invalidOptions.push(optItem.option_item_id);
+                            continue;
+                        }
+                        console.log(`Option item price: ${optionItem.price} x quantity: ${item.quantity}`);
+                        serverTotal += Number(optionItem.price) * item.quantity;
+                        validPriceItem += Number(optionItem.price);
+                    }
                 }
-                const optionItem = await OptionItem.findOne({
-                    where: {
-                      id: opt.option_item_id,
-                      status: true
-                    },
-                    include: [{
-                      model: Option,
-                      as: 'options',
-                      where: { merchant_id },
-                      required: true,
-                      attributes: ['id'],
-                      include: [{
-                        model: MenuItem,
-                        as: 'option_menu_items',
-                        where: { id: item.menu_item_id },
-                        through: { attributes: [] },
-                        required: true
-                      }]
-                    }],
-                    attributes: ['id', 'price']
-                  });
-                if (!optionItem) {
-                    invalidOptions.push(opt.option_item_id);
-                    continue;
-                }
-
-                serverTotal += Number(optionItem.price) * item.quantity;
-                validPriceItem += Number(optionItem.price);
-
             }
+            console.log(`Validating item ${item.menu_item_id}: client price ${item.client_price}, valid price ${validPriceItem}`);
             if (Number(item.client_price) !== validPriceItem) {
-            return callback(null, {
-                status: { success: false, message: 'Giá món không hợp lệ' }
-            });
-        }
+                return callback(null, {
+                    status: { success: false, message: 'Giá món không hợp lệ' }
+                });
+            }
         }
 
         if (invalidMenuItems.length > 0 || invalidOptions.length > 0) {
