@@ -208,6 +208,6 @@ services:
   ngrok:
     profiles: ["production"]
 
-  networks:
-    app-network:
-      driver: bridge
+networks:
+  app-network:
+    driver: bridge
