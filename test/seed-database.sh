@@ -11,8 +11,20 @@ POSTGRES_DB=${POSTGRES_DB:-testdb}
 export PGPASSWORD=$POSTGRES_PASSWORD
 
 echo "Waiting for PostgreSQL..."
-until pg_isready -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER; do
-  echo "Waiting for postgres..."
+until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q' 2>/dev/null; do
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  
+  if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+    echo "Timeout waiting for PostgreSQL after ${MAX_RETRIES} attempts"
+    echo "Debug info:"
+    echo "  Host: $POSTGRES_HOST"
+    echo "  Port: $POSTGRES_PORT"
+    echo "  User: $POSTGRES_USER"
+    echo "  Database: $POSTGRES_DB"
+    exit 1
+  fi
+  
+  echo "Waiting for postgres... (attempt $RETRY_COUNT/$MAX_RETRIES)"
   sleep 2
 done
 
