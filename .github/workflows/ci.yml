@@ -177,7 +177,8 @@ jobs:
       - name: Start E2E environment
         run: |
           echo "Starting all services for E2E..."
-          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml up -d
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml up -d --build
+          echo "All services completed"
 
       - name: Wait for services to be healthy
         run: |
