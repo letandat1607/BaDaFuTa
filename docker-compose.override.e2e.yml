@@ -1,0 +1,186 @@
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d testdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./test/seeds:/seeds:ro
+
+  rabbitMQ:
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db_seeder:
+    image: postgres:15-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    volumes:
+      - ./test/seeds:/seeds:ro
+      - ./test/seed-database.sh:/seed-database.sh:ro
+    command: sh /seed-database.sh
+
+  user_service:
+    command: npm start
+    environment:
+      - NODE_ENV=e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=user_e2e
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - PORT=3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitMQ:
+        condition: service_healthy
+      db_seeder:
+        condition: service_completed_successfully
+
+  merchant_service:
+    command: npm start
+    environment:
+      - NODE_ENV=e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=merchant_e2e
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - PORT=3002
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitMQ:
+        condition: service_healthy
+      db_seeder:
+        condition: service_completed_successfully
+
+  order_service:
+    command: npm start
+    environment:
+      - NODE_ENV=e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=order_e2e
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - PORT=3003
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitMQ:
+        condition: service_healthy
+      db_seeder:
+        condition: service_completed_successfully
+
+  payment_service:
+    command: npm start
+    environment:
+      - NODE_ENV=e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=payment_e2e
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - PORT=3004
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitMQ:
+        condition: service_healthy
+      db_seeder:
+        condition: service_completed_successfully
+
+  drone_delivery_service:
+    command: npm start
+    environment:
+      - NODE_ENV=e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=drone_e2e
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - PORT=3005
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitMQ:
+        condition: service_healthy
+      db_seeder:
+        condition: service_completed_successfully
+
+  gateway:
+    command: npm start
+    environment:
+      - NODE_ENV=e2e
+      - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
+      - USER_SERVICE_URL=http://user_service:3001
+      - MERCHANT_SERVICE_URL=http://merchant_service:3002
+      - ORDER_SERVICE_URL=http://order_service:3003
+      - PAYMENT_SERVICE_URL=http://payment_service:3004
+      - DRONE_DELIVERY_SERVICE_URL=http://drone_delivery_service:3005
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      rabbitMQ:
+        condition: service_healthy
+      user_service:
+        condition: service_started
+      merchant_service:
+        condition: service_started
+      order_service:
+        condition: service_started
+      payment_service:
+        condition: service_started
+      drone_delivery_service:
+        condition: service_started
+
+  frontend:
+    command: npm run dev -- --host
+    environment:
+      - NODE_ENV=e2e
+      - VITE_API_URL=http://gateway:3000
+    ports:
+      - "5173:5173"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      gateway:
+        condition: service_healthy
+
+  # Cypress runner
+  cypress:
+    image: cypress/included:13.6.2
+    depends_on:
+      frontend:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    environment:
+      - CYPRESS_baseUrl=http://frontend:5173
+      - CYPRESS_API_URL=http://gateway:3000
+    working_dir: /e2e
+    volumes:
+      - ./test/cypress:/e2e/cypress:ro
+      - ./test/cypress.config.js:/e2e/cypress.config.js:ro
+      - ./test/cypress-results:/e2e/results
+      - ./test/cypress/screenshots:/e2e/cypress/screenshots
+      - ./test/cypress/videos:/e2e/cypress/videos
+    # Không set command ở đây - sẽ chạy từ GitHub Actions
+
+  ngrok:
+    profiles: ["production"]

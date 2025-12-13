@@ -156,6 +156,91 @@ jobs:
           docker compose --profile frontend-test down -v --remove-orphans
           rm -f .env
 
+  test_e2e:
+    name: E2E Tests with Cypress
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [test_backend, test_frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Make seed script executable
+        run: |
+          chmod +x test/seed-database.sh
+
+      - name: Start E2E environment
+        run: |
+          echo "Starting all services for E2E..."
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for services..."
+          
+          # Wait for gateway
+          timeout 120 bash -c '
+            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T gateway wget --spider -q http://localhost:3000/health 2>/dev/null; do
+              echo "Waiting for gateway..."
+              sleep 3
+            done
+          '
+          
+          # Wait for frontend
+          timeout 120 bash -c '
+            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T frontend wget --spider -q http://localhost:5173 2>/dev/null; do
+              echo "Waiting for frontend..."
+              sleep 3
+            done
+          '
+          
+          echo "All services are ready!"
+
+      - name: Show service status
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml ps
+
+      - name: Run Cypress E2E tests
+        run: |
+          echo "Running Cypress tests..."
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml run --rm cypress
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Gateway Logs ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs gateway --tail=100
+          echo ""
+          echo "=== Frontend Logs ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs frontend --tail=100
+
+      - name: Upload Cypress screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ github.run_number }}
+          path: test/cypress/screenshots/
+          retention-days: 7
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-${{ github.run_number }}
+          path: test/cypress/videos/
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml down -v --remove-orphans
+          rm -f .env
+
   test-summary:
     name: Generate Test Summary
     needs: [test_backend, test_frontend]
