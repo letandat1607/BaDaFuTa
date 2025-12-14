@@ -156,7 +156,7 @@ jobs:
           docker compose --profile frontend-test down -v --remove-orphans
           rm -f .env
 
-    test_e2e:
+  test_e2e:
     name: E2E Tests with Cypress
     runs-on: ubuntu-latest
     timeout-minutes: 30
