@@ -5,14 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    fs: {
-      strict: false  // Disable để bypass 403, chỉ dùng cho dev/CI
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    watch: {
+      usePolling: true
     }
   },
-  allowedHosts: [
-    'frontend',
-    'localhost',
-    '127.0.0.1',
-    '.localhost'
-  ],
 })
