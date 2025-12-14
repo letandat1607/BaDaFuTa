@@ -173,12 +173,12 @@ services:
       - VITE_API_URL=http://gateway:3000
     ports:
       - "5173:5173"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 30s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:5173"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 30
+    #   start_period: 30s
     depends_on:
       gateway:
         condition: service_healthy
@@ -189,8 +189,8 @@ services:
   cypress:
     image: cypress/included:13.6.2
     depends_on:
-      frontend:
-        condition: service_healthy
+      # frontend:
+      #   condition: service_healthy
       gateway:
         condition: service_healthy
     environment:
