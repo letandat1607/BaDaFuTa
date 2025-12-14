@@ -8,8 +8,10 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
-    watch: {
-      usePolling: true
-    }
+    hmr: {
+      host: 'localhost',
+      clientPort: 5173
+    },
+    allowedHosts: true  // or use array: ['frontend', 'localhost', '.localhost']
   },
 })
