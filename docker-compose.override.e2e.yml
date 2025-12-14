@@ -167,18 +167,51 @@ services:
       - app-network
 
   frontend:
-    command: npm run dev -- --host 0.0.0.0
+    command: >
+      sh -c '
+        echo "Starting frontend..."
+        
+        # Tạo health file trước khi start
+        rm -f /tmp/healthy
+        
+        # Start Vite với output logging
+        echo "Starting Vite dev server..."
+        npm run dev -- --host 0.0.0.0 --port 5173 2>&1 &
+        VITE_PID=$!
+        
+        # Đợi Vite khởi động và tạo health file
+        for i in {1..60}; do
+          if curl -s http://localhost:5173 > /dev/null 2>&1; then
+            echo "Vite server is ready!"
+            touch /tmp/healthy
+            echo "Health file created at /tmp/healthy"
+            break
+          fi
+          
+          # Kiểm tra process còn sống không
+          if ! kill -0 $VITE_PID 2>/dev/null; then
+            echo "Vite process died, exiting..."
+            exit 1
+          fi
+          
+          echo "Waiting for Vite... ($i/60)"
+          sleep 1
+        done
+        
+        # Giữ container sống
+        wait $VITE_PID
+      '
     environment:
       - NODE_ENV=e2e
       - VITE_API_URL=http://gateway:3000
     ports:
       - "5173:5173"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
-      interval: 10s
+      test: ["CMD", "test", "-f", "/tmp/healthy"]
+      interval: 5s
       timeout: 5s
       retries: 30
-      start_period: 30s
+      start_period: 40s  # Tăng lên 40s cho Vite có thời gian compile
     depends_on:
       gateway:
         condition: service_healthy

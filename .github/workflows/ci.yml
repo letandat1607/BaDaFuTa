@@ -156,7 +156,7 @@ jobs:
           docker compose --profile frontend-test down -v --remove-orphans
           rm -f .env
 
-  test_e2e:
+    test_e2e:
     name: E2E Tests with Cypress
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -177,56 +177,81 @@ jobs:
       - name: Start E2E environment
         run: |
           echo "Starting all services for E2E..."
-          for i in {1..3}; do
-            echo "Attempt $i to start services..."
-            
-            docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml down -v --remove-orphans 2>/dev/null || true
-            
-            docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml up -d --build
-            sleep 30
-
-            if docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml ps frontend | grep -q "(healthy)"; then
-              echo "Frontend is healthy!"
-              break
-            elif [ $i -eq 3 ]; then
-              echo "Frontend failed to become healthy after 3 attempts"
-              docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs frontend
-              exit 1
-            else
-              echo "Frontend not healthy yet, retrying..."
-            fi
-          done
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml down -v --remove-orphans 2>/dev/null || true
+          
+          # Build và start tất cả services
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml up -d --build
+          
+          echo "Waiting for services to start..."
+          sleep 30
 
       - name: Wait for services to be healthy
         run: |
           echo "Waiting for services..."
           
-          # Wait for gateway
-          timeout 120 bash -c '
-            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T gateway wget --spider -q http://localhost:3000/health 2>/dev/null; do
-              echo "Waiting for gateway..."
-              sleep 3
-            done
-          '
+          # 1. Đợi gateway
+          echo "1. Waiting for gateway..."
+          for i in {1..30}; do
+            if docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T gateway \
+              curl -f http://localhost:3000/health > /dev/null 2>&1; then
+              echo "✓ Gateway is ready"
+              break
+            fi
+            
+            if [ $i -eq 30 ]; then
+              echo "❌ Gateway failed to start"
+              docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs gateway
+              exit 1
+            fi
+            
+            echo "   Waiting for gateway... ($i/30)"
+            sleep 3
+          done
           
-          # Wait for frontend
-          timeout 120 bash -c '
-            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T frontend curl -f http://localhost:5173 2>/dev/null; do
-              echo "Waiting for frontend..."
-              sleep 3
-            done
-          '
+          # 2. Đợi frontend - dùng polling từ host thay vì từ trong container
+          echo "2. Waiting for frontend..."
+          for i in {1..60}; do
+            # Check từ host (vì port đã được expose)
+            if curl -f http://localhost:5173 > /dev/null 2>&1; then
+              echo "✓ Frontend is accessible from host"
+              
+              # Thêm check từ trong container để chắc chắn
+              if docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T frontend \
+                sh -c "test -f /tmp/healthy"; then
+                echo "✓ Frontend health file exists"
+                break
+              fi
+            fi
+            
+            if [ $i -eq 60 ]; then
+              echo "❌ Frontend failed to start after 60 attempts"
+              echo "=== Frontend logs ==="
+              docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs frontend --tail=50
+              echo "=== Checking processes ==="
+              docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec frontend ps aux || true
+              exit 1
+            fi
+            
+            echo "   Waiting for frontend... ($i/60)"
+            sleep 3
+          done
           
-          echo "All services are ready!"
+          echo "✅ All services are ready!"
+          sleep 5
 
       - name: Show service status
         run: |
+          echo "=== Service Status ==="
           docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml ps
+          echo ""
+          echo "=== Checking frontend health file ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec frontend ls -la /tmp/ || true
 
       - name: Run Cypress E2E tests
         run: |
           echo "Running Cypress tests..."
           docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml run --rm cypress
+
 
       - name: Show logs on failure
         if: failure()
