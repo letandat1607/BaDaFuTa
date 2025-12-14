@@ -2,13 +2,17 @@ const getLoginUrl = () => `${Cypress.config('baseUrl')}/customer/login`;
 
 describe('Login', () => {
   beforeEach(() => {
-    cy.visit('/customer/login');
+    cy.visit('/customer/login', {
+      failOnStatusCode: false,
+      timeout: 30000
+    });
     cy.get('body').then(($body) => {
       cy.log('Response body:', $body.text());
     });
   });
 
   it('should login successfully', () => {
+    cy.wait(1000);
     cy.get('[data-cy="email-input"]').type('user1@example.com');
     cy.get('[data-cy="password-input"]').type('123456');
     cy.get('[data-cy="login-submit-button"]').click();

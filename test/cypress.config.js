@@ -10,6 +10,7 @@ module.exports = defineConfig({
       // implement node event listeners here
     },
 
+    chromeWebSecurity: false,
     video: true,
     screenshotOnRunFailure: true,
     videosFolder: "cypress/videos",

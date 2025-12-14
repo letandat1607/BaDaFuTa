@@ -167,7 +167,7 @@ services:
       - app-network
 
   frontend:
-    command: npm run dev -- --host
+    command: npm run dev -- --host 0.0.0.0
     environment:
       - NODE_ENV=e2e
       - VITE_API_URL=http://gateway:3000
