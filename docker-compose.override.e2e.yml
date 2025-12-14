@@ -204,6 +204,7 @@ services:
       - ./test/cypress/videos:/e2e/cypress/videos
     networks:
       - app-network
+    profiles: ["e2e"]  
 
   ngrok:
     profiles: ["production"]
