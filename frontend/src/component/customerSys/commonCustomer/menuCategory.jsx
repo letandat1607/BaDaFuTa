@@ -1,4 +1,4 @@
-import MenuItem from "./MenuItem";
+import MenuItem from "./menuItem";
 
 export default function MenuCategory({ category }) {
   return (
