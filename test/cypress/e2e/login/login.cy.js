@@ -1,8 +1,8 @@
-// const getLoginUrl = () => `${Cypress.config('baseUrl')}/customer/login`;
+const getLoginUrl = () => `${Cypress.config('baseUrl')}/customer/login`;
 
 describe('Login', () => {
     beforeEach(() => {
-        cy.visit('http://localhost:5173/customer/login');
+        cy.visit('/customer/login');
     });
 
     it('should login successfully', () => {
