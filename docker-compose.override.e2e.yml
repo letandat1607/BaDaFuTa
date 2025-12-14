@@ -170,7 +170,7 @@ services:
     command: npm run dev -- --host
     environment:
       - NODE_ENV=e2e
-      - VITE_API_URL=http://gateway:3000
+      - VITE_API_URL=http://localhost:3000
     ports:
       - "5173:5173"
     healthcheck:
