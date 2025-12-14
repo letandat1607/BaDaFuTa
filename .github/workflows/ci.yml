@@ -211,7 +211,7 @@ jobs:
           
           # Wait for frontend
           timeout 120 bash -c '
-            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T frontend wget --spider -q http://0.0.0.0:5173 2>/dev/null; do
+            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T frontend curl -f http://localhost:5173 2>/dev/null; do
               echo "Waiting for frontend..."
               sleep 3
             done
