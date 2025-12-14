@@ -191,22 +191,13 @@ jobs:
           
           # 1. Đợi gateway
           echo "1. Waiting for gateway..."
-          for i in {1..30}; do
-            if docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T gateway \
-              curl -f http://localhost:3000/health > /dev/null 2>&1; then
-              echo "✓ Gateway is ready"
-              break
-            fi
-            
-            if [ $i -eq 30 ]; then
-              echo "❌ Gateway failed to start"
-              docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs gateway
-              exit 1
-            fi
-            
-            echo "   Waiting for gateway... ($i/30)"
-            sleep 3
-          done
+          # Wait for gateway
+          timeout 120 bash -c '
+            until docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec -T gateway wget --spider -q http://localhost:3000/health 2>/dev/null; do
+              echo "Waiting for gateway..."
+              sleep 3
+            done
+          '
           
           # 2. Đợi frontend - dùng polling từ host thay vì từ trong container
           echo "2. Waiting for frontend..."
