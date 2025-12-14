@@ -169,37 +169,39 @@ services:
   frontend:
     command: >
       sh -c '
-        echo "Starting frontend..."
+        echo "Starting frontend with direct health check..."
         
-        # Tạo health file trước khi start
-        rm -f /tmp/healthy
-        
-        # Start Vite với output logging
-        echo "Starting Vite dev server..."
+        # Start Vite
         npm run dev -- --host 0.0.0.0 --port 5173 2>&1 &
         VITE_PID=$!
         
-        # Đợi Vite khởi động và tạo health file
-        for i in {1..60}; do
+        # Log startup
+        echo "Vite process started with PID: $VITE_PID"
+        
+        # Wait và kiểm tra
+        for i in {1..90}; do
           if curl -s http://localhost:5173 > /dev/null 2>&1; then
-            echo "Vite server is ready!"
-            touch /tmp/healthy
-            echo "Health file created at /tmp/healthy"
-            break
+            echo "✅ Frontend is ready after $i seconds"
+            # Giữ container sống
+            wait $VITE_PID
+            exit 0
           fi
           
-          # Kiểm tra process còn sống không
+          # Kiểm tra process
           if ! kill -0 $VITE_PID 2>/dev/null; then
-            echo "Vite process died, exiting..."
+            echo "❌ Vite process died"
             exit 1
           fi
           
-          echo "Waiting for Vite... ($i/60)"
+          if [ $i -lt 10 ] || [ $((i % 10)) -eq 0 ]; then
+            echo "⏳ Waiting for frontend... ($i/90 seconds)"
+          fi
+          
           sleep 1
         done
         
-        # Giữ container sống
-        wait $VITE_PID
+        echo "❌ Frontend failed to start after 90 seconds"
+        exit 1
       '
     environment:
       - NODE_ENV=e2e
