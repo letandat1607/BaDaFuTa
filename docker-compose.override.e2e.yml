@@ -174,10 +174,11 @@ services:
     ports:
       - "5173:5173"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5173"]
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 30
+      start_period: 30s
     depends_on:
       gateway:
         condition: service_healthy
