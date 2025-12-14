@@ -80,6 +80,14 @@ app.use(
   })
 );
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'gateway'
+  });
+});
+
 server.listen(PORT, async () => {
   await start();
   console.log("API Gateway running on port", PORT);
