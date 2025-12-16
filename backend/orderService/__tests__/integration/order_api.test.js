@@ -20,6 +20,10 @@ jest.mock('../../src/helpers/middleware', () => ({
             role: "customer"
         };
         next();
+    }),
+    authorize: jest.fn((req, res, next) => {
+        req.body.user_id = req.user.id;
+        next();
     })
 }));
 
