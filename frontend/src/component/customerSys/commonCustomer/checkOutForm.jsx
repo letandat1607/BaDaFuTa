@@ -74,11 +74,12 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     lng: null,
   });
 
+  const [formErrors, setFormErrors] = useState({}); // Thêm state lỗi
   const [position, setPosition] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // Lỗi server hoặc chung
   const [qrUrl, setQrUrl] = useState("");
   const [orderId, setOrderId] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
@@ -86,10 +87,34 @@ export default function CheckoutForm({ cartItems, merchantId }) {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
 
+  // Validation
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.full_name.trim()) {
+      errors.full_name = "Họ tên là bắt buộc";
+    }
+
+    if (!form.phone.trim()) {
+      errors.phone = "Số điện thoại là bắt buộc";
+    } else if (!/^0[3|5|7|8|9][0-9]{8}$/.test(form.phone.replace(/\s/g, ""))) {
+      errors.phone = "Số điện thoại không hợp lệ (VD: 0901234567)";
+    }
+
+    if (!form.delivery_address.trim()) {
+      errors.delivery_address = "Vui lòng chọn địa chỉ giao hàng";
+    } else if (!form.lat || !form.lng) {
+      errors.delivery_address = "Vui lòng chọn chính xác vị trí trên bản đồ";
+    }
+
+    return errors;
+  };
+
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const merchantCart = cart.filter((item) => item.merchant_id === merchantId);
     setOrderId(merchantCart.order_id || "");
+
     const getCurrentLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -102,7 +127,10 @@ export default function CheckoutForm({ cartItems, merchantId }) {
           (err) => {
             console.log("Không lấy được vị trí:", err.message);
             setPosition([10.7769, 106.7009]);
-            setForm((prev) => ({ ...prev, delivery_address: "Vui lòng chọn địa chỉ chính xác trên bản đồ" }));
+            setForm((prev) => ({
+              ...prev,
+              delivery_address: "Vui lòng chọn địa chỉ chính xác trên bản đồ",
+            }));
           },
           { enableHighAccuracy: true, timeout: 10000 }
         );
@@ -114,7 +142,6 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     getCurrentLocation();
   }, []);
 
-  // Xử lý tìm kiếm địa chỉ
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
@@ -130,13 +157,14 @@ export default function CheckoutForm({ cartItems, merchantId }) {
         const newLat = parseFloat(lat);
         const newLng = parseFloat(lon);
         const newPos = [newLat, newLng];
-        setPosition(newPos); // Kích hoạt FlyToLocation → bản đồ bay mượt
+        setPosition(newPos);
         setForm((prev) => ({
           ...prev,
           delivery_address: display_name,
           lat: newLat,
           lng: newLng,
         }));
+        setFormErrors((prev) => ({ ...prev, delivery_address: "" })); // Xóa lỗi khi chọn thành công
       } else {
         setError("Không tìm thấy địa chỉ. Vui lòng thử lại!");
       }
@@ -145,7 +173,6 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     }
   };
 
-  // Dùng vị trí hiện tại
   const handleUseCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -153,8 +180,9 @@ export default function CheckoutForm({ cartItems, merchantId }) {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const newPos = [lat, lng];
-          setPosition(newPos); // Bản đồ sẽ tự động bay về
+          setPosition(newPos);
           reverseGeocode(lat, lng, setForm);
+          setFormErrors((prev) => ({ ...prev, delivery_address: "" }));
         },
         () => alert("Không thể lấy vị trí hiện tại. Vui lòng kiểm tra quyền truy cập vị trí.")
       );
@@ -163,8 +191,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
   useEffect(() => {
     if (!user?.id) return;
-    console.log("orderId:", orderId);
-    const emitName = `paymentQR_${orderId}`;
+
     socket = io("http://localhost:3000", {
       query: { userId: user.id },
       transports: ["websocket"],
@@ -182,7 +209,6 @@ export default function CheckoutForm({ cartItems, merchantId }) {
         setPaymentStatus("success");
         setSuccess(true);
         const allCart = JSON.parse(localStorage.getItem("cart") || "[]");
-        console.log("Giỏ hàng hiện tại sau khi thanh toán thành công:", allCart);
         const newCart = allCart.filter((item) => item.merchant_id !== merchantId);
         localStorage.setItem("cart", JSON.stringify(newCart));
       }
@@ -197,19 +223,24 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.full_name || !form.phone || !form.lat || !form.lng) {
-      setError("Vui lòng nhập đầy đủ thông tin và chọn chính xác địa chỉ giao hàng!");
+    setError("");
+
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setError("Vui lòng kiểm tra lại các trường thông tin!");
       return;
     }
 
+    setFormErrors({}); // Xóa lỗi nếu hợp lệ
+
     setLoading(true);
-    setError("");
 
     const payload = {
       merchant_id: merchantId,
       user_id: user.id,
-      full_name: form.full_name,
-      phone: form.phone,
+      full_name: form.full_name.trim(),
+      phone: form.phone.replace(/\s/g, ""),
       method: form.method,
       delivery_address: {
         full_address: form.delivery_address,
@@ -230,7 +261,6 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     };
 
     try {
-      console.log(payload);
       const res = await fetch("http://localhost:3000/api/order/checkOutOrder", {
         method: "POST",
         headers: {
@@ -242,59 +272,75 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
       if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
       const result = await res.json();
-      console.log("Kết quả tạo đơn hàng:", result.order_id);
       setOrderId(result.order_id);
+
+      // Xóa giỏ hàng của merchant này
       let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log("Giỏ hàng hiện tại:", cart);
       cart = cart.filter((item) => item.merchant_id !== merchantId);
-      const newCart = {...cart, orderId: result.orderId};
-      console.log("Cập nhật giỏ hàng sau khi tạo đơn:", newCart);
-      localStorage.setItem("cart", JSON.stringify([newCart]));
+      localStorage.setItem("cart", JSON.stringify(cart));
 
     } catch (err) {
-      setError(err.message || "Lỗi hệ thống");
+      setError(err.message || "Lỗi hệ thống khi tạo đơn hàng");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-      <h3 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "20px" }}>
+    <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }} data-cy="checkout-form-container" data-testid="checkout-form-container">
+      <h3 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "20px" }} data-cy="delivery-info-title">
         Thông tin giao hàng
       </h3>
 
       <form onSubmit={handleSubmit}>
-        {/* Họ tên & SĐT */}
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "16px" }} data-cy="fullname-field">
           <label>Họ tên <span style={{ color: "red" }}>*</span></label>
           <input
             type="text"
-            required
             value={form.full_name}
-            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            data-cy="fullname-input"
+            data-testid="fullname-input"
+            onChange={(e) => {
+              setForm({ ...form, full_name: e.target.value });
+              setFormErrors((prev) => ({ ...prev, full_name: "" }));
+            }}
             style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd" }}
           />
+          {formErrors.full_name && (
+            <p style={{ color: "red", fontSize: "0.875rem", marginTop: "-0.5rem", marginBottom: "0.5rem" }} data-cy="fullname-error">
+              {formErrors.full_name}
+            </p>
+          )}
         </div>
 
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "16px" }} data-cy="phone-field">
           <label>Số điện thoại <span style={{ color: "red" }}>*</span></label>
           <input
             type="tel"
-            required
             value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            data-cy="phone-input"
+            data-testid="phone-input"
+            onChange={(e) => {
+              setForm({ ...form, phone: e.target.value });
+              setFormErrors((prev) => ({ ...prev, phone: "" }));
+            }}
             style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd" }}
           />
+          {formErrors.phone && (
+            <p style={{ color: "red", fontSize: "0.875rem", marginTop: "-0.5rem", marginBottom: "0.5rem" }} data-cy="phone-error">
+              {formErrors.phone}
+            </p>
+          )}
         </div>
 
-        {/* Thanh tìm kiếm + nút vị trí hiện tại */}
-        <div style={{ marginBottom: "12px" }}>
+        <div style={{ marginBottom: "12px" }} data-cy="address-search-section">
           <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
             <input
               type="text"
               placeholder="Tìm địa chỉ: số nhà, đường, phường, quận..."
               value={searchQuery}
+              data-cy="address-search-input"
+              data-testid="address-search-input"
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               style={{
@@ -308,6 +354,8 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             <button
               type="button"
               onClick={handleSearch}
+              data-cy="search-button"
+              data-testid="search-button"
               style={{
                 padding: "0 20px",
                 background: "#3b82f6",
@@ -324,6 +372,8 @@ export default function CheckoutForm({ cartItems, merchantId }) {
           <button
             type="button"
             onClick={handleUseCurrentLocation}
+            data-cy="use-current-location-button"
+            data-testid="use-current-location-button"
             style={{
               width: "100%",
               padding: "10px",
@@ -339,8 +389,8 @@ export default function CheckoutForm({ cartItems, merchantId }) {
           </button>
         </div>
 
-        {/* Bản đồ – ĐÃ SỬA: TỰ ĐỘNG BAY VỀ VỊ TRÍ MỚI */}
-        <div style={{ marginBottom: "16px" }}>
+        {/* Bản đồ + Địa chỉ */}
+        <div style={{ marginBottom: "16px" }} data-cy="map-section">
           <label>Chọn địa chỉ chính xác trên bản đồ <span style={{ color: "red" }}>*</span></label>
           <div style={{
             height: "380px",
@@ -351,9 +401,11 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
             position: "relative",
             zIndex: 1
-          }}>
+          }}
+          data-cy="leaflet-map-container"
+          >
             {position ? (
-              <MapContainer center={position} zoom={17} style={{ height: "100%", width: "100%" }}>
+              <MapContainer center={position} zoom={17} style={{ height: "100%", width: "100%" }} data-testid="leaflet-map">
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <LocationMarker position={position} setPosition={setPosition} setForm={setForm} />
                 <FlyToLocation center={position} />
@@ -375,12 +427,22 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
           <textarea
             value={form.delivery_address}
-            onChange={(e) => setForm({ ...form, delivery_address: e.target.value })}
+            data-cy="delivery-address-textarea"
+            data-testid="delivery-address-textarea"
+            onChange={(e) => {
+              setForm({ ...form, delivery_address: e.target.value });
+              setFormErrors((prev) => ({ ...prev, delivery_address: "" }));
+            }}
             placeholder="Bạn có thể chỉnh sửa địa chỉ chi tiết tại đây..."
             rows={3}
-            required
             style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd", marginTop: "8px" }}
           />
+
+          {formErrors.delivery_address && (
+            <p style={{ color: "red", fontSize: "0.875rem", marginTop: "4px" }} data-cy="address-error">
+              {formErrors.delivery_address}
+            </p>
+          )}
 
           {form.lat && (
             <div style={{ color: "#10b981", fontWeight: "500", marginTop: "8px", fontSize: "14px" }}>
@@ -390,21 +452,23 @@ export default function CheckoutForm({ cartItems, merchantId }) {
         </div>
 
         {/* Ghi chú */}
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "16px" }} data-cy="note-field">
           <label>Ghi chú cho shipper (không bắt buộc)</label>
           <textarea
             value={form.note}
+            data-cy="note-textarea"
             onChange={(e) => setForm({ ...form, note: e.target.value })}
-            placeholder="Ví dụ: Để trước cổng, gọi khi đến..."
+            placeholder="Ghi chú"
             style={{ width: "100%", padding: "12px 5px", borderRadius: "8px", border: "1px solid #ddd" }}
           />
         </div>
 
-        {/* Phương thức thanh toán */}
-        <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: "20px" }} data-cy="payment-method-section" data-testid="payment-method-section">
           <label>Phương thức thanh toán</label>
           <select
             value={form.method}
+            data-cy="payment-method-select"
+            data-testid="payment-method-select"
             onChange={(e) => setForm({ ...form, method: e.target.value })}
             style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
           >
@@ -413,11 +477,13 @@ export default function CheckoutForm({ cartItems, merchantId }) {
           </select>
         </div>
 
-        {error && <div style={{ color: "#dc2626", marginBottom: "12px", fontWeight: "500" }}>{error}</div>}
+        {error && <div style={{ color: "#dc2626", marginBottom: "12px", fontWeight: "500" }} data-cy="form-error">{error}</div>}
 
         <button
           type="submit"
           disabled={loading || success}
+          data-cy="submit-order-button"
+          data-testid="submit-order-button"
           style={{
             width: "100%",
             padding: "16px",
@@ -436,13 +502,13 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
       {/* QR Momo */}
       {qrUrl && paymentStatus === "waiting" && (
-        <div style={{ marginTop: "30px", padding: "24px", background: "#fdf2f8", borderRadius: "12px", textAlign: "center" }}>
+        <div style={{ marginTop: "30px", padding: "24px", background: "#fdf2f8", borderRadius: "12px", textAlign: "center" }} data-cy="momo-qr-section">
           <h4 style={{ color: "#d946ef", marginBottom: "12px" }}>Quét mã QR để thanh toán Momo</h4>
-          <p>Mã đơn hàng: <strong>{orderId}</strong></p>
+          <p>Mã đơn hàng: <strong data-cy="order-id">{orderId}</strong></p>
           <div style={{ background: "white", padding: "16px", borderRadius: "12px", display: "inline-block" }}>
-            <QRCodeSVG value={qrUrl} size={220} level="H" includeMargin />
+            <QRCodeSVG data-cy="momo-qr-code" value={qrUrl} size={220} level="H" includeMargin />
           </div>
-          <a
+          {/* <a
             href={qrUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -458,16 +524,17 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             }}
           >
             Mở ứng dụng Momo
-          </a>
+          </a> */}
         </div>
       )}
 
       {paymentStatus === "success" && (
-        <div style={{ marginTop: "20px", padding: "20px", background: "#d4edda", color: "#155724", borderRadius: "12px", textAlign: "center" }}>
+        <div data-cy="momo-qr-code" style={{ marginTop: "20px", padding: "20px", background: "#d4edda", color: "#155724", borderRadius: "12px", textAlign: "center" }}>
           <strong>Thanh toán thành công!</strong> Đơn hàng: <strong>{orderId}</strong>
           <button
-            onClick={() => (window.location.href = `/customer/order-success/${orderId}`)}
+            onClick={() => (window.location.href = `/customer/order/${orderId}`)}
             style={{ marginLeft: "12px", padding: "10px 20px", background: "#28a745", color: "white", border: "none", borderRadius: "6px" }}
+            data-cy="view-order-detail"
           >
             Xem chi tiết đơn hàng
           </button>

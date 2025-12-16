@@ -6,7 +6,7 @@ const { sequelize, connectDB } = require("./src/utils/db");
 const PORT = process.env.orderServicePORT;
 const {startConsumers} = require("./src/rabbitMQ/rabbitConsumer");
 // const {authenticate} = require("./src/helpers/middleware");
-const {authenticate} = require("./src/helpers/middleware")
+const {authenticate, authorize} = require("./src/helpers/middleware")
 const {
     checkOutOrder,
     // getAllOrder,
@@ -30,7 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/getUserOrders", authenticate, getUserOrders)
-app.post("/checkOutOrder", authenticate, checkOutOrder);
+app.post("/checkOutOrder", authenticate, authorize, checkOutOrder);
 // app.post("/getAllOrder", getAllOrder);
 // app.get("/updateOrderStatusPayment/:id", updateOrderStatusPayment);
 

@@ -38,26 +38,26 @@ export default function OrderSummary({ items }) {
         }
       `}</style>
 
-      <div className="summary-card">
-        <h3 className="summary-title">Tóm tắt đơn hàng</h3>
-        <div className="item-list">
+      <div className="summary-card" data-cy="order-summary" data-testid="order-summary">
+        <h3 className="summary-title" data-cy="summary-title">Tóm tắt đơn hàng</h3>
+        <div className="item-list" data-cy="items-list">
           {items.map(item => (
             <CheckoutItem key={item.id} item={item} />
           ))}
         </div>
 
-        <div className="price-row">
+        <div className="price-row" data-cy="subtotal-row">
           <span>Tạm tính</span>
           <span>{subtotal.toLocaleString("vi-VN")}₫</span>
         </div>
-        <div className="price-row">
+        <div className="price-row" data-cy="delivery-fee-row">
           <span>Phí giao hàng</span>
           <span>{deliveryFee.toLocaleString("vi-VN")}₫</span>
         </div>
 
-        <div className="total-row">
+        <div className="total-row" data-cy="total-row">
           <span>Tổng cộng</span>
-          <span>{total.toLocaleString("vi-VN")}₫</span>
+          <span>{total.toLocaleString("vi-VN")} ₫</span>
         </div>
       </div>
     </>

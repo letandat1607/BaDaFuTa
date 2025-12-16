@@ -22,6 +22,7 @@ async function startConsumers() {
                     try {
                         switch (queue.bindingKey) {
                             case 'payment.order.completed':
+                                console.log('Processing payment.order.completed:', content);
                                 await orderService.updateOrderStatusPayment(content.orderId, content.statusPayment);
                                 await orderService.publishOrderMerchant(content.orderId);
                                 break;

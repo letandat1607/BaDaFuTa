@@ -8,10 +8,19 @@ module.exports.authenticate  = async (req, res, next) =>{
     if (!token) return res.sendStatus(401).json({message: "Cần đăng nhập người dùng"});
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if(err) return res.sendStatus(403);
+        if(err) return res.sendStatus(403).json({message: "Token không hợp lệ hoặc hết hạn"});
         req.user = user;
         next();
     })
+}
+
+module.exports.authorize = async (req, res, next) => {
+    const user = req.user;
+    if(user.id !== req.body.user_id){
+        return res.status(403).json({message: "Thông tin đơn hàng không hợp lệ"});
+    }
+
+    next();
 }
 
 // module.exports.sendMail = async ({email, title, html}) =>{

@@ -51,9 +51,9 @@ export default function Checkout() {
         }
       `}</style>
 
-      <div className="checkout-page">
-        <h1 className="checkout-title">Thanh toán</h1>
-        <div className="checkout-grid">
+      <div className="checkout-page" data-cy="checkout-page" data-testid="checkout-page">
+        <h1 className="checkout-title" data-cy="checkout-title">Thanh toán</h1>
+        <div className="checkout-grid" data-cy="checkout-grid" data-testid="checkout-grid">
           <CheckoutForm cartItems={cartItems} merchantId={merchantId} />
           <OrderSummary items={cartItems} />
         </div>

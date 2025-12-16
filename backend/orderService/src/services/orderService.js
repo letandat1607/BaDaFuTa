@@ -117,12 +117,12 @@ module.exports.createOrder = async (data, userId) => {
     }
 }
 
-// module.exports.updateOrderStatusPayment = async (orderId, statusPayment) => {
-//     const orderExists = await orderRepo.updateField(orderId, { status_payment: statusPayment });
-//     if (!orderExists) throw new Error('Không tìm thấy đơn hàng');
+module.exports.updateOrderStatusPayment = async (orderId, statusPayment) => {
+    const orderExists = await orderRepo.updateField(orderId, { status_payment: statusPayment });
+    if (!orderExists) throw new Error('Không tìm thấy đơn hàng');
 
-//     return orderExists;
-// }
+    return orderExists;
+}
 
 module.exports.publishOrderMerchant = async (orderId) => {
     const order = await orderRepo.getOneOrder(orderId);

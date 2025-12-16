@@ -83,7 +83,8 @@ export default function CustomerLogin() {
                             border: "1px solid #e5e7eb",
                         }}
                     >
-                        <h2
+                        <h2 
+                            data-testid="login-title"
                             data-cy="login-title"
                             style={{
                                 fontSize: "1.75rem",
