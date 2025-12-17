@@ -210,6 +210,19 @@ jobs:
           echo ""
           echo "=== Frontend Logs ==="
           docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs frontend --tail=100
+          echo ""
+          echo "=== User Logs ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs user_service --tail=100
+          echo ""
+          echo "=== Merchant Logs ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs merchant_service --tail=100
+          echo ""
+          echo "=== Order Logs ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs order_service --tail=100
+          echo ""
+          echo "=== Payment Logs ==="
+          docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml logs payment_service --tail=100
+          echo ""
 
       - name: Upload Cypress screenshots
         if: failure()
