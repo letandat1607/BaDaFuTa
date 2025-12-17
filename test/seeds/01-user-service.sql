@@ -1,7 +1,7 @@
 -- User Service E2E Seed Data
 -- Schema: user_e2e
 
-SET search_path TO user_e2e;
+-- SET search_path TO user_e2e;
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,

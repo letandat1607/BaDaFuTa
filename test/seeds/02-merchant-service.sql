@@ -1,7 +1,7 @@
 -- Merchant Service E2E Seed Data
 -- Schema: merchant_e2e
 
-SET search_path TO merchant_e2e;
+-- SET search_path TO merchant_e2e;
 
 CREATE TABLE IF NOT EXISTS merchant (
     id UUID PRIMARY KEY,

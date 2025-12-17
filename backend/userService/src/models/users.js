@@ -33,7 +33,6 @@ const User = sequelize.define("User", {
         type: DataTypes.STRING,
     },
 }, {
-    schema: "user_e2e",
     tableName: "users",
     freezeTableName: true,
     timestamps: true,

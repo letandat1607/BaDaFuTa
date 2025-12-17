@@ -34,18 +34,18 @@ done
 echo "PostgreSQL is ready!"
 
 # Create schemas
-echo "Creating schemas..."
-psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB <<-EOSQL
-    DROP SCHEMA IF EXISTS user_e2e CASCADE;
-    DROP SCHEMA IF EXISTS merchant_e2e CASCADE;
-    DROP SCHEMA IF EXISTS order_e2e CASCADE;
-    DROP SCHEMA IF EXISTS drone_e2e CASCADE;
+# echo "Creating schemas..."
+# psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB <<-EOSQL
+#     DROP SCHEMA IF EXISTS user_e2e CASCADE;
+#     DROP SCHEMA IF EXISTS merchant_e2e CASCADE;
+#     DROP SCHEMA IF EXISTS order_e2e CASCADE;
+#     DROP SCHEMA IF EXISTS drone_e2e CASCADE;
     
-    CREATE SCHEMA user_e2e;
-    CREATE SCHEMA merchant_e2e;
-    CREATE SCHEMA order_e2e;
-    CREATE SCHEMA drone_e2e;
-EOSQL
+#     CREATE SCHEMA user_e2e;
+#     CREATE SCHEMA merchant_e2e;
+#     CREATE SCHEMA order_e2e;
+#     CREATE SCHEMA drone_e2e;
+# EOSQL
 
 # Seed each service
 echo "Seeding user_service..."

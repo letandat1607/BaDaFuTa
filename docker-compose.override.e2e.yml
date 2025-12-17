@@ -51,7 +51,7 @@ services:
     command: npm start
     environment:
       - NODE_ENV=e2e
-      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=user_e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
       - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
       - PORT=3001
     depends_on:
@@ -68,7 +68,7 @@ services:
     command: npm start
     environment:
       - NODE_ENV=e2e
-      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=merchant_e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
       - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
       - PORT=3002
     depends_on:
@@ -85,7 +85,7 @@ services:
     command: npm start
     environment:
       - NODE_ENV=e2e
-      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=order_e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
       - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
       - PORT=3003
     depends_on:
@@ -102,7 +102,7 @@ services:
     command: npm start
     environment:
       - NODE_ENV=e2e
-      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=payment_e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
       - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
       - PORT=3004
     depends_on:
@@ -119,7 +119,7 @@ services:
     command: npm start
     environment:
       - NODE_ENV=e2e
-      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb?schema=drone_e2e
+      - DATABASE_URL=postgresql://test:test@postgres:5432/testdb
       - RABBITMQ_URL=amqp://guest:guest@rabbitMQ:5672
       - PORT=3005
     depends_on:

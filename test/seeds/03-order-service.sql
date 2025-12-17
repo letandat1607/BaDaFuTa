@@ -1,7 +1,7 @@
 -- Order Service E2E Seed Data
 -- Schema: order_e2e
 
-SET search_path TO order_e2e;
+-- SET search_path TO order_e2e;
 
 CREATE TABLE IF NOT EXISTS "order" (
     id UUID PRIMARY KEY,

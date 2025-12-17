@@ -1,7 +1,7 @@
 -- Drone Service E2E Seed Data
 -- Schema: drone_e2e
 
-SET search_path TO drone_e2e;
+-- SET search_path TO drone_e2e;
 
 CREATE TABLE IF NOT EXISTS drone (
     id UUID PRIMARY KEY,
