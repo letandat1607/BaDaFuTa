@@ -187,7 +187,7 @@ services:
       frontend: 
         condition: service_started
     environment:
-      - CYPRESS_BASE_URL=http://frontend:5173
+      - CYPRESS_BASE_URL=http://172.18.0.10:5173
       - CYPRESS_API_URL=http://gateway:3000
     working_dir: /e2e
     volumes:
