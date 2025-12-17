@@ -23,7 +23,7 @@ module.exports.registerUser = async (req, res) => {
 
 module.exports.signInUser = async (req, res) => {
   try{
-    console.log(req.body);
+    console.log(req.body.email);
     const {token, user} = await userService.signIn(req.body)
     return res.status(200).json({
       message: "Đăng nhập thành công",
