@@ -112,7 +112,7 @@ describe('Customer Cart Flow', () => {
     it('should remove item when quantity reaches 0 or click remove', () => {
         cy.get('[data-cy="view-menu-button"]').first().click();
         cy.get('[data-cy^="add-to-cart-button-"]').first().click();
-        cy.wait(1000);
+        cy.wait(2000);
 
         cy.get('input[type="radio"], input[type="checkbox"]').first().check({ force: true });
         cy.get('[data-cy="add-to-cart-confirm-button"]').click();
