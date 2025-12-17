@@ -20,20 +20,20 @@ const MenuItemOption = sequelize.define("MenuItemOption", {
 });
 
 
-Option.belongsToMany(MenuItem, {
-  through: MenuItemOption,
-  foreignKey: "option_id",
-  as: "option_menu_items",
-  onDelete: "CASCADE"
-});
+// Option.belongsToMany(MenuItem, {
+//   through: MenuItemOption,
+//   foreignKey: "option_id",
+//   as: "option_menu_items",
+//   onDelete: "CASCADE"
+// });
 
 
-MenuItem.belongsToMany(Option, {
-  through: MenuItemOption,
-  foreignKey: "menu_item_id",
-  as: "options",
-  onDelete: "CASCADE"
-});
+// MenuItem.belongsToMany(Option, {
+//   through: MenuItemOption,
+//   foreignKey: "menu_item_id",
+//   as: "options",
+//   onDelete: "CASCADE"
+// });
 
 // MenuItemOption.belongsTo(MenuItem, {
 //   foreignKey: "menu_item_id",

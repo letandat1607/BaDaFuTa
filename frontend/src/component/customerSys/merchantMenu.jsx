@@ -8,12 +8,13 @@ export default function MerchantMenu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // Load menu
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/merchant/getMenuClient/${id}`);
+        const response = await fetch(`${baseURL}/api/merchant/getMenuClient/${id}`);
         if (!response.ok) throw new Error("Không thể tải menu");
         const data = await response.json();
         setMenuData(data.categories || []);

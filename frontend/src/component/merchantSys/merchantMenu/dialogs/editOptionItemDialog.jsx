@@ -6,6 +6,7 @@ export default function EditOptionItemDialog({ item, optionGroups, onClose, onUp
     onClose?.();
     return null;
   }
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +22,7 @@ export default function EditOptionItemDialog({ item, optionGroups, onClose, onUp
     };
 
     try {
-      const res = await fetch(`http://localhost:3000/api/merchant/updateOptionItem/${item.id}`, {
+      const res = await fetch(`${baseURL}0/api/merchant/updateOptionItem/${item.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

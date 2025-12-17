@@ -13,13 +13,14 @@ export default function OrderSuccess() {
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // === LẤY ĐƠN HÀNG TỪ API ===
   useEffect(() => {
     console.log(token)
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/order/getOrder/${orderId}`, {
+      const res = await fetch(`${baseURL}/api/order/getOrder/${orderId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export default function OrderSuccess() {
   useEffect(() => {
     if (!user?.id || !orderId) return;
 
-    socket = io("http://localhost:3000", {
+    socket = io(baseURL, {
       query: { userId: user.id },
       transports: ["websocket"],
     });

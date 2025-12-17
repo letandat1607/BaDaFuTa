@@ -16,7 +16,7 @@ describe('Login', () => {
     cy.get('[data-cy="email-input"]').type('user1@example.com');
     cy.get('[data-cy="password-input"]').type('123456');
     cy.get('[data-cy="login-submit-button"]').click();
-
+    cy.wait(2000);
     cy.url().should('include', '/customer/merchants');
   });
 

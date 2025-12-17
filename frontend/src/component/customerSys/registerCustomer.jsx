@@ -11,6 +11,7 @@ export default function CustomerRegister() {
 
     const [formErrors, setFormErrors] = useState({});
     const [serverError, setServerError] = useState(null);
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     const navigate = useNavigate();
 
@@ -60,7 +61,7 @@ export default function CustomerRegister() {
 
         try {
             const role = "customer";
-            const res = await fetch("http://localhost:3000/api/auth/register", {
+            const res = await fetch(`${baseURL}/api/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

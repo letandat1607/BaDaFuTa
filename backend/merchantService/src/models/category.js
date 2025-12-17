@@ -21,7 +21,7 @@ const Category = sequelize.define("Category", {
     timestamps: false
 });
 
-Category.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
-Merchant.hasMany(Category, {foreignKey: "merchant_id"});
+// Category.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
+// Merchant.hasMany(Category, {foreignKey: "merchant_id"});
 
 module.exports = Category;

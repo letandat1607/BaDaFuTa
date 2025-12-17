@@ -34,12 +34,13 @@ export default function OrderDetail() {
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // === LẤY CHI TIẾT ĐƠN HÀNG ===
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/order/getOrder/${orderId}`, {
+        const res = await fetch(`${baseURL}/api/order/getOrder/${orderId}`, {
           headers: { authorization: `${token}` },
         });
         if (!res.ok) throw new Error("Không tìm thấy đơn hàng");
@@ -58,7 +59,7 @@ export default function OrderDetail() {
   useEffect(() => {
     if (!user?.id || !orderId) return;
 
-    socket = io("http://localhost:3000", {
+    socket = io(baseURL, {
       query: { userId: user.id },
       transports: ["websocket"],
     });
@@ -122,7 +123,7 @@ export default function OrderDetail() {
     setIsConfirming(true);
 
     try {
-      const res = await fetch(`http://localhost:3000/api/order/updateOrder/${orderId}`, {
+      const res = await fetch(`${baseURL}/api/order/updateOrder/${orderId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

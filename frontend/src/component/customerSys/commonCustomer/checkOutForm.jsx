@@ -83,6 +83,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
   const [qrUrl, setQrUrl] = useState("");
   const [orderId, setOrderId] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
@@ -192,7 +193,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
   useEffect(() => {
     if (!user?.id) return;
 
-    socket = io("http://localhost:3000", {
+    socket = io(baseURL, {
       query: { userId: user.id },
       transports: ["websocket"],
     });
@@ -264,7 +265,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/api/order/checkOutOrder", {
+      const res = await fetch(`${baseURL}/api/order/checkOutOrder`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

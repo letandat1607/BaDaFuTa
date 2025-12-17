@@ -8,9 +8,10 @@ export default function MerchantList() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/merchant/getAllMerchant")
+    fetch(`${baseURL}/api/merchant/getAllMerchant`)
       .then((res) => {
         if (!res.ok) throw new Error("Không thể tải danh sách");
         return res.json();

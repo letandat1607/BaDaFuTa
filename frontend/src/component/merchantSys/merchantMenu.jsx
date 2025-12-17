@@ -17,6 +17,8 @@ export default function MerchantMenu() {
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [selectedOptionGroups, setSelectedOptionGroups] = useState([]);
 
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
   useEffect(() => {
     const getMerchantMenu = async () => {
       try {
@@ -24,16 +26,16 @@ export default function MerchantMenu() {
         if (!merchant) throw new Error("Merchant không hợp lệ");
 
         const [resMenu, resUncategorized, resOption, resMenuItemOption] = await Promise.all([
-          fetch(`http://localhost:3000/api/merchant/getMenuClient/${merchant.id}`, {
+          fetch(`${baseURL}/api/merchant/getMenuClient/${merchant.id}`, {
             headers: { authorization: localStorage.getItem("token") },
           }),
-          fetch(`http://localhost:3000/api/merchant/getMenuItemNoneCategory/${merchant.id}`, {
+          fetch(`${baseURL}/api/merchant/getMenuItemNoneCategory/${merchant.id}`, {
             headers: { authorization: localStorage.getItem("token") },
           }),
-          fetch(`http://localhost:3000/api/merchant/getOption/${merchant.id}`, {
+          fetch(`${baseURL}/api/merchant/getOption/${merchant.id}`, {
             headers: { authorization: localStorage.getItem("token") },
           }),
-          fetch(`http://localhost:3000/api/merchant/getMenuItemOption/${merchant.id}`, {
+          fetch(`${baseURL}/api/merchant/getMenuItemOption/${merchant.id}`, {
             headers: { authorization: localStorage.getItem("token") },
           }),
         ]);
@@ -94,8 +96,8 @@ export default function MerchantMenu() {
       try {
         const body = { menuItemId: selectedMenuItem.id, optionId };
         const url = isChecked
-          ? "http://localhost:3000/api/merchant/deleteMenuItemOption"
-          : "http://localhost:3000/api/merchant/createMenuItemOption";
+          ? `${baseURL}/api/merchant/deleteMenuItemOption`
+          : `${baseURL}/api/merchant/createMenuItemOption`;
 
         const res = await fetch(url, {
           method: isChecked ? "DELETE" : "POST",

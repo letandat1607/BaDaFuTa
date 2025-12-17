@@ -10,14 +10,14 @@ export default function OptionItemTab({ option, setOption }) {
   const [addOpen, setAddOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [bulkOpen, setBulkOpen] = useState(false);
-
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   console.log(option);
   
   // === XÓA NHÓM ===
   const handleDeleteGroup = async (groupId) => {
     if (!confirm("Xóa nhóm topping này? Tất cả topping sẽ bị xóa!")) return;
     try {
-      await fetch(`http://localhost:3000/api/merchant/deleteOption/${groupId}`, {
+      await fetch(`${baseURL}/api/merchant/deleteOption/${groupId}`, {
         method: "POST",
         headers: { authorization: localStorage.getItem("token") },
       });
@@ -31,7 +31,7 @@ export default function OptionItemTab({ option, setOption }) {
   const handleDeleteTopping = async (itemId, groupId) => {
     if (!confirm("Xóa topping này?")) return;
     try {
-      await fetch(`http://localhost:3000/api/merchant/deleteOptionItem/${itemId}`, {
+      await fetch(`${baseURL}/api/merchant/deleteOptionItem/${itemId}`, {
         method: "POST",
         headers: { authorization: localStorage.getItem("token") },
       });
@@ -160,7 +160,7 @@ export default function OptionItemTab({ option, setOption }) {
                     handleChangeStatus={async (checked) => {
                       const updated = { ...item, status: checked };
                       try {
-                        const res = await fetch(`http://localhost:3000/api/merchant/updateOptionItem/${item.id}`, {
+                        const res = await fetch(`${baseURL}/api/merchant/updateOptionItem/${item.id}`, {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",

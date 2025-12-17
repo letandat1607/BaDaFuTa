@@ -5,12 +5,13 @@ export default function ToppingModal({ item, onClose, merchantId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState({});
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/merchant/getMenuWithOption/${item.id}`,
+          `${baseURL}/api/merchant/getMenuWithOption/${item.id}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

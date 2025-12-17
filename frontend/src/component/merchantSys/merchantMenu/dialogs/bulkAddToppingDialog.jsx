@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function BulkAddToppingDialog({ optionGroups, onSuccess, onClose }) {
   const [tempItems, setTempItems] = useState([]);
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const handleAddTemp = (e) => {
     e.preventDefault();
@@ -39,7 +40,7 @@ export default function BulkAddToppingDialog({ optionGroups, onSuccess, onClose 
       const results = [];
       
       for (const item of tempItems) {
-        const res = await fetch("http://localhost:3000/api/merchant/createOptionItem", {
+        const res = await fetch(`${baseURL}/api/merchant/createOptionItem`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -6,6 +6,7 @@ export default function EditMenuItemDialog({ item, categories, onClose, onUpdate
     e.preventDefault();
     const form = e.target;
     const merchant = JSON.parse(localStorage.getItem("merchant"));
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     const updated = {
       category_id: form.category_id.value || null,
@@ -17,7 +18,7 @@ export default function EditMenuItemDialog({ item, categories, onClose, onUpdate
     };
 
     try {
-      const res = await fetch(`http://localhost:3000/api/merchant/updateMenuItem/${item.id}`, {
+      const res = await fetch(`${baseURL}/api/merchant/updateMenuItem/${item.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

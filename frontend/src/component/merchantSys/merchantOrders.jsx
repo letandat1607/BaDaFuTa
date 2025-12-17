@@ -12,11 +12,12 @@ export default function MerchantOrders() {
 
   const merchant = JSON.parse(localStorage.getItem("merchant") || "{}");
   const merchantId = merchant?.id;
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // Socket.io
   useEffect(() => {
     if (!merchantId) return;
-    const socket = io("http://localhost:3000", { query: { merchantId } });
+    const socket = io(baseURL, { query: { merchantId } });
     socket.on("connect", () => console.log("Socket connected"));
     socket.on("newOrder", (incomingOrder) => {
       setOrders((prevOrders) => {
@@ -48,7 +49,7 @@ export default function MerchantOrders() {
   // Lấy đơn hàng ban đầu
   useEffect(() => {
     if (!merchantId) return;
-    fetch(`http://localhost:3000/api/order/getAllOrderMerchant/${merchantId}`)
+    fetch(`${baseURL}/api/order/getAllOrderMerchant/${merchantId}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => setOrders(data.orders || data.orderss || []))
       .catch(console.error);
@@ -57,7 +58,7 @@ export default function MerchantOrders() {
   // Lấy danh sách drone
   const fetchDrones = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/drone/merchant/${merchantId}`);
+      const res = await fetch(`${baseURL}/api/drone/merchant/${merchantId}`);
       const json = await res.json();
       console.log("Drones fetched:", json);
       if (res.ok) {
@@ -98,7 +99,7 @@ export default function MerchantOrders() {
 
     // 2. Sau đó mới gọi API (nếu lỗi thì vẫn có thể rollback, nhưng hiếm)
     try {
-      const res = await fetch(`http://localhost:3000/api/order/updateOrder/${selectedOrder.id}`, {
+      const res = await fetch(`${baseURL}/api/order/updateOrder/${selectedOrder.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,7 +133,7 @@ export default function MerchantOrders() {
   const handleChangeStatus = useCallback((item, currentStatus) => {
     if (currentStatus === "waiting") {
       const updated = { ...item, status: "preparing" };
-      fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
+      fetch(`${baseURL}/api/order/updateOrder/${item.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -151,7 +152,7 @@ export default function MerchantOrders() {
     if (currentStatus === "cancel") {
       if (window.confirm("Bạn chắc chắn muốn hủy đơn này?")) {
         const updated = { ...item, status: "cancelled" };
-        fetch(`http://localhost:3000/api/order/updateOrder/${item.id}`, {
+        fetch(`${baseURL}/api/order/updateOrder/${item.id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

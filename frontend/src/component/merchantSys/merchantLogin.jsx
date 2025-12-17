@@ -6,12 +6,13 @@ export default function MerchantLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const role = "merchant"
-            const res = await fetch("http://localhost:3000/api/auth/login", {
+            const res = await fetch(`${baseURL}/api/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -28,7 +29,7 @@ export default function MerchantLogin() {
             if (!token || !user) {
                 throw new Error("Dữ liệu trả về không hợp lệ");
             }
-            const dataMerchant = await fetch(`http://localhost:3000/api/merchant/getMerchant/${user.id}`, {
+            const dataMerchant = await fetch(`${baseURL}/api/merchant/getMerchant/${user.id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

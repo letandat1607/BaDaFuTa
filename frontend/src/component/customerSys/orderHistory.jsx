@@ -12,12 +12,13 @@ export default function OrderHistory() {
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const token = localStorage.getItem("token");
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     // LẤY DANH SÁCH ĐƠN HÀNG
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/api/order/getUserOrders`, {
+                const res = await fetch(`${baseURL}/api/order/getUserOrders`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -39,7 +40,7 @@ export default function OrderHistory() {
     useEffect(() => {
         if (!user?.id) return;
 
-        socket = io("http://localhost:3000", {
+        socket = io(baseURL, {
             query: { userId: user.id },
             transports: ["websocket"],
         });

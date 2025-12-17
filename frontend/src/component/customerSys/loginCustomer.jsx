@@ -8,6 +8,7 @@ export default function CustomerLogin() {
     const [formErrors, setFormErrors] = useState({});
     const [serverError, setServerError] = useState(null);
     const navigate = useNavigate();
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     const validateForm = () => {
         const errors = {};
@@ -34,7 +35,7 @@ export default function CustomerLogin() {
 
         try {
             const role = "customer";
-            const res = await fetch("http://localhost:3000/api/auth/login", {
+            const res = await fetch(`${baseURL}/api/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

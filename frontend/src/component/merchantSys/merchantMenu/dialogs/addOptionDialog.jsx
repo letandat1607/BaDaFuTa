@@ -6,6 +6,7 @@ export default function AddOptionDialog({ onSuccess }) {
     e.preventDefault();
     const form = e.target;
     const merchant = JSON.parse(localStorage.getItem("merchant"));
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     const newOption = {
       option_name: form.option_name.value.trim(),
@@ -15,7 +16,7 @@ export default function AddOptionDialog({ onSuccess }) {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/api/merchant/createOption/", {
+      const res = await fetch(`${baseURL}/api/merchant/createOption/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function BulkAddMenuDialog({ categories, onSuccess, onClose }) {
   const [tempItems, setTempItems] = useState([]);
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const handleAddTemp = (e) => {
     e.preventDefault();
@@ -33,7 +34,7 @@ export default function BulkAddMenuDialog({ categories, onSuccess, onClose }) {
       
       // Thêm từng món một
       for (const item of tempItems) {
-        const res = await fetch("http://localhost:3000/api/merchant/createMenuItem", {
+        const res = await fetch(`${baseURL}/api/merchant/createMenuItem`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

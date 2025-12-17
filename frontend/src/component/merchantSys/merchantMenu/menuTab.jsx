@@ -17,13 +17,14 @@ export default function MenuTab({
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [bulkAddOpen, setBulkAddOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // === XÓA DANH MỤC ===
   const handleDeleteCategory = async (catId) => {
     if (!confirm("Xóa danh mục này? Tất cả món ăn sẽ bị xóa!")) return;
 
     try {
-      await fetch(`http://localhost:3000/api/merchant/deleteCategory/${catId}`, {
+      await fetch(`${baseURL}/api/merchant/deleteCategory/${catId}`, {
         method: "POST",
         headers: { authorization: localStorage.getItem("token") },
       });
@@ -39,7 +40,7 @@ export default function MenuTab({
     if (!confirm(`Xóa món "${item.name_item}"?`)) return;
 
     try {
-      await fetch(`http://localhost:3000/api/merchant/deleteMenuItem/${item.id}`, {
+      await fetch(`${baseURL}/api/merchant/deleteMenuItem/${item.id}`, {
         method: "POST",
         headers: { authorization: localStorage.getItem("token") },
       });
@@ -66,7 +67,7 @@ export default function MenuTab({
     const updated = { ...item, status: checked };
 
     try {
-      await fetch(`http://localhost:3000/api/merchant/updateMenuItem/${item.id}`, {
+      await fetch(`${baseURL}/api/merchant/updateMenuItem/${item.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

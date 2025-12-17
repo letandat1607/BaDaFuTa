@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { Grid, Box, Container, Button, Flex } from "@radix-ui/themes";
 
 export default function MerchantInfor() {
-  // State
   const [merchant, setMerchant] = useState(null);
   const [updateMerchant, setUpdateMerchant] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
-  // Lấy dữ liệu từ localStorage
   useEffect(() => {
     const getMerchant = async () => {
       try {
