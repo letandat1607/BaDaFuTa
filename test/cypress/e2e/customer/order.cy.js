@@ -101,7 +101,7 @@ describe('Customer Order Flow', () => {
 
         cy.get('[data-cy="submit-order-button"]').click();
         cy.window().then((win) => {
-            win.socket.emit('paymentQR', {
+            win.socket.on('paymentQR', {
               payUrl: 'https://example.com/fake-momo-qr.png',
             });        
           });
