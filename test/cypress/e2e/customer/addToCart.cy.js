@@ -125,10 +125,17 @@ describe('Customer Cart Flow', () => {
 
         cy.get('[data-cy="continue-shopping-link"]').click();
         cy.get('[data-cy^="add-to-cart-button-"]').first().click();
-        cy.get('[data-cy="add-to-cart-confirm-button"]').then(($btn) => {
-            if ($btn.length) cy.wrap($btn).click();
-        });
+        cy.wait(2000);
+
+        cy.get('input[type="radio"], input[type="checkbox"]').first().check({ force: true });
+        cy.get('[data-cy="add-to-cart-confirm-button"]').click();
+        cy.wait(1000);
+
         cy.get('[data-cy="cart-fab"]').click();
+
+        cy.get('[data-cy="increase-quantity-button"]').click();
+        cy.get('[data-cy="increase-quantity-button"]').click();
+        cy.get('[data-cy="quantity-display"]').should('contain', '3');
 
         cy.get('[data-cy="remove-item-button"]').click();
         cy.get('[data-cy^="cart-item-"]').should('not.exist');

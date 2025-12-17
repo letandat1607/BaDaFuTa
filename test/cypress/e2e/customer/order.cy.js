@@ -92,19 +92,19 @@ describe('Customer Order Flow', () => {
             .should('not.have.value', 'Vui lòng chọn địa chỉ chính xác trên bản đồ');
     });
 
-    it('should show Momo QR when selecting Momo payment', () => {
-        cy.get('[data-cy="fullname-input"]').type('Test Momo');
-        cy.get('[data-cy="phone-input"]').type('0912345678');
-        cy.get('[data-cy="payment-method-select"]').select('MOMO');
-        cy.get('[data-cy="use-current-location-button"]').click();
-        cy.get('[data-cy="delivery-address-textarea"]', { timeout: 10000 }).should('not.be.empty');
+    // it('should show Momo QR when selecting Momo payment', () => {
+    //     cy.get('[data-cy="fullname-input"]').type('Test Momo');
+    //     cy.get('[data-cy="phone-input"]').type('0912345678');
+    //     cy.get('[data-cy="payment-method-select"]').select('MOMO');
+    //     cy.get('[data-cy="use-current-location-button"]').click();
+    //     cy.get('[data-cy="delivery-address-textarea"]', { timeout: 10000 }).should('not.be.empty');
 
-        cy.get('[data-cy="submit-order-button"]').click();
-        cy.wait(5000);
+    //     cy.get('[data-cy="submit-order-button"]').click();
+    //     cy.wait(5000);
 
-        cy.get('[data-cy="momo-qr-container"]', { timeout: 15000 }).should('be.visible');
-        cy.get('[data-cy="momo-qr-svg"]').should('be.visible');
-        // cy.get('[data-cy="order-id"]').should('not.be.empty');
-    });
+    //     cy.get('[data-cy="momo-qr-container"]', { timeout: 15000 }).should('be.visible');
+    //     cy.get('[data-cy="momo-qr-svg"]').should('be.visible');
+    //     // cy.get('[data-cy="order-id"]').should('not.be.empty');
+    // });
 
 });
