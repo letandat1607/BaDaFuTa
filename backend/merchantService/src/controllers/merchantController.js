@@ -17,7 +17,7 @@ module.exports.getMenuItemWithOption = async (req, res) => {
     const {id} = req.params;
     const {merchant_id} = req.body;
 
-    console.log("do contrl");
+    // console.log("do contrl");
 
     const options = await merchantService.getMenuItemWithOption(id, merchant_id);
 

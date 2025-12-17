@@ -40,6 +40,7 @@ describe('Customer Cart Flow', () => {
         cy.get('[data-cy="modal-total-price"]', { timeout: 15000 }).should('be.visible');
 
         cy.wait(2000);
+        cy.get('input[type="radio"], input[type="checkbox"]').first().check({ force: true });
         cy.get('[data-cy="add-to-cart-confirm-button"]').click();
 
         cy.on('window:alert', (text) => {
@@ -87,7 +88,7 @@ describe('Customer Cart Flow', () => {
         cy.get('[data-cy^="add-to-cart-button-"]').first().click();
         cy.wait(1000);
 
-
+        cy.get('input[type="radio"], input[type="checkbox"]').first().check({ force: true });
         cy.get('[data-cy="add-to-cart-confirm-button"]').click();
         cy.wait(1000);
 
@@ -113,6 +114,7 @@ describe('Customer Cart Flow', () => {
         cy.get('[data-cy^="add-to-cart-button-"]').first().click();
         cy.wait(1000);
 
+        cy.get('input[type="radio"], input[type="checkbox"]').first().check({ force: true });
         cy.get('[data-cy="add-to-cart-confirm-button"]').click();
         cy.wait(1000);
 

@@ -41,10 +41,8 @@ module.exports.signIn = async (data) => {
         ]
     })
     if(!user) throw new Error("Email hoặc mật khẩu không đúng");
-    console.log("check email xong")
     const checkPwd = await bcrypt.compare(value.password, user.password);
     if(!checkPwd) throw new Error("Email hoặc mật khẩu không đúng");
-    console.log("check pass xong")
 
     const payload = {id: user.id, user_name: user.user_name, email: user.email, role: user.role};
     const token = jwt.sign(payload, JWT_SECRET, {expiresIn: JWT_EXPIRES_IN});
