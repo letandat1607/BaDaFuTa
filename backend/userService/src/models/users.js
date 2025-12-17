@@ -26,16 +26,17 @@ const User = sequelize.define("User", {
     password: {
         type: DataTypes.STRING,
     },
-    role:{
+    role: {
         type: DataTypes.STRING(20),
     },
     image: {
         type: DataTypes.STRING,
     },
-    }, {
+}, {
+    schema: "user_e2e",
     tableName: "users",
-    freezeTableName: true, 
-    timestamps: true,      
+    freezeTableName: true,
+    timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
 });
