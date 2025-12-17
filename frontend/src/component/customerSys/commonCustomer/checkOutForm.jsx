@@ -97,7 +97,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
 
     if (!form.phone.trim()) {
       errors.phone = "Số điện thoại là bắt buộc";
-    } else if (!/^0[3|5|7|8|9][0-9]{8}$/.test(form.phone.replace(/\s/g, ""))) {
+    } else if (!/^0[2|3|5|7|8|9][0-9]{8}$/.test(form.phone.replace(/\s/g, ""))) {
       errors.phone = "Số điện thoại không hợp lệ (VD: 0901234567)";
     }
 
@@ -201,7 +201,6 @@ export default function CheckoutForm({ cartItems, merchantId }) {
     socket.on(`paymentQR`, (data) => {
       console.log("Nhận QR Momo:", data);
       setQrUrl(data.payUrl);
-      setOrderId(data.orderId);
       setPaymentStatus("waiting");
     });
     socket.on("paymentSuccess", (data) => {
@@ -232,11 +231,15 @@ export default function CheckoutForm({ cartItems, merchantId }) {
       return;
     }
 
-    setFormErrors({}); // Xóa lỗi nếu hợp lệ
+    setFormErrors({});
 
     setLoading(true);
 
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const merchantCart = cart.filter((item) => item.merchant_id === merchantId);
+    console.log("cart dùng lại đâyyy:", merchantCart);
     const payload = {
+      order_id: merchantCart[0].order_id || null,
       merchant_id: merchantId,
       user_id: user.id,
       full_name: form.full_name.trim(),
@@ -274,10 +277,18 @@ export default function CheckoutForm({ cartItems, merchantId }) {
       const result = await res.json();
       setOrderId(result.order_id);
 
-      // Xóa giỏ hàng của merchant này
       let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      cart = cart.filter((item) => item.merchant_id !== merchantId);
-      localStorage.setItem("cart", JSON.stringify(cart));
+      let oldCart = cart.filter((item) => item.merchant_id !== merchantId);
+      let currentCart = cart
+        .filter(item => item.merchant_id === merchantId)
+        .map(item => ({
+          ...item,
+          order_id: result.order_id
+        }));
+      let newCart = [...oldCart, ...currentCart];
+      // console.log("newcart ở đâyy", newCart);
+      setOrderId(result.order_id);
+      localStorage.setItem("cart", JSON.stringify(newCart));
 
     } catch (err) {
       setError(err.message || "Lỗi hệ thống khi tạo đơn hàng");
@@ -402,7 +413,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             position: "relative",
             zIndex: 1
           }}
-          data-cy="leaflet-map-container"
+            data-cy="leaflet-map-container"
           >
             {position ? (
               <MapContainer center={position} zoom={17} style={{ height: "100%", width: "100%" }} data-testid="leaflet-map">
@@ -477,7 +488,7 @@ export default function CheckoutForm({ cartItems, merchantId }) {
           </select>
         </div>
 
-        {error && <div style={{ color: "#dc2626", marginBottom: "12px", fontWeight: "500" }} data-cy="form-error">{error}</div>}
+        {error && <div style={{ color: "#dc2626", marginBottom: "12px", fontWeight: "500" }} data-cy="checkout-form-error">{error}</div>}
 
         <button
           type="submit"
@@ -505,13 +516,14 @@ export default function CheckoutForm({ cartItems, merchantId }) {
         <div style={{ marginTop: "30px", padding: "24px", background: "#fdf2f8", borderRadius: "12px", textAlign: "center" }} data-cy="momo-qr-section">
           <h4 style={{ color: "#d946ef", marginBottom: "12px" }}>Quét mã QR để thanh toán Momo</h4>
           <p>Mã đơn hàng: <strong data-cy="order-id">{orderId}</strong></p>
-          <div style={{ background: "white", padding: "16px", borderRadius: "12px", display: "inline-block" }}>
-            <QRCodeSVG data-cy="momo-qr-code" value={qrUrl} size={220} level="H" includeMargin />
+          <div style={{ background: "white", padding: "16px", borderRadius: "12px", display: "inline-block" }} data-cy="momo-qr-container">
+            <QRCodeSVG data-cy="momo-qr-svg" value={qrUrl} size={220} level="H" includeMargin />
           </div>
-          {/* <a
+          <a
             href={qrUrl}
             target="_blank"
             rel="noopener noreferrer"
+            data-cy="momo-direct"
             style={{
               display: "inline-block",
               marginTop: "16px",
@@ -524,17 +536,17 @@ export default function CheckoutForm({ cartItems, merchantId }) {
             }}
           >
             Mở ứng dụng Momo
-          </a> */}
+          </a>
         </div>
       )}
 
       {paymentStatus === "success" && (
-        <div data-cy="momo-qr-code" style={{ marginTop: "20px", padding: "20px", background: "#d4edda", color: "#155724", borderRadius: "12px", textAlign: "center" }}>
+        <div data-cy="payment-success-message" style={{ marginTop: "20px", padding: "20px", background: "#d4edda", color: "#155724", borderRadius: "12px", textAlign: "center" }}>
           <strong>Thanh toán thành công!</strong> Đơn hàng: <strong>{orderId}</strong>
           <button
             onClick={() => (window.location.href = `/customer/order/${orderId}`)}
             style={{ marginLeft: "12px", padding: "10px 20px", background: "#28a745", color: "white", border: "none", borderRadius: "6px" }}
-            data-cy="view-order-detail"
+            data-cy="view-order-button"
           >
             Xem chi tiết đơn hàng
           </button>

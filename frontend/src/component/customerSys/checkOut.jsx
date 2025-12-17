@@ -20,7 +20,7 @@ export default function Checkout() {
     setLoading(false);
   }, [merchantId, navigate]);
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px" }}>Đang tải...</div>;
+  if (loading) return <div style={{ textAlign: "center", padding: "60px" }} data-cy="checkout-loading">Đang tải...</div>;
 
   return (
     <>

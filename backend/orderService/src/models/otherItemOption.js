@@ -20,7 +20,7 @@ const OrderItemOption = sequelize.define("OrderItemOption", {
     }
 );
 
-// OrderItem.hasMany(OrderItemOption, { foreignKey: "order_item_id", as: "options", onDelete: "CASCADE" });
-// OrderItemOption.belongsTo(OrderItem, { foreignKey: "order_item_id", onDelete: "CASCADE" });
+OrderItem.hasMany(OrderItemOption, { foreignKey: "order_item_id", as: "options", onDelete: "CASCADE" });
+OrderItemOption.belongsTo(OrderItem, { foreignKey: "order_item_id", onDelete: "CASCADE" });
 
 module.exports = OrderItemOption;

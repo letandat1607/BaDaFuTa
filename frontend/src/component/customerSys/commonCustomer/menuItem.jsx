@@ -98,7 +98,7 @@ export default function MenuItem({ item, merchantId }) {
             <span className="item-sold">Đã bán: {item.sold_count}</span>
           </div>
         </div>
-        <button className="add-btn" onClick={openModal}>+</button>
+        <button className="add-btn" onClick={openModal} data-cy={`add-to-cart-button-${item.id}`}>+</button>
       </li>
 
       {modalOpen && <ToppingModal item={item} onClose={closeModal} merchantId={merchantId}/>}

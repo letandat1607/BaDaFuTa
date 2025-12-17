@@ -37,7 +37,7 @@ export default function MerchantList() {
           </Text>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-cy="restaurant-grid">
           {restaurants.map((r) => (
             <RestaurantCard key={r.id} restaurant={r} />
           ))}

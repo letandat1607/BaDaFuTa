@@ -171,7 +171,8 @@ describe('Order Controller Black Box Tests - POST /checkOutOrder', () => {
             expect(res.body.error).toBe("Đơn hàng không tồn tại hoặc đã được thanh toán");
         });
 
-        it("Order-007_EP - Truyền giá món sai", async () => {
+        //////
+        it("Order-007_EP_SC - Truyền giá món sai", async () => {
             const payload = JSON.parse(JSON.stringify(validPayload));
             payload.order_items[0].price = 1000;
 
@@ -222,7 +223,8 @@ describe('Order Controller Black Box Tests - POST /checkOutOrder', () => {
             expect(res.body.error).toBe("Có món hoặc tùy chọn không hợp lệ");
         });
 
-        it("Order-010_EP - Tổng tiền không hợp lệ", async () => {
+        //////
+        it("Order-010_EP_SC - Tổng tiền không hợp lệ", async () => {
             const payload = JSON.parse(JSON.stringify(validPayload));
             payload.total_amount = 1000;
 
@@ -327,7 +329,8 @@ describe('Order Controller Black Box Tests - POST /checkOutOrder', () => {
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
         });
 
-        it("Order-016_BVA - price = 0 -> lỗi", async () => {
+        //////
+        it("Order-016_BVA_SC - price = 0 -> lỗi", async () => {
             const payload = JSON.parse(JSON.stringify(validPayload));
             payload.order_items[0].price = 0;
 
@@ -344,7 +347,8 @@ describe('Order Controller Black Box Tests - POST /checkOutOrder', () => {
             expect(res.body.error).toBe("Đơn hàng không hợp lệ");
         });
 
-        it("Order-017_BVA - total_amount = 0 -> lỗi", async () => {
+        //////
+        it("Order-017_BVA_SC - total_amount = 0 -> lỗi", async () => {
             const payload = { ...validPayload, total_amount: 0 };
 
             require('../../../src/services/orderService').createOrder.mockRejectedValue(

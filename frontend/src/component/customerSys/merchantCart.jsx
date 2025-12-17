@@ -71,21 +71,20 @@ export default function MerchantCart() {
           }
         `}</style>
 
-      <div className="cart-page">
+      <div className="cart-page" data-cy="cart-page">
         <div className="cart-header">
-          <h1 className="cart-title">Giỏ hàng</h1>
-          <Link to={`/customer/merchant/${merchantId}`} className="back-link">
+          <h1 className="cart-title" data-cy="cart-title">Giỏ hàng</h1>
+          <Link to={`/customer/merchant/${merchantId}`} className="back-link" data-cy="continue-shopping-link">
             ← Tiếp tục mua
           </Link>
         </div>
 
-        <div className="cart-list">
+        <div className="cart-list" data-cy="cart-items-list">
           {cartItems.map((item) => (
             <CartItem
               key={item.menu_item_id}
               item={item}
               onUpdate={(updatedItem) => {
-                // DÙNG menu_item_id ĐỂ SO SÁNH
                 const newCart = cartItems.map(i =>
                   i.menu_item_id === updatedItem.menu_item_id
                     ? { ...i, quantity: updatedItem.quantity }
@@ -94,7 +93,6 @@ export default function MerchantCart() {
                 updateCart(newCart);
               }}
               onRemove={() => {
-                // DÙNG menu_item_id ĐỂ XÓA
                 const newCart = cartItems.filter(i => i.menu_item_id !== item.menu_item_id);
                 updateCart(newCart);
               }}

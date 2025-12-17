@@ -63,26 +63,26 @@ export default function CartItem({ item, onUpdate, onRemove }) {
           .remove:hover { color: #b91c1c; }
         `}</style>
   
-        <div className="cart-item">
+        <div className="cart-item" data-cy={`cart-item-${item.menu_item_id}`}>
           <img src={item.image_item?.url} alt={item.name_item} className="item-image" />
           <div className="item-info">
-            <h3 className="item-name">{item.name_item}</h3>
+            <h3 className="item-name" data-cy="cart-item-name">{item.name_item}</h3>
             {item.options?.map((opt, i) => (
               <div key={i}>
                 {opt.items.map((it, j) => (
-                  <span key={j} className="option-tag">
+                  <span key={j} className="option-tag" data-cy="cart-item-option">
                     {it.name} {it.price > 0 ? `+${it.price.toLocaleString()}₫` : ""}
                   </span>
                 ))}
               </div>
             ))}
             <div className="item-footer">
-              <span className="price">{(item.price * item.quantity).toLocaleString("vi-VN")}₫</span>
+              <span className="price" data-cy="cart-item-total-price">{(item.price * item.quantity).toLocaleString("vi-VN")}₫</span>
               <div className="quantity">
-                <button className="qty-btn" onClick={() => handleQuantity(-1)}>−</button>
-                <span style={{ minWidth: "24px", textAlign: "center" }}>{item.quantity}</span>
-                <button className="qty-btn" onClick={() => handleQuantity(1)}>+</button>
-                <span className="remove" onClick={onRemove} title="Xóa">×</span>
+                <button className="qty-btn" onClick={() => handleQuantity(-1)} data-cy="decrease-quantity-button">−</button>
+                <span style={{ minWidth: "24px", textAlign: "center" }} data-cy="quantity-display">{item.quantity}</span>
+                <button className="qty-btn" onClick={() => handleQuantity(1)} data-cy="increase-quantity-button">+</button>
+                <span className="remove" onClick={onRemove} title="Xóa" data-cy="remove-item-button">×</span>
               </div>
             </div>
           </div>

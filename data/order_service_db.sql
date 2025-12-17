@@ -28,10 +28,10 @@ CREATE TABLE order_item (
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 3. Bảng order_item_option (bảng liên kết nhiều-nhiều)
+-- 3. Bảng order_item_option
 CREATE TABLE order_item_option (
     order_item_id UUID NOT NULL REFERENCES order_item(id) ON DELETE CASCADE,
     option_item_id UUID NOT NULL,
-    PRIMARY KEY (order_item_id, option_item_id)  -- Composite primary key như bạn định nghĩa
+    PRIMARY KEY (order_item_id, option_item_id) 
 );
 

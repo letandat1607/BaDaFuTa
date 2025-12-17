@@ -30,7 +30,7 @@ export default function MenuCategory({ category }) {
         }
       `}</style>
 
-      <div className="category">
+      <div className="category" data-cy={`menu-category-${category.id}`}>
         <div className="category-header">{category.category_name}</div>
         {category.menu_items && category.menu_items.length > 0 ? (
           <ul className="item-list">

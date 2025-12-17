@@ -251,13 +251,14 @@ export default function ToppingModal({ item, onClose, merchantId }) {
           </div>
 
           <div className="footer">
-            <div className="total">
+            <div className="total" data-cy="modal-total-price">
               Tổng cộng: {(parseInt(item.price) + getTotalOptionPrice()).toLocaleString("vi-VN")}₫
             </div>
             <button
               className="confirm"
               onClick={addToCart}
               disabled={!canAddToCart()}
+              data-cy="add-to-cart-confirm-button"
             >
               Thêm vào giỏ hàng
             </button>

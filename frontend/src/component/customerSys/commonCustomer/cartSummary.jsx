@@ -38,13 +38,13 @@ export default function CartSummary({ items, merchantId }) {
         }
       `}</style>
 
-      <div className="summary">
+      <div className="summary" data-cy="cart-summary">
         <div className="total-row">
           <span>Tổng cộng:</span>
-          <span>{total.toLocaleString("vi-VN")}₫</span>
+          <span data-cy="cart-total-price">{total.toLocaleString("vi-VN")}₫</span>
         </div>
         <Link to={`/customer/checkout/${merchantId}`}>
-          <button className="checkout-btn">Tiến hành thanh toán</button>
+          <button className="checkout-btn" data-cy="checkout-button">Tiến hành thanh toán</button>
         </Link>
       </div>
     </>

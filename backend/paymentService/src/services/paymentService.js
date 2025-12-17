@@ -21,7 +21,8 @@ async function paymentMomo(payload) {
     var requestType = "payWithMethod";
     const extraDataObj = {
         userId: payload.user_id,
-        merchantId: payload.merchant_id
+        merchantId: payload.merchant_id,
+        orderId: payload.order_id
     };
     const extraData = Buffer.from(JSON.stringify(extraDataObj)).toString('base64');
 
@@ -123,23 +124,26 @@ module.exports.handlePayment = async (payload) => {
 module.exports.checkPaymentMomo = async (data, extraDataBase64) => {
     
     let userId = null;
-    let merchantId = null
+    let merchantId = null;
+    let orderId = null;
     if (extraDataBase64) {
         const decoded = Buffer.from(extraDataBase64, 'base64').toString('utf-8');
         const extra = JSON.parse(decoded);
         userId = extra.userId;
         merchantId = extra.merchantId;
+        orderId= extra.orderId;
     }
 
     console.log("userID: ", userId);
     console.log("merchantID: ", merchantId);
+    console.log("orderID: ", orderId);
 
     if (data.resultCode === "0") {
         const orderPayment = {
             userId,
             merchantId,
             statusPayment: "paid",
-            orderId: data.orderId
+            orderId
         };
         await publishMsg(orderPayment, "payment_exchange", "payment.order.completed")
     } else {
@@ -147,7 +151,7 @@ module.exports.checkPaymentMomo = async (data, extraDataBase64) => {
             userId,
             merchantId,
             statusPayment: "failed",
-            orderId: data.orderId
+            orderId
         };
         await publishMsg(orderPayment, "payment_exchange", "payment.order.failed");
     }

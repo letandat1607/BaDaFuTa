@@ -24,7 +24,7 @@ export default function CheckoutItem({ item }) {
           }
         `}</style>
   
-        <div className="checkout-item" data-cy={`cart-item-${item.id}`}>
+        <div className="checkout-item" data-cy={`checkout-item-${item.menu_item_id}`}>
           <div>
             <div className="item-name">
               {item.name_item} <span className="quantity">x{item.quantity}</span>

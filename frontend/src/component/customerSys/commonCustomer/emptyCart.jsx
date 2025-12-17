@@ -16,9 +16,9 @@ export default function EmptyCart({ merchantId }) {
         }
       `}</style>
 
-      <div className="empty">
+      <div className="empty" data-cy="empty-cart-message">
         Giỏ hàng trống.<br />
-        <Link to={`/customer/merchant/${merchantId}`}>Quay lại chọn món</Link>
+        <Link to={`/customer/merchant/${merchantId}`} data-cy="continue-shopping-link">Quay lại chọn món</Link>
       </div>
     </>
   );

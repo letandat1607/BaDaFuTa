@@ -120,15 +120,12 @@ module.exports.createOrder = async (data, userId) => {
 module.exports.updateOrderStatusPayment = async (orderId, statusPayment) => {
     const orderExists = await orderRepo.updateField(orderId, { status_payment: statusPayment });
     if (!orderExists) throw new Error('Không tìm thấy đơn hàng');
-
     return orderExists;
 }
 
-module.exports.publishOrderMerchant = async (orderId) => {
-    const order = await orderRepo.getOneOrder(orderId);
+module.exports.publishOrderMerchant = async (orderId, userId) => {
+    const order = await orderRepo.getOneOrder(orderId, userId);
     if (!order) throw new Error('Không tìm thấy đơn hàng');
-
-    console.log("Oder publish merchant: ", order);
 
     await publishMsg(order, "order_exchange", "order.merchant.confirmed");
 }

@@ -86,15 +86,15 @@ export default function RestaurantCard({ restaurant }) {
         }
       `}</style>
 
-      <Link to={`/customer/merchant/${restaurant.id}`} className="card-link">
+      <Link to={`/customer/merchant/${restaurant.id}`} className="card-link" data-cy={`restaurant-card-${restaurant.id}`}>
         <div className="card">
           <img src={imgUrl} alt={restaurant.merchant_name} className="card-img" />
           <div className="card-body">
-            <h3 className="card-title">{restaurant.merchant_name}</h3>
+            <h3 className="card-title" data-cy="restaurant-name">{restaurant.merchant_name}</h3>
             <p className="card-address">{address}</p>
             <div className="card-footer">
               <span className="badge">Mở cửa</span>
-              <button className="btn">Xem Menu</button>
+              <button className="btn" data-cy="view-menu-button">Xem Menu</button>
             </div>
           </div>
         </div>

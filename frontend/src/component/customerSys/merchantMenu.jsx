@@ -118,7 +118,7 @@ export default function MerchantMenu() {
       `}</style>
 
       <div className="menu-container">
-        <h1 className="menu-title">Thực đơn</h1>
+        <h1 className="menu-title" data-cy="menu-title">Thực đơn</h1>
 
         {loading && <div className="loading">Đang tải menu...</div>}
         {error && <div className="error">Lỗi: {error}</div>}
@@ -129,7 +129,7 @@ export default function MerchantMenu() {
         {!loading && !error && menuData.map((category) => (
           <MenuCategory key={category.id} category={category} merchantId={id} />
         ))}
-          <Link to={`/customer/merchant/cart/${id}`} className="cart-fab">
+          <Link to={`/customer/merchant/cart/${id}`} className="cart-fab" data-cy="cart-fab">
             <div>Giỏ</div>
           </Link>
       </div>
