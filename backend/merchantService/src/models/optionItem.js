@@ -36,8 +36,8 @@ const OptionItem = sequelize.define("OptionItem", {
 
 
 
-// OptionItem.belongsTo(Option, { foreignKey: "option_id", onDelete: "CASCADE", as: 'options' });
-// Option.hasMany(OptionItem, { foreignKey: "option_id", as: `option_items` });
+OptionItem.belongsTo(Option, { foreignKey: "option_id", onDelete: "CASCADE", as: 'options' });
+Option.hasMany(OptionItem, { foreignKey: "option_id", as: `option_items` });
 
 
 module.exports = OptionItem;

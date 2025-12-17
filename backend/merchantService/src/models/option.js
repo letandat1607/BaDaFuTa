@@ -35,7 +35,7 @@ const Option = sequelize.define("Option",{
 });
 
 
-// Option.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
-// Merchant.hasMany(Option, {foreignKey: "merchant_id", as: "options"});
+Option.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
+Merchant.hasMany(Option, {foreignKey: "merchant_id", as: "options"});
 
 module.exports = Option;

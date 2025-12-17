@@ -46,10 +46,10 @@ const MenuItem = sequelize.define("MenuItem", {
     timestamps: false,      
 });
 
-// MenuItem.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
-// Merchant.hasMany(MenuItem, {foreignKey: "merchant_id"});
+MenuItem.belongsTo(Merchant, {foreignKey: "merchant_id", onDelete: "CASCADE"});
+Merchant.hasMany(MenuItem, {foreignKey: "merchant_id"});
 
-// MenuItem.belongsTo(Category, {foreignKey: "category_id", onDelete: "SET NULL"});
-// Category.hasMany(MenuItem, {foreignKey: "category_id", as: "menu_items"});
+MenuItem.belongsTo(Category, {foreignKey: "category_id", onDelete: "SET NULL"});
+Category.hasMany(MenuItem, {foreignKey: "category_id", as: "menu_items"});
 
 module.exports = MenuItem;
