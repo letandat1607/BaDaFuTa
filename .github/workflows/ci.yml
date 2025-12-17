@@ -189,6 +189,14 @@ jobs:
           echo "=== Checking frontend health file ==="
           docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml exec frontend ls -la /tmp/ || true
 
+      - name: Show service logs
+        run: |
+          echo "=== Docker Compose Logs (last 200 lines) ==="
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.override.e2e.yml \
+            logs
+
       - name: Run Cypress E2E tests
         run: |
           echo "Running Cypress tests..."
