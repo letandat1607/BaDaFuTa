@@ -167,42 +167,7 @@ services:
       - app-network
 
   frontend:
-    command: >
-      sh -c '
-        echo "Starting frontend with direct health check..."
-        
-        # Start Vite
-        npm run dev -- --host 0.0.0.0 --port 5173 2>&1 &
-        VITE_PID=$!
-        
-        # Log startup
-        echo "Vite process started with PID: $VITE_PID"
-        
-        # Wait và kiểm tra
-        for i in {1..90}; do
-          if curl -s http://localhost:5173 > /dev/null 2>&1; then
-            echo "✅ Frontend is ready after $i seconds"
-            # Giữ container sống
-            wait $VITE_PID
-            exit 0
-          fi
-          
-          # Kiểm tra process
-          if ! kill -0 $VITE_PID 2>/dev/null; then
-            echo "❌ Vite process died"
-            exit 1
-          fi
-          
-          if [ $i -lt 10 ] || [ $((i % 10)) -eq 0 ]; then
-            echo "⏳ Waiting for frontend... ($i/90 seconds)"
-          fi
-          
-          sleep 1
-        done
-        
-        echo "❌ Frontend failed to start after 90 seconds"
-        exit 1
-      '
+    command: npm run dev --host
     environment:
       - NODE_ENV=e2e
       - VITE_API_URL=http://gateway:3000
@@ -213,14 +178,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
-      start_period: 40s  # Tăng lên 40s cho Vite có thời gian compile
+      start_period: 40s 
     depends_on:
       gateway:
         condition: service_healthy
     networks:
       - app-network
 
-  # Cypress runner
   cypress:
     image: cypress/included:13.6.2
     depends_on:
