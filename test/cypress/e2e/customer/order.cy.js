@@ -4,7 +4,23 @@ describe('Customer Order Flow', () => {
     beforeEach(() => {
         cy.visit('/customer/login', {
             failOnStatusCode: false,
-            timeout: 30000
+            timeout: 30000,
+            onBeforeLoad(win) {
+                const socketListeners = {};
+
+                win.socket = {
+                    emit: cy.stub().as('socketEmit'),
+                    on: cy.stub().callsFake((event, callback) => {
+                        socketListeners[event] = callback;
+                    }),
+                    off: cy.stub(),
+                    _trigger: (event, data) => {
+                        if (socketListeners[event]) {
+                            socketListeners[event](data);
+                        }
+                    }
+                };
+            }
         });
         cy.get('body').then(($body) => {
             cy.log('Response body:', $body.text());
@@ -101,10 +117,10 @@ describe('Customer Order Flow', () => {
 
         cy.get('[data-cy="submit-order-button"]').click();
         cy.window().then((win) => {
-            win.socket.on('paymentQR', {
-              payUrl: 'https://example.com/fake-momo-qr.png',
-            });        
-          });
+            win.socket._trigger('paymentQR', {
+                payUrl: 'https://example.com/fake-momo-qr.png',
+            });
+        });
         cy.wait(5000);
 
         cy.get('[data-cy="momo-qr-container"]', { timeout: 15000 }).should('be.visible');
