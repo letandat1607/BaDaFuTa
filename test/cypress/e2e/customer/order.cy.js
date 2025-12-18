@@ -5,22 +5,6 @@ describe('Customer Order Flow', () => {
         cy.visit('/customer/login', {
             failOnStatusCode: false,
             timeout: 30000,
-            onBeforeLoad(win) {
-                const socketListeners = {};
-
-                win.socket = {
-                    emit: cy.stub().as('socketEmit'),
-                    on: cy.stub().callsFake((event, callback) => {
-                        socketListeners[event] = callback;
-                    }),
-                    off: cy.stub(),
-                    _trigger: (event, data) => {
-                        if (socketListeners[event]) {
-                            socketListeners[event](data);
-                        }
-                    }
-                };
-            }
         });
         cy.get('body').then(($body) => {
             cy.log('Response body:', $body.text());
@@ -103,7 +87,7 @@ describe('Customer Order Flow', () => {
         });
 
         cy.get('[data-cy="use-current-location-button"]').click();
-
+        cy.wait(3000);
         cy.get('[data-cy="delivery-address-textarea"]', { timeout: 8000 })
             .should('not.have.value', 'Vui lòng chọn địa chỉ chính xác trên bản đồ');
     });
