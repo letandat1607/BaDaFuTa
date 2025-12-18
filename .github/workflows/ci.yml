@@ -65,13 +65,13 @@ jobs:
       - name: Show logs of all services
         run: |
           echo "=== User Service Logs ==="
-          docker compose logs user_service --tail=200
+          docker compose logs user_service --tail=50
           echo ""
           echo "=== Merchant Service Logs ==="
-          docker compose logs merchant_service --tail=200
+          docker compose logs merchant_service --tail=50
           echo ""
           echo "=== Order Service Logs ==="
-          docker compose logs order_service --tail=200
+          docker compose logs order_service --tail=50
           echo ""
           
       - name: Show logs on failure
