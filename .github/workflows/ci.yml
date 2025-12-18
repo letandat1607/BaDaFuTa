@@ -62,19 +62,23 @@ jobs:
             exit 1
           fi
 
+      - name: Show logs of all services
+        run: |
+          echo "=== User Service Logs ==="
+          docker compose logs user_service --tail=200
+          echo ""
+          echo "=== Merchant Service Logs ==="
+          docker compose logs merchant_service --tail=200
+          echo ""
+          echo "=== Order Service Logs ==="
+          docker compose logs order_service --tail=200
+          echo ""
+          
       - name: Show logs on failure
         if: failure()
         run: |
           echo "=== Backend Logs ==="
           docker compose logs --tail=200
-
-      - name: Upload Coverage Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage-${{ github.run_number }}
-          path: coverage-output/backend/
-          retention-days: 14
       
       - name: Cleanup Docker & .env
         if: always()
@@ -245,62 +249,3 @@ jobs:
         run: |
           docker compose -f docker-compose.yml -f docker-compose.override.e2e.yml down -v --remove-orphans
           rm -f .env
-
-  test-summary:
-    name: Generate Test Summary
-    needs: [test_backend, test_frontend]
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Download backend coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-coverage-${{ github.run_number }}
-          path: coverage-backend/
-        continue-on-error: true
-
-      - name: Download frontend coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-coverage-${{ github.run_number }}
-          path: coverage-frontend/
-        continue-on-error: true
-
-      - name: Generate summary
-        run: |
-          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Workflow Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          echo "### Backend Services" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.test-backend.result }}" == "success" ]; then
-            echo "Backend tests passed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Backend tests failed" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Frontend" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.test-frontend.result }}" == "success" ]; then
-            echo "Frontend tests passed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Frontend tests failed" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Coverage Reports" >> $GITHUB_STEP_SUMMARY
-          
-          if [ -d "coverage-backend" ]; then
-            for service in user_service merchant_service order_service payment_service drone_delivery_service gateway; do
-              if [ -d "coverage-backend/$service" ]; then
-                echo "**$service** - Coverage generated" >> $GITHUB_STEP_SUMMARY
-              fi
-            done
-          fi
-          
-          if [ -d "coverage-frontend" ]; then
-            echo "**frontend** - Coverage generated" >> $GITHUB_STEP_SUMMARY
-          fi

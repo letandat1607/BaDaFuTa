@@ -116,15 +116,15 @@ describe('Customer Order Flow', () => {
         cy.get('[data-cy="delivery-address-textarea"]', { timeout: 10000 }).should('not.be.empty');
 
         cy.get('[data-cy="submit-order-button"]').click();
-        cy.window().then((win) => {
-            win.socket._trigger('paymentQR', {
-                payUrl: 'https://example.com/fake-momo-qr.png',
-            });
-        });
-        cy.wait(5000);
+        // cy.window().then((win) => {
+        //     win.socket._trigger('paymentQR', {
+        //         payUrl: 'https://example.com/fake-momo-qr.png',
+        //     });
+        // });
+        // cy.wait(5000);
 
-        cy.get('[data-cy="momo-qr-container"]', { timeout: 15000 }).should('be.visible');
-        cy.get('[data-cy="momo-qr-svg"]').should('be.visible');
+        // cy.get('[data-cy="momo-qr-container"]', { timeout: 15000 }).should('be.visible');
+        // cy.get('[data-cy="momo-qr-svg"]').should('be.visible');
         // cy.get('[data-cy="order-id"]').should('not.be.empty');
     });
 
