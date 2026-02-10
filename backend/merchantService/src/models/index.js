@@ -5,6 +5,6 @@ const Merchant = require("./merchant.js");
 const Option = require("./option.js");
 const OptionItem = require("./optionItem.js");
 
-require('./associations.js')
+// require('./associations.js')
 
 module.exports = {Category, MenuItem, MenuItemOption, Merchant, Option, OptionItem} 

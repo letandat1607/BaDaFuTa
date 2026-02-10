@@ -6,7 +6,8 @@ export default function AddOptionDialog({ onSuccess }) {
     e.preventDefault();
     const form = e.target;
     const merchant = JSON.parse(localStorage.getItem("merchant"));
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const baseURL ="http://localhost:3000";
 
     const newOption = {
       option_name: form.option_name.value.trim(),

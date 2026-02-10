@@ -8,7 +8,8 @@ export default function MerchantList() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
 
   useEffect(() => {
     fetch(`${baseURL}/api/merchant/getAllMerchant`)

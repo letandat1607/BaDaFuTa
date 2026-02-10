@@ -6,7 +6,8 @@ export default function EditMenuItemDialog({ item, categories, onClose, onUpdate
     e.preventDefault();
     const form = e.target;
     const merchant = JSON.parse(localStorage.getItem("merchant"));
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const baseURL ="http://localhost:3000";
 
     const updated = {
       category_id: form.category_id.value || null,

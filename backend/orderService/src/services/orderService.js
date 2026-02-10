@@ -8,11 +8,13 @@ const { validateOrder } = require('../grpc/merchantClient');
 const orderSchema = require("../validations/orderValidation");
 const orderUpdateSchema = require("../validations/orderUpdateValidation");
 const orderItemValidation = require("../validations/orderItemValidation");
+const e = require("express");
 
 module.exports.getUserOrders = async (userId) => {
     console.log("Fetching orders for user:", userId);
     console.log("Calling orderRepo.getUserOrders with userId:", userId);
     const orders = await orderRepo.getUserOrders(userId);
+
     console.log("Orders fetched:", orders);
     if(!orders || orders.length === 0) {
         console.log("No orders found for user:", userId);
@@ -147,8 +149,10 @@ module.exports.getAllOrderMerchant = async (merchant_id) => {
 };
 
 module.exports.updateOrder = async (orderId, data, location) => {
+    console.log("Updating order:", orderId, "with data:", data);
     const { value, error } = orderUpdateSchema.validate(data, { stripUnknown: true });
-    if (error || !(location && typeof location === 'object')) throw new Error("Dữ liệu cập nhật đơn hàng không hợp lệ");
+    if (error) throw new Error(error.message);
+    // if (error) throw new Error("Dữ liệu cập nhật đơn hàng không hợp lệ");
 
     const order = await orderRepo.updateField(orderId, value);
     if (!order) throw new Error('Không tìm thấy đơn hàng');

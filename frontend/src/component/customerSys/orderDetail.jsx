@@ -28,13 +28,15 @@ export default function OrderDetail() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [droneId, setDroneId] = useState(null);
   const [droneLocation, setDroneLocation] = useState(null);
   const [hasArrived, setHasArrived] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false); // loading khi xác nhận
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
 
   // === LẤY CHI TIẾT ĐƠN HÀNG ===
   useEffect(() => {
@@ -66,8 +68,12 @@ export default function OrderDetail() {
 
     socket.on("orderUpdated", (data) => {
       if (data.orderId === orderId) {
+
         setOrder(prev => ({ ...prev, ...data }));
-        if (data.location) setDroneLocation(data.location);
+        if (data.location && data.droneId){
+          setDroneId(data.droneId);
+          setDroneLocation(data.location);
+        } 
       }
     });
 
@@ -130,7 +136,7 @@ export default function OrderDetail() {
           authorization: token || "",
         },
         body: JSON.stringify({
-          data: { status: "complete" },
+          data: { status: "complete", drone_id: droneId },
           orderId: orderId,
           location: droneLocation || order.delivery_address, // gửi vị trí cuối cùng
         }),

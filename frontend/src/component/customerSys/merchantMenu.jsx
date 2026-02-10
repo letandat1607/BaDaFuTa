@@ -8,7 +8,8 @@ export default function MerchantMenu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartCount, setCartCount] = useState(0);
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // Load menu
   useEffect(() => {

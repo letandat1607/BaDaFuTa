@@ -17,7 +17,8 @@ export default function MenuTab({
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [bulkAddOpen, setBulkAddOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // === XÓA DANH MỤC ===
   const handleDeleteCategory = async (catId) => {

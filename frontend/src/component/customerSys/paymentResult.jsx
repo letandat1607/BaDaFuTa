@@ -10,7 +10,8 @@ export default function PaymentResult() {
 
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("Đang xử lý thanh toán...");
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
 
 
   useEffect(() => {

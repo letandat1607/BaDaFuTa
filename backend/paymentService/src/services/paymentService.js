@@ -12,7 +12,7 @@ async function paymentMomo(payload) {
     var accessKey = "F8BBA842ECF85";
     var secretkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
     var requestId = partnerCode + new Date().getTime();
-    var orderId = payload.order_id + new Date().getTime();/////////////lỗi ở đây
+    var orderId = payload.order_id + new Date().getTime();
     var orderInfo = `pay ${payload.order_id}`;
     var redirectUrl = `https://unrecurring-kieran-savagely.ngrok-free.dev/checkPaymentMomo`;
     var ipnUrl = `https://unrecurring-kieran-savagely.ngrok-free.dev/checkPaymentMomo`;
@@ -63,7 +63,7 @@ async function paymentMomo(payload) {
     });
     // return res.status(200).json({ payUrl: response.data.payUrl });
 
-
+    console.log("MOMO response: ", response.data);
     publishMsg({ orderId, payUrl: response.data.payUrl, userId: payload.user_id }, "payment_exchange", "payment.gateway.payment_qr")
     return response.data.payUrl;
 }

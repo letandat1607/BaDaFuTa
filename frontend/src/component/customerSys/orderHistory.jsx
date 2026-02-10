@@ -12,7 +12,8 @@ export default function OrderHistory() {
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const token = localStorage.getItem("token");
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const baseURL ="http://localhost:3000";
+    // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     // LẤY DANH SÁCH ĐƠN HÀNG
     useEffect(() => {

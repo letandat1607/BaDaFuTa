@@ -2,7 +2,8 @@
 import { Dialog, Button } from "@radix-ui/themes";
 
 export default function AddCategoryDialog({ onSuccess }) {
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const handleSubmit = async (e) => {
     e.preventDefault();
     const name = e.target.category_name.value.trim();

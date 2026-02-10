@@ -10,7 +10,8 @@ export default function OptionItemTab({ option, setOption }) {
   const [addOpen, setAddOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [bulkOpen, setBulkOpen] = useState(false);
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   console.log(option);
   
   // === XÓA NHÓM ===

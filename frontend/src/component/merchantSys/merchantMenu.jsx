@@ -17,7 +17,8 @@ export default function MerchantMenu() {
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [selectedOptionGroups, setSelectedOptionGroups] = useState([]);
 
-  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseURL ="http://localhost:3000";
+  // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   useEffect(() => {
     const getMerchantMenu = async () => {

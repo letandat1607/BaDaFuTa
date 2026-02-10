@@ -33,7 +33,7 @@ module.exports.getUserOrders = async (req, res) => {
       message: "Get orders success",
     });
   } catch (err) {
-    // console.log("orderController getUserOrders error", err);
+    console.log("orderController getUserOrders error", err);
     return res.status(500).json({
       error: err.message,
     });
@@ -137,6 +137,7 @@ module.exports.updateOrder= async (req, res) => {
       order,
     });
   } catch (err) {
+    console.log("Lỗi khi cập nhật đơn hàng:", err);
     return res.status(500).json({ error: err.message || "Lỗi server khi cập nhật đơn hàng" });
   }
 }

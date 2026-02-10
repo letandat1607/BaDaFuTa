@@ -6,7 +6,8 @@ export default function MerchantLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const baseURL ="http://localhost:3000";
 
     const handleSubmit = async (e) => {
         e.preventDefault();

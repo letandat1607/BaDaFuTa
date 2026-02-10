@@ -22,6 +22,7 @@ async function startConsumers() {
                     try {
                         switch (queue.bindingKey) {
                             case "order.payment.process":
+                                console.log("Received order.payment.process:", content);
                                 await handlePayment(content);
                                 break;
                             case "payment.order.failed":

@@ -11,7 +11,8 @@ export default function CustomerRegister() {
 
     const [formErrors, setFormErrors] = useState({});
     const [serverError, setServerError] = useState(null);
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const baseURL ="http://localhost:3000";
+    // const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
     const navigate = useNavigate();
 
